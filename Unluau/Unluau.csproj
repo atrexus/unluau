@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Unluau</RootNamespace>
+    <AssemblyName>Unluau</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Decompiler.cs" />
+    <Compile Include="Deserializer\Deserializer.cs" />
+    <Compile Include="Deserializer\Models\Chunk.cs" />
+    <Compile Include="Deserializer\Models\Constant.cs" />
+    <Compile Include="Deserializer\Models\DebugInfo.cs" />
+    <Compile Include="Deserializer\Models\Function.cs" />
+    <Compile Include="Deserializer\Models\Instruction.cs" />
+    <Compile Include="Deserializer\Models\LineInfo.cs" />
+    <Compile Include="Deserializer\Models\OpProperties.cs" />
+    <Compile Include="Deserializer\Reader\BytecodeReader.cs" />
+    <Compile Include="Lifter\Decleration.cs" />
+    <Compile Include="Lifter\Expressions\BinaryExpression.cs" />
+    <Compile Include="Lifter\Expressions\BooleanLiteral.cs" />
+    <Compile Include="Lifter\Expressions\Closure.cs" />
+    <Compile Include="Lifter\Expressions\Expression.cs" />
+    <Compile Include="Lifter\Expressions\ExpressionIndex.cs" />
+    <Compile Include="Lifter\Expressions\FunctionCall.cs" />
+    <Compile Include="Lifter\Expressions\Global.cs" />
+    <Compile Include="Lifter\Expressions\LocalExpression.cs" />
+    <Compile Include="Lifter\Expressions\NameIndex.cs" />
+    <Compile Include="Lifter\Expressions\NilLiteral.cs" />
+    <Compile Include="Lifter\Expressions\NumberLiteral.cs" />
+    <Compile Include="Lifter\Expressions\StringLiteral.cs" />
+    <Compile Include="Lifter\Expressions\TableLiteral.cs" />
+    <Compile Include="Lifter\Expressions\UnaryExpression.cs" />
+    <Compile Include="Lifter\Expressions\Vararg.cs" />
+    <Compile Include="Lifter\Lifter.cs" />
+    <Compile Include="Lifter\Local.cs" />
+    <Compile Include="Lifter\Output.cs" />
+    <Compile Include="Lifter\Registers.cs" />
+    <Compile Include="Lifter\Statements\Assignment.cs" />
+    <Compile Include="Lifter\Statements\Block.cs" />
+    <Compile Include="Lifter\Statements\IfElse.cs" />
+    <Compile Include="Lifter\Statements\LocalAssignment.cs" />
+    <Compile Include="Lifter\Statements\OuterBlock.cs" />
+    <Compile Include="Lifter\Statements\Statement.cs" />
+    <Compile Include="Lifter\Statements\StatementExpression.cs" />
+    <Compile Include="Lifter\Statements\WhileLoop.cs" />
+    <Compile Include="Utilities\DecompilerException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
