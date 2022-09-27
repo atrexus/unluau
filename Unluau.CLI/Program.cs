@@ -103,7 +103,7 @@ namespace Unluau.CLI
                 helpText = HelpText.AutoBuild(result, h =>
                 {
                     h.Heading = $"Unluau {Version}";
-                    h.Copyright = "Copyright (c) 2022 Buff3rOverfl0w";
+                    h.Copyright = $"Copyright (c) {DateTime.Now.Year} Buff3rOverfl0w";
                     return h;
                 }, e => e);
             }
