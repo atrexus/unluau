@@ -17,7 +17,7 @@ namespace Unluau
 
     public class Decompiler
     {
-        private const string version = "1.0.0";
+        public static string Version = "1.0.0";
 
         private DecompilerOptions options;
         private Chunk chunk;
@@ -37,7 +37,7 @@ namespace Unluau
             Lifter lifter = new Lifter(chunk, options);
 
             if (options.HeaderEnabled)          
-                options.Output.WriteLine($"-- Unluau.NET v{version} guid: {Guid}");
+                options.Output.WriteLine($"-- Unluau.NET v{Version} guid: {Guid}");
 
             OuterBlock program = lifter.LiftProgram();
 

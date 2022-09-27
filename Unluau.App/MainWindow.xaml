@@ -58,6 +58,7 @@
                             
                         </TabItem>
                         <TabItem Header="Psuedocode" Margin="-1,0,1,-2" Foreground="{DynamicResource SpenishGray}"/>
+                        
                     </TabControl>
                 </Grid>
             </Border>
