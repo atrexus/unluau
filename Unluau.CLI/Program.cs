@@ -45,7 +45,7 @@ namespace Unluau.CLI
         {
             Parser parser = new Parser(with => with.HelpWriter = null);
 
-            ParserResult<Options> result = GetParserInstance().ParseArguments<Options>(args);
+            ParserResult<Options> result = parser.ParseArguments<Options>(args);
 
             result.WithParsed(RunOptions);
             result.WithNotParsed(errors => HandleParseError(result, errors));
@@ -53,14 +53,6 @@ namespace Unluau.CLI
             // Not required for release builds. 
             if (Debugger.IsAttached)
                 Console.ReadKey();
-        }
-
-        static Parser GetParserInstance()
-        {
-            return new Parser(o => new ParserSettings()
-            {
-                HelpWriter = null
-            });
         }
 
         static void RunOptions(Options options)
