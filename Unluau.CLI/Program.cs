@@ -72,7 +72,8 @@ namespace Unluau.CLI
                     Output = options.OutputFile == null ? new Output() : new Output(File.CreateText(options.OutputFile)),
                     DescriptiveComments = options.Verbose,
                     HeaderEnabled = options.Watermark,
-                    InlineTableDefintions = options.Inline
+                    InlineTableDefintions = options.Inline,
+                    Version = Version
                 };
 
                 try
