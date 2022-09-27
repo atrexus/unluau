@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using CommandLine;
 using CommandLine.Text;
@@ -9,6 +10,8 @@ namespace Unluau.CLI
     class Program
     {
         private static readonly TextWriter ErrorStream = Console.Error;
+
+        private static string Version = "1.0.0";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.
@@ -40,11 +43,24 @@ namespace Unluau.CLI
         /// <param name="args">The command line arguments</param>
         static void Main(string[] args)
         {
-            Parser.Default.ParseArguments<Options>(args)
-                .WithParsed(RunOptions)
-                .WithNotParsed(HandleParseError);
+            Parser parser = new Parser(with => with.HelpWriter = null);
 
-            Console.ReadKey();
+            ParserResult<Options> result = GetParserInstance().ParseArguments<Options>(args);
+
+            result.WithParsed(RunOptions);
+            result.WithNotParsed(errors => HandleParseError(result, errors));
+
+            // Not required for release builds. 
+            if (Debugger.IsAttached)
+                Console.ReadKey();
+        }
+
+        static Parser GetParserInstance()
+        {
+            return new Parser(o => new ParserSettings()
+            {
+                HelpWriter = null
+            });
         }
 
         static void RunOptions(Options options)
@@ -76,9 +92,23 @@ namespace Unluau.CLI
             }
         }
 
-        static void HandleParseError(IEnumerable<Error> errors)
+        static void HandleParseError<T>(ParserResult<T> result, IEnumerable<Error> errors)
         {
-            Environment.Exit(1);
+            HelpText helpText = null;
+
+            if (errors.IsVersion())
+                helpText = new HelpText("Unluau " + Version);
+            else
+            {
+                helpText = HelpText.AutoBuild(result, h =>
+                {
+                    h.Heading = $"Unluau {Version}";
+                    h.Copyright = "Copyright (c) 2022 Buff3rOverfl0w";
+                    return h;
+                }, e => e);
+            }
+
+            Console.WriteLine(helpText);
         }
     }
 }

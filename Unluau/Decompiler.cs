@@ -12,13 +12,12 @@ namespace Unluau
         public bool DescriptiveComments { get; set; }
         public bool HeaderEnabled { get; set; } = true;
         public bool InlineTableDefintions { get; set; } = false;
+        public string Version { get; set; }
         public Output Output { get; set; } = new Output();
     }
 
     public class Decompiler
     {
-        public static string Version = "1.0.0";
-
         private DecompilerOptions options;
         private Chunk chunk;
 
@@ -37,7 +36,7 @@ namespace Unluau
             Lifter lifter = new Lifter(chunk, options);
 
             if (options.HeaderEnabled)          
-                options.Output.WriteLine($"-- Unluau.NET v{Version} guid: {Guid}");
+                options.Output.WriteLine($"-- Unluau.NET v{options.Version} guid: {Guid}");
 
             OuterBlock program = lifter.LiftProgram();
 
