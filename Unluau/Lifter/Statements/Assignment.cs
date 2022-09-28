@@ -19,9 +19,18 @@ namespace Unluau
 
         public override void Write(Output output)
         {
-            Variable.Write(output);
-            output.Write(" = ");
-            Value.Write(output);
+            if (((LocalExpression)Value).Expression is Closure)
+            {
+                output.Write("function ");
+                Variable.Write(output);
+                Value.Write(output);
+            }
+            else
+            {
+                Variable.Write(output);
+                output.Write(" = ");
+                Value.Write(output);
+            }
         }
     }
 }

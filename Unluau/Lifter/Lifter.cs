@@ -321,6 +321,15 @@ namespace Unluau
                         block.AddStatement(statement);
                         break;
                     }
+                    case OpCode.NEWCLOSURE:
+                    case OpCode.DUPCLOSURE:
+                    {
+                        Function newFunction = function.Functions[properties.Code == OpCode.DUPCLOSURE ? (function.Constants[instruction.D] as ClosureConstant).Value : instruction.D];
+                        Registers newRegisters = CreateRegisters(newFunction);
+
+                        registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclerations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters)), block);
+                        break;
+                    }
                 }
             }
 
@@ -370,8 +379,10 @@ namespace Unluau
         private Registers CreateRegisters(Function function)
         {
             IDictionary<int, Decleration> declerations = LoadDeclerations(function);
+            IDictionary<int, Expression> expressions = LoadExpressions(declerations);
 
-            return new Registers(function, declerations);
+
+            return new Registers(function, declerations, expressions);
         }
 
         private IDictionary<int, Decleration> LoadDeclerations(Function function)
@@ -383,14 +394,24 @@ namespace Unluau
                 // Load the entire debug info into the declerations
                 foreach (LocalVariable variable in function.DebugInfo.Locals)
                     declerations[variable.Slot] = new Decleration(variable);
-
-                return declerations;
+            }
+            else
+            {
+                for (int slot = 0; slot < function.Parameters; slot++)
+                    declerations[slot] = new Decleration(slot, "arg" + slot + 1, 0);
             }
 
-            for (int slot = 0; slot < function.Parameters; slot++)
-                declerations[slot] = new Decleration(slot, "arg" + slot, 0);
-
             return declerations;
+        }
+
+        private IDictionary<int, Expression> LoadExpressions(IDictionary<int, Decleration> declerations)
+        {
+            IDictionary<int, Expression> expressions = new Dictionary<int, Expression>();
+
+            foreach (KeyValuePair<int, Decleration> decleration in declerations)
+                expressions[decleration.Key] = new LocalExpression(null, decleration.Value);
+
+            return expressions;
         }
 
         private Expression ConstantToExpression(Constant constant)

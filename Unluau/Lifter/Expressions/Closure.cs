@@ -8,11 +8,11 @@ namespace Unluau
 {
     public class Closure : Expression
     {
-        public IList<Local> Arguments { get; protected set; }
+        public IList<Decleration> Arguments { get; protected set; }
         public bool HasVararg { get; protected set; }
         public Block Block { get; protected set; }
 
-        public Closure(IList<Local> arguments, bool hasVararg, Block block)
+        public Closure(IList<Decleration> arguments, bool hasVararg, Block block)
         {
             Arguments = arguments;
             HasVararg = hasVararg;
@@ -24,7 +24,7 @@ namespace Unluau
             output.Write("(");
 
             bool first = true;
-            foreach (Local argument in Arguments)
+            foreach (Decleration argument in Arguments)
             {
                 if (!first)
                     output.Write(", ");
@@ -37,7 +37,7 @@ namespace Unluau
             if (HasVararg)
                 output.Write(", ...");
 
-            output.Write(")");
+            output.WriteLine(")");
 
             Block.Write(output);
 

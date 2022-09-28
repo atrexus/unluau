@@ -8,21 +8,21 @@ namespace Unluau
 {
     public class Registers
     {
+        private static int closureCount = 1;
         public int Count { get; private set; }
 
         private IDictionary<int, Decleration> declerations;
         private IDictionary<int, Expression> expressions;
 
-        public Registers(Function function, IDictionary<int, Decleration> declerations)
+        public Registers(Function function, IDictionary<int, Decleration> declerations, IDictionary<int, Expression> expressions)
         {
             Count = function.MaxStackSize;
             this.declerations = declerations;
-
-            expressions = new Dictionary<int, Expression>(Count);
+            this.expressions = expressions;
         }
 
         public Registers(Function function)
-            : this(function, new Dictionary<int, Decleration>())
+            : this(function, new Dictionary<int, Decleration>(), new Dictionary<int, Expression>())
         { }
 
         public void LoadRegister(int register, Expression expression, Block block)
@@ -30,6 +30,10 @@ namespace Unluau
             //FreeRegister(register, block);
 
             Decleration decleration = new Decleration(register, block.Statements.Count);
+
+            if (expression is Closure)
+                decleration = new Decleration(register, "fun" + closureCount++, block.Statements.Count);
+
             LocalExpression local = new LocalExpression(expression, decleration);
 
             SetDecleration(register, decleration);
@@ -77,6 +81,11 @@ namespace Unluau
 
             SetDecleration(toRegister, decleration);
             SetExpression(toRegister, expressions[fromRegister]);
+        }
+
+        public IList<Decleration> GetDeclerations()
+        {
+            return declerations.Values.ToList();
         }
 
         public Decleration GetDecleration(int register)
