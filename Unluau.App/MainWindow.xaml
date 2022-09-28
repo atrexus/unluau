@@ -53,12 +53,17 @@
             </Border>
             <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,40,10,10">
                 <Grid>
-                    <TabControl TabStripPlacement="Top" Style="{DynamicResource CustomTabControl}" BorderThickness="0">
+                    <TabControl TabStripPlacement="Top" Style="{DynamicResource CustomTabControl}" Background="{StaticResource DarkCharchoal}" BorderThickness="0" HorizontalAlignment="Left" Margin="2,2,0,2" Width="256">
+                        <TabItem Header="Constants" Margin="-1,0,1,-2" Foreground="{DynamicResource SpenishGray}">
+                            <ListBox Background="{StaticResource DarkCharchoal}" BorderBrush="{StaticResource DarkCharchoal}"/>
+                        </TabItem>
+                    </TabControl>
+                    <TabControl TabStripPlacement="Top" Style="{DynamicResource CustomTabControl}" Background="{StaticResource DarkCharchoal}" BorderThickness="0" HorizontalAlignment="Stretch" Margin="263,2,-1,2">
                         <TabItem Header="Dissasembly" Margin="-1,0,1,-2" Foreground="{DynamicResource SpenishGray}">
-                            
+
                         </TabItem>
                         <TabItem Header="Psuedocode" Margin="-1,0,1,-2" Foreground="{DynamicResource SpenishGray}"/>
-                        
+
                     </TabControl>
                 </Grid>
             </Border>
