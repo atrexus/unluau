@@ -284,10 +284,13 @@ namespace Unluau
                     case OpCode.JUMPIFLT:
                     case OpCode.JUMPIFNOTLE:
                     case OpCode.JUMPIFLE:
+                    case OpCode.JUMPXEQKNIL:
+                    case OpCode.JUMPXEQKB:
+                    case OpCode.JUMPXEQKN:
+                    case OpCode.JUMPXEQKS:
                     {
                         bool auxUsed = false;
-                        Expression condition = GetCondition(registers, instruction, function.Instructions[pc + 1], ref auxUsed);
-
+                        Expression condition = GetCondition(registers, instruction, function.Instructions[pc + 1], function.Constants, ref auxUsed);
 
                         Statement statement = new IfElse(condition, LiftBlock(function, registers, auxUsed ? pc + 2 : pc + 1, (pc += instruction.D) + 1));
 
@@ -334,7 +337,7 @@ namespace Unluau
             return new BinaryExpression(left, BinaryExpression.BinaryOperation.Concat, right);
         }
 
-        private Expression GetCondition(Registers registers, Instruction instruction, Instruction aux, ref bool auxUsed)
+        private Expression GetCondition(Registers registers, Instruction instruction, Instruction aux, IList<Constant> constants, ref bool auxUsed)
         {
             auxUsed = false;
 
@@ -351,7 +354,17 @@ namespace Unluau
             if (operation == BinaryExpression.BinaryOperation.CompareGt || operation == BinaryExpression.BinaryOperation.CompareGe)
                 return new BinaryExpression(registers.GetExpression((int)aux.Value), operation, registers.GetExpression(instruction.A));
 
-            return new BinaryExpression(registers.GetExpression(instruction.A), operation, registers.GetExpression((int)aux.Value));
+            Expression right = registers.GetExpression((int)aux.Value);
+
+            if (operation == BinaryExpression.BinaryOperation.CompareEq && code != OpCode.JUMPIFEQ)
+            {
+                if (code == OpCode.JUMPXEQKN || code == OpCode.JUMPXEQKS)
+                    right = ConstantToExpression(constants[(int)aux.Value & 0xffffff]);
+                else
+                    right = ConstantToExpression(constants[(int)aux.Value]);
+            }
+
+            return new BinaryExpression(registers.GetExpression(instruction.A), operation, right);
         }
 
         private Registers CreateRegisters(Function function)

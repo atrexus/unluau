@@ -359,7 +359,7 @@ namespace Unluau
         JUMPXEQKS,
 
         // Enum entry for number of opcodes, not a valid opcode by itself!
-        _COUNT
+        COUNT
     }
 
     public class OpProperties

@@ -107,6 +107,10 @@ namespace Unluau
                 case OpCode.JUMPIFEQ:
                     return BinaryOperation.CompareNe;
                 case OpCode.JUMPIFNOTEQ:
+                case OpCode.JUMPXEQKNIL:
+                case OpCode.JUMPXEQKB:
+                case OpCode.JUMPXEQKN:
+                case OpCode.JUMPXEQKS:
                     return BinaryOperation.CompareEq;
                 case OpCode.JUMPIFLE:
                     return BinaryOperation.CompareGe;
