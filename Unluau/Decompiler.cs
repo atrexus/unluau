@@ -12,6 +12,7 @@ namespace Unluau
         public bool DescriptiveComments { get; set; }
         public bool HeaderEnabled { get; set; } = true;
         public bool InlineTableDefintions { get; set; } = false;
+        public bool RenameUpvalues { get; set; }
         public string Version { get; set; }
         public Output Output { get; set; } = new Output();
     }
@@ -38,7 +39,7 @@ namespace Unluau
             OuterBlock program = lifter.LiftProgram();
 
             if (options.HeaderEnabled)
-                options.Output.WriteLine($"-- Unluau.NET v{options.Version} guid: {Guid}");
+                options.Output.WriteLine($"-- Unluau v{options.Version} guid: {Guid}");
 
             program.Write(options.Output);
         }

@@ -24,11 +24,14 @@ namespace Unluau.CLI
             [Option('w', "watermark", Default = false, HelpText = "Displays a watermark comment at the beginning of the decompiled script.")]
             public bool Watermark { get; set; }
 
-            [Option('v', "verbose", Default = false, HelpText = "Adds comments above each statement about the instructions it originated from.")]
+            [Option('v', "verbose", Default = false, HelpText = "Adds comments above each statement about the origins of the statement (instruction info, constant info, ...).")]
             public bool Verbose { get; set; }
 
             [Option('i', "inline", Default = false, HelpText = "Inlines table definitions.")]
             public bool Inline { get; set; }
+
+            [Option('u', "upvalues", Default = false, HelpText = "Renames upvalues to \"upval{x}\" to help you distinguish from regular local variables.")]
+            public bool Upvalues { get; set; }
 
             [Option('o', "output", Default = null, HelpText = "The file that the decompiled script will be stored in (stdout otherwise).")]
             public string OutputFile { get; set; }
@@ -65,6 +68,7 @@ namespace Unluau.CLI
                     DescriptiveComments = options.Verbose,
                     HeaderEnabled = options.Watermark,
                     InlineTableDefintions = options.Inline,
+                    RenameUpvalues = options.Upvalues,
                     Version = Version
                 };
 
@@ -79,7 +83,7 @@ namespace Unluau.CLI
                 }
                 catch (DecompilerException e)
                 {
-                    ErrorStream.WriteLine("UnluauNET -> " + e.Message);
+                    ErrorStream.WriteLine("Unluau -> " + e.Message);
                 }
             }
         }

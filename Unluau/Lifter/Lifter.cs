@@ -352,6 +352,13 @@ namespace Unluau
                             }
 
                             expression.Decleration.Referenced++;
+
+                            if (options.RenameUpvalues)
+                            {
+                                expression.Decleration.Name = "upval" + ++upvalueId;
+                                Decleration.IdCounter--;
+                            }
+                            
                             newFunction.Upvalues.Add(expression);
                         }
 
