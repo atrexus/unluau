@@ -53,7 +53,7 @@ namespace Unluau
         {
             int id = reader.ReadInt32Compressed();
 
-            return id == 0 ? null : strings[id - 1];
+            return id == 0 || id > strings.Count ? null : strings[id - 1];
         }
 
         private IList<Function> ReadFunctions(IList<string> strings)
@@ -76,7 +76,8 @@ namespace Unluau
 
             function.MaxStackSize = reader.ReadByte();
             function.Parameters = reader.ReadByte();
-            function.Upvalues = reader.ReadByte();
+            function.MaxUpvalues = reader.ReadByte();
+            function.Upvalues = new List<LocalExpression>(function.MaxUpvalues);
             function.IsVararg = reader.ReadBoolean();
 
             function.Instructions = ReadInstructions();

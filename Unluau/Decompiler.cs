@@ -35,10 +35,10 @@ namespace Unluau
         {
             Lifter lifter = new Lifter(chunk, options);
 
-            if (options.HeaderEnabled)          
-                options.Output.WriteLine($"-- Unluau.NET v{options.Version} guid: {Guid}");
-
             OuterBlock program = lifter.LiftProgram();
+
+            if (options.HeaderEnabled)
+                options.Output.WriteLine($"-- Unluau.NET v{options.Version} guid: {Guid}");
 
             program.Write(options.Output);
         }

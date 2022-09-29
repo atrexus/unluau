@@ -79,17 +79,20 @@ namespace Unluau
         /// </summary>
         public int ReadInt32Compressed()
         {
-            int result = 0, shift = 0;
-            byte value;
+            uint result = 0;
+            uint shift = 0;
+
+            byte b;
 
             do
             {
-                value = ReadByte();
-                result |= (value & 0x7F) << shift;
+                b = ReadByte();
+                /*result |= (b & 127) << shift;*/
+                result |= (uint)(b & 127) << (int)shift;
                 shift += 7;
-            } while ((value & 0x80) > 0);
+            } while ((b & 128) != 0);
 
-            return result;
+            return (int)result;
         }
 
         /// <summary>

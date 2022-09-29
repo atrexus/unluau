@@ -10,7 +10,8 @@ namespace Unluau
         public int Id { get; set; }
         public byte MaxStackSize { get; set; }
         public byte Parameters { get; set; }
-        public byte Upvalues { get; set; }
+        public byte MaxUpvalues { get; set; }
+        public IList<LocalExpression> Upvalues { get; set; }
         public bool IsVararg { get; set; }
         public int LineDefined { get; set; }
         public string DebugName { get; set; }
@@ -24,7 +25,7 @@ namespace Unluau
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.Append($"{Parameters}{(IsVararg ? "+" : string.Empty)} param(s), {MaxStackSize} slot(s), {Upvalues} upvalue(s), {Constants.Count} constant(s), {Functions.Count} function(s)\n");
+            builder.Append($"{Parameters}{(IsVararg ? "+" : string.Empty)} param(s), {MaxStackSize} slot(s), {MaxUpvalues} upvalue(s), {Constants.Count} constant(s), {Functions.Count} function(s)\n");
 
             builder.Append($"function {(DebugName == null ? "main" : DebugName)}(");
 

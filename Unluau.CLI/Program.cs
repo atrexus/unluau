@@ -80,7 +80,6 @@ namespace Unluau.CLI
                 catch (DecompilerException e)
                 {
                     ErrorStream.WriteLine("UnluauNET -> " + e.Message);
-                    Environment.Exit(1);
                 }
             }
         }

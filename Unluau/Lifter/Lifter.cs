@@ -10,6 +10,14 @@ namespace Unluau
     {
         private Chunk chunk;
         private DecompilerOptions options;
+        private static int upvalueId = 0;
+
+        private enum CaptureType : byte
+        {
+            Value,
+            Reference,
+            Upvalue
+        }
 
         public Lifter(Chunk chunk, DecompilerOptions options)
         { 
@@ -327,7 +335,32 @@ namespace Unluau
                         Function newFunction = function.Functions[properties.Code == OpCode.DUPCLOSURE ? (function.Constants[instruction.D] as ClosureConstant).Value : instruction.D];
                         Registers newRegisters = CreateRegisters(newFunction);
 
+                        while (newFunction.Upvalues.Count < newFunction.MaxUpvalues)
+                        {
+                            Instruction capture = function.Instructions[++pc];
+
+                            if (capture.GetProperties().Code != OpCode.CAPTURE)
+                                throw new DecompilerException(Stage.Lifter, "Expected capture instruction following NEWCLOSURE/DUPCLOSURE");
+
+                            LocalExpression expression = null;
+
+                            switch ((CaptureType)capture.A)
+                            {
+                                case CaptureType.Value:
+                                    expression = (LocalExpression)registers.GetExpression(capture.B);
+                                    break;
+                            }
+
+                            expression.Decleration.Referenced++;
+                            newFunction.Upvalues.Add(expression);
+                        }
+
                         registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclerations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters)), block);
+                        break;
+                    }
+                    case OpCode.GETUPVAL:
+                    {
+                        registers.LoadRegister(instruction.A, function.Upvalues[instruction.B], block);
                         break;
                     }
                 }
@@ -398,7 +431,7 @@ namespace Unluau
             else
             {
                 for (int slot = 0; slot < function.Parameters; slot++)
-                    declerations[slot] = new Decleration(slot, "arg" + slot + 1, 0);
+                    declerations[slot] = new Decleration(slot, "arg" + (slot + 1), 0);
             }
 
             return declerations;
