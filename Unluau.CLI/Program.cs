@@ -9,7 +9,7 @@ namespace Unluau.CLI
 {
     class Program
     {
-        private static readonly TextWriter ErrorStream = Console.Error;
+        private static readonly TextWriter errorStream = Console.Error;
 
         private static string Version = "1.0.0";
 
@@ -83,7 +83,7 @@ namespace Unluau.CLI
                 }
                 catch (DecompilerException e)
                 {
-                    ErrorStream.WriteLine("Unluau -> " + e.Message);
+                    errorStream.WriteLine("Unluau -> " + e.Message);
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace Unluau.CLI
                 helpText = HelpText.AutoBuild(result, h =>
                 {
                     h.Heading = $"Unluau {Version}";
-                    h.Copyright = $"Copyright (c) {DateTime.Now.Year} Buff3rOverfl0w";
+                    h.Copyright = $"Copyright (c) {DateTime.Now.Year} societal";
                     return h;
                 }, e => e);
             }

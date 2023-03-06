@@ -349,6 +349,10 @@ namespace Unluau
                                 case CaptureType.Value:
                                     expression = (LocalExpression)registers.GetExpression(capture.B);
                                     break;
+                                case CaptureType.Upvalue:
+                                    // We've got an existing upvalue
+                                    expression = function.Upvalues[capture.B];
+                                    break;
                             }
 
                             expression.Decleration.Referenced++;

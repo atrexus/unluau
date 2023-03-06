@@ -27,8 +27,8 @@ namespace Unluau
         /// The current position of the stream.
         /// </summary>
         public long Position {
-            get => Stream.Position;
-            set => Stream.Position = value;
+            get => Reader.BaseStream.Position;
+            set => Reader.BaseStream.Position = value;
         }
 
         /// <summary>
@@ -80,19 +80,25 @@ namespace Unluau
         public int ReadInt32Compressed()
         {
             uint result = 0;
-            uint shift = 0;
-
+            int shift = 0;
+            long lastPos = Position;
             byte b;
 
             do
             {
                 b = ReadByte();
-                /*result |= (b & 127) << shift;*/
-                result |= (uint)(b & 127) << (int)shift;
+                result |= (uint)((b & 127) << shift);
                 shift += 7;
             } while ((b & 128) != 0);
 
-            return (int)result;
+            //  
+/*            long offset;
+            if ((offset = sizeof(uint) - (lastPos - Position)) != 0)
+                Position += offset;*/
+
+
+
+            return Convert.ToInt32(result);
         }
 
         /// <summary>

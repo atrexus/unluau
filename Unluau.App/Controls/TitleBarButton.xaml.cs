@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,7 +29,7 @@ namespace Unluau.App.Controls
             set { SetValue(TitleProperty, value); }
         }
 
-        public TitleBarButton()
+        public TitleBarButton()               
         {
             InitializeComponent();
             DataContext = this;

@@ -7,7 +7,7 @@ namespace Unluau
 {
     public class Instruction
     {
-        private uint _value;
+        private int _value;
 
         public OpProperties GetProperties()
         {
@@ -20,7 +20,7 @@ namespace Unluau
             throw new DecompilerException(Stage.Deserializer, $"unhandled operation code ({code})");
         }
 
-        public uint Value { 
+        public int Value { 
             get { return _value; } 
             private set { _value = value; } 
         }
@@ -35,12 +35,12 @@ namespace Unluau
             => (byte)((_value >> 24) & 0xFF);
 
         public int D
-            => (int)_value >> 16;
+            => _value >> 16;
 
         public int E
-            => (int)_value >> 8;
+            => _value >> 8;
 
-        public Instruction(uint value)
+        public Instruction(int value)
             => Value = value;
     }
 }
