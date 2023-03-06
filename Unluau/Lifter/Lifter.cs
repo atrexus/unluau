@@ -332,7 +332,7 @@ namespace Unluau
                     case OpCode.NEWCLOSURE:
                     case OpCode.DUPCLOSURE:
                     {
-                        Function newFunction = function.Functions[properties.Code == OpCode.DUPCLOSURE ? (function.Constants[instruction.D] as ClosureConstant).Value : instruction.D];
+                        Function newFunction = function.GetFunction(properties.Code == OpCode.DUPCLOSURE ? (function.Constants[instruction.D] as ClosureConstant).Value : instruction.D);
                         Registers newRegisters = CreateRegisters(newFunction);
 
                         while (newFunction.Upvalues.Count < newFunction.MaxUpvalues)
@@ -367,6 +367,9 @@ namespace Unluau
                         }
 
                         registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclerations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters)), block);
+                        
+                        // Note: functions should always appear, even if they're never referenced.
+                        registers.GetDecleration(instruction.A).Referenced++;
                         break;
                     }
                     case OpCode.GETUPVAL:

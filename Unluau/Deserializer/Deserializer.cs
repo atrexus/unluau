@@ -83,6 +83,7 @@ namespace Unluau
             function.Instructions = ReadInstructions();
             function.Constants = ReadConstants(strings);
             function.Functions = GetFunctions(functions);
+            function.GlobalFunctions = functions;
 
             function.LineDefined = reader.ReadInt32Compressed();
             function.DebugName = ReadString(strings);
@@ -99,8 +100,17 @@ namespace Unluau
 
             IList<Instruction> instructions = new List<Instruction>(size);
 
-            while (instructions.Count < size)
-                instructions.Add(new Instruction(reader.ReadUInt32()));
+            while (instructions.Count < size) 
+            {
+                Instruction instruction = new Instruction((int)reader.ReadUInt32());
+
+                // Optimization: check for NOP as everything following it will be screwed up
+                /*if (instruction.GetProperties().Code == OpCode.NOP)
+                    throw new DecompilerException(Stage.Deserializer, "Deserializer encountered NOP (no operation) instruction. Unable to proceed.");*/
+
+                instructions.Add(instruction);
+            }
+                
 
             return instructions;
         }
@@ -161,15 +171,15 @@ namespace Unluau
             }
         }
 
-        private IList<Function> GetFunctions(IList<Function> functions)
+        private IList<int> GetFunctions(IList<Function> functions)
         {
             int size = reader.ReadInt32Compressed();
 
-            IList<Function> newFunctions = new List<Function>(size);
+            IList<int> newFunctions = new List<int>(size);
 
             while (newFunctions.Count < size)
-                newFunctions.Add(functions[reader.ReadInt32Compressed()]);
-
+                newFunctions.Add(reader.ReadInt32Compressed());
+            
             return newFunctions;
         }
 

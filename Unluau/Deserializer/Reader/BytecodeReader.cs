@@ -91,13 +91,6 @@ namespace Unluau
                 shift += 7;
             } while ((b & 128) != 0);
 
-            //  
-/*            long offset;
-            if ((offset = sizeof(uint) - (lastPos - Position)) != 0)
-                Position += offset;*/
-
-
-
             return Convert.ToInt32(result);
         }
 
