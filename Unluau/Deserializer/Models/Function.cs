@@ -17,9 +17,14 @@ namespace Unluau
         public string DebugName { get; set; }
         public IList<Constant> Constants { get; set; }
         public IList<Instruction> Instructions { get; set; }
-        public IList<Function> Functions { get; set; }
+        public IList<int> Functions { get; set; }
         public LineInfo LineInfo { get; set; }
         public DebugInfo DebugInfo { get; set; }
+
+        public IList<Function> GlobalFunctions { get; set; }
+
+        public Function GetFunction(int fId)
+            => GlobalFunctions[fId];
 
         public override string ToString()
         {

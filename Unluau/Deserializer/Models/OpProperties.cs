@@ -10,7 +10,10 @@ namespace Unluau
         iAD,
         // E encoding: one signed 24-bit value
         iE,
-        AUX
+        AUX,
+
+        // Represents an empy instruction (contans no args)
+        None
     }
 
     public enum OpCode : byte
@@ -374,8 +377,8 @@ namespace Unluau
 
         public static IDictionary<OpCode, OpProperties> Map = new Dictionary<OpCode, OpProperties>()
         {
-            { OpCode.NOP, null },
-            { OpCode.BREAK, null },
+            { OpCode.NOP, new OpProperties(OpCode.NOP, OpMode.None) },
+            { OpCode.BREAK, new OpProperties(OpCode.BREAK, OpMode.None) },
             { OpCode.LOADNIL, new OpProperties(OpCode.LOADNIL, OpMode.iABC) },
             { OpCode.LOADB, new OpProperties(OpCode.LOADB, OpMode.iABC) },
             { OpCode.LOADN, new OpProperties(OpCode.LOADN, OpMode.iAD) },

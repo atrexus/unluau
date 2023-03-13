@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.CLI", "Unluau.CLI\Unluau.CLI.csproj", "{F157804B-C10E-40BC-9687-5FEFC9B201AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.App", "Unluau.App\Unluau.App.csproj", "{D44232F8-D3CA-40E7-BF43-2B19542243CE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau", "Unluau\Unluau.csproj", "{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}"
 EndProject
 Global
@@ -19,10 +17,6 @@ Global
 		{F157804B-C10E-40BC-9687-5FEFC9B201AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F157804B-C10E-40BC-9687-5FEFC9B201AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F157804B-C10E-40BC-9687-5FEFC9B201AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D44232F8-D3CA-40E7-BF43-2B19542243CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D44232F8-D3CA-40E7-BF43-2B19542243CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D44232F8-D3CA-40E7-BF43-2B19542243CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D44232F8-D3CA-40E7-BF43-2B19542243CE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}.Release|Any CPU.ActiveCfg = Release|Any CPU

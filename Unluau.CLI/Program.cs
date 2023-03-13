@@ -11,7 +11,7 @@ namespace Unluau.CLI
     {
         private static readonly TextWriter errorStream = Console.Error;
 
-        private static string Version = "1.0.0";
+        private static string Version = "0.0.2-alpha";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.
@@ -21,23 +21,27 @@ namespace Unluau.CLI
             [Option(Default = false, HelpText = "Converts the bytecode to a readable list of instructions.")]
             public bool Dissasemble { get; set; }
 
-            [Option('w', "watermark", Default = false, HelpText = "Displays a watermark comment at the beginning of the decompiled script.")]
-            public bool Watermark { get; set; }
-
-            [Option('v', "verbose", Default = false, HelpText = "Adds comments above each statement about the origins of the statement (instruction info, constant info, ...).")]
-            public bool Verbose { get; set; }
-
-            [Option('i', "inline", Default = false, HelpText = "Inlines table definitions.")]
-            public bool Inline { get; set; }
-
-            [Option('u', "upvalues", Default = false, HelpText = "Renames upvalues to \"upval{x}\" to help you distinguish from regular local variables.")]
-            public bool Upvalues { get; set; }
-
             [Option('o', "output", Default = null, HelpText = "The file that the decompiled script will be stored in (stdout otherwise).")]
             public string OutputFile { get; set; }
 
             [Value(0, MetaName = "input file", HelpText = "Input bytecode file.", Required = true)]
             public string InputFile { get; set; }
+
+            [Option('v', "verbose", Default = false, HelpText = "Shows log messages as the decompiler is decompiling a script.")]
+            public bool Verbose { get; set; }
+
+            #region Decompiler Configuration
+
+            [Option("inline-tables", Default = false, HelpText = "Inlines table definitions. Usually leads to cleaner code.")]
+            public bool InlineTables { get; set; }
+
+            [Option("rename-upvalues", Default = true, HelpText = "Renames upvalues to \"upval{x}\" to help distinguish from regular local variables.")]
+            public bool RenameUpvalues { get; set; }
+
+            [Option("smart-variable-names", Default = true, HelpText = "Generates logical names for local variables based on their value.")]
+            public bool SmartVariableNames { get; set; }
+
+            #endregion
         }
 
         /// <summary>
@@ -66,9 +70,10 @@ namespace Unluau.CLI
                 {
                     Output = options.OutputFile == null ? new Output() : new Output(File.CreateText(options.OutputFile)),
                     DescriptiveComments = options.Verbose,
-                    HeaderEnabled = options.Watermark,
-                    InlineTableDefintions = options.Inline,
-                    RenameUpvalues = options.Upvalues,
+                    HeaderEnabled = true,
+                    InlineTableDefintions = options.InlineTables,
+                    RenameUpvalues = options.RenameUpvalues,
+                    VariableNameGuessing = options.SmartVariableNames,
                     Version = Version
                 };
 

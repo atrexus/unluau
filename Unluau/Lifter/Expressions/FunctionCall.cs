@@ -23,18 +23,39 @@ namespace Unluau
             output.Write("(");
 
             bool first = true;
+
             foreach (Expression argument in Arguments)
             {
-                if (!first)
-                    output.Write(",");
-                else
-                    first = false;
+                if (argument is null)
+                    continue;
 
-                if (argument != null)
-                    argument.Write(output);
+                argument.Write(output);
+
+                if (first)
+                    first = false;
+                else
+                    output.Write(",");
             }
 
             output.Write(")");
+        }
+
+        public override string[] GetNames()
+        {
+            string[] names = Function.GetNames();
+
+            if (names != null)
+            {
+                foreach (Expression expression in Arguments)
+                {
+                    string[] exprNames = expression is null ? null : expression.GetNames();
+
+                    if (exprNames != null)
+                        names = names.Concat(exprNames).ToArray();
+                }
+            }
+
+            return names;
         }
     }
 }
