@@ -10,17 +10,24 @@ namespace Unluau
     {
         public Expression Expression { get; set; }
         public string Name { get; set; }
+        public bool IsSelf { get; set; }
 
-        public NameIndex(Expression expression, string name)
+        public NameIndex(Expression expression, string name, bool isSelf = false)
         {
             Expression = expression;
             Name = name;
+            IsSelf = isSelf;
         }
 
         public override void Write(Output output)
         {
             Expression.Write(output);
-            output.Write("." + Name);
+            output.Write((IsSelf ? ":" : ".") + Name);
+        }
+
+        public override string[] GetNames()
+        {
+            return Expression.GetNames().Append(Name).ToArray();
         }
     }
 }

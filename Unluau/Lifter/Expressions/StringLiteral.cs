@@ -18,5 +18,10 @@ namespace Unluau
         {
             return Value.CompareTo(other);
         }
+
+        public override string[] GetNames()
+        {
+            return new[] { Value };
+        }
     }
 }

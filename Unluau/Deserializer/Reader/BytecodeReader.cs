@@ -75,13 +75,13 @@ namespace Unluau
         }
 
         /// <summary>
-        /// Reads a compressed 32 bit integer.
+        /// Reads a compressed unsigned 32 bit integer.
         /// </summary>
-        public int ReadInt32Compressed()
+        public uint ReadUInt32Compressed()
         {
             uint result = 0;
             int shift = 0;
-            long lastPos = Position;
+
             byte b;
 
             do
@@ -89,9 +89,17 @@ namespace Unluau
                 b = ReadByte();
                 result |= (uint)((b & 127) << shift);
                 shift += 7;
-            } while ((b & 128) != 0);
+            } while ((b & 128) > 0);
 
-            return Convert.ToInt32(result);
+            return result;
+        }
+
+        /// <summary>
+        /// Reads a compressed 32 bit integer.
+        /// </summary>
+        public int ReadInt32Compressed()
+        {
+            return (int)ReadUInt32Compressed();
         }
 
         /// <summary>
@@ -153,6 +161,11 @@ namespace Unluau
         {
             byte[] bytes = ReadBytes(length);
             return ASCII.GetString(bytes);
+        }
+
+        public int Peek()
+        {
+            return Reader.PeekChar();
         }
     }
 }

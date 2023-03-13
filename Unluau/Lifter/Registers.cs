@@ -8,31 +8,31 @@ namespace Unluau
 {
     public class Registers
     {
-        private static int closureCount = 1;
         public int Count { get; private set; }
 
         private IDictionary<int, Decleration> declerations;
         private IDictionary<int, Expression> expressions;
+        private Namer namer;
+        private DecompilerOptions options;
 
-        public Registers(Function function, IDictionary<int, Decleration> declerations, IDictionary<int, Expression> expressions)
+        public Registers(Function function, IDictionary<int, Decleration> declerations, IDictionary<int, Expression> expressions, DecompilerOptions options)
         {
             Count = function.MaxStackSize;
+
             this.declerations = declerations;
             this.expressions = expressions;
+            this.options = options;
+
+            namer = new Namer(this);
         }
 
-        public Registers(Function function)
-            : this(function, new Dictionary<int, Decleration>(), new Dictionary<int, Expression>())
+        public Registers(Function function, DecompilerOptions options)
+            : this(function, new Dictionary<int, Decleration>(), new Dictionary<int, Expression>(), options)
         { }
 
         public void LoadRegister(int register, Expression expression, Block block)
         {
-            //FreeRegister(register, block);
-
-            Decleration decleration = new Decleration(register, block.Statements.Count);
-
-            if (expression is Closure)
-                decleration = new Decleration(register, "fun" + closureCount++, block.Statements.Count);
+            Decleration decleration = namer.CreateDecleration(register, expression, block, !options.VariableNameGuessing);
 
             LocalExpression local = new LocalExpression(expression, decleration);
 
@@ -51,13 +51,15 @@ namespace Unluau
                 {
                     LocalAssignment assignment = block.Statements[i] as LocalAssignment;
 
-                    if (assignment.Variable.Decleration.Referenced == 0)
+                    if (assignment.Variable.Decleration.Referenced < 2)
                     {
                         block.Statements.RemoveAt(i);
                         i--;
                     }
                 }
             }
+
+            namer.PurifyVariableNames();
 
             declerations.Clear();
             expressions.Clear();
@@ -77,7 +79,6 @@ namespace Unluau
         public void MoveRegister(int fromRegister, int toRegister)
         {
             Decleration decleration = GetDecleration(fromRegister);
-            decleration.Referenced++;
 
             SetDecleration(toRegister, decleration);
             SetExpression(toRegister, expressions[fromRegister]);
@@ -88,10 +89,22 @@ namespace Unluau
             return declerations.Values.ToList();
         }
 
+        public IDictionary<int, Decleration> GetDeclerationDict()
+        {
+            return declerations;
+        }
+
         public Decleration GetDecleration(int register)
         {
             if (declerations.ContainsKey(register))
-                return declerations[register];
+            {
+                var decleration = declerations[register];
+                decleration.Referenced++;
+
+                SetDecleration(register, decleration);
+
+                return decleration;
+            }
             
             return null;
         }
@@ -99,15 +112,17 @@ namespace Unluau
         public void SetDecleration(int register, Decleration decleration)
         {
             if (declerations.ContainsKey(register))
-                declerations[register] = decleration;
-            else
-                declerations.Add(register, decleration);
+            {
+                declerations.Remove(register);
+            }
+            
+            declerations.Add(register, decleration);
         }
 
         public Expression GetExpression(int register)
         {
             Decleration decleration = GetDecleration(register);
-
+            
             if (expressions.ContainsKey(register))
             {
                 if (decleration != null)

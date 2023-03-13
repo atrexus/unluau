@@ -9,5 +9,9 @@ namespace Unluau
     public abstract class Expression
     {
         public abstract void Write(Output output);
+        public virtual string[] GetNames()
+        {
+            return null;
+        }
     }
 }

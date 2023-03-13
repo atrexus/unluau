@@ -51,7 +51,7 @@ namespace Unluau
                     case OpCode.LOADK:
                     {
                         Constant target = properties.Code == OpCode.LOADK 
-                            ? function.Constants[instruction.D] : function.Constants[(int)function.Instructions[++pc].Value];
+                            ? function.Constants[instruction.D] : function.Constants[function.Instructions[++pc].Value];
 
                         registers.LoadRegister(instruction.A, ConstantToExpression(target), block);
                         break;
@@ -63,14 +63,14 @@ namespace Unluau
                     }
                     case OpCode.GETGLOBAL:
                     {
-                        Constant target = function.Constants[(int)function.Instructions[++pc].Value];
+                        Constant target = function.Constants[function.Instructions[++pc].Value];
 
                         registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block);
                         break;
                     }
                     case OpCode.SETGLOBAL:
                     {
-                        Constant target = function.Constants[(int)function.Instructions[++pc].Value];
+                        Constant target = function.Constants[function.Instructions[++pc].Value];
 
                         block.AddStatement(new Assignment(GetConstantAsGlobal(target), registers.GetExpression(instruction.A)));
                         break;
@@ -95,11 +95,12 @@ namespace Unluau
                         pc++;
                         break;
                     }
+                    case OpCode.NAMECALL:
                     case OpCode.GETTABLEKS:
                     {
-                        Constant target = function.Constants[(int)function.Instructions[++pc].Value];
+                        Constant target = function.Constants[function.Instructions[++pc].Value];
 
-                        Expression expression = new NameIndex(registers.GetExpression(instruction.B), ((StringConstant)target).Value);
+                        Expression expression = new NameIndex(registers.GetExpression(instruction.B), ((StringConstant)target).Value, properties.Code == OpCode.NAMECALL);
 
                         registers.LoadRegister(instruction.A, expression, block);
                         break;
@@ -429,7 +430,7 @@ namespace Unluau
             IDictionary<int, Expression> expressions = LoadExpressions(declerations);
 
 
-            return new Registers(function, declerations, expressions);
+            return new Registers(function, declerations, expressions, options);
         }
 
         private IDictionary<int, Decleration> LoadDeclerations(Function function)

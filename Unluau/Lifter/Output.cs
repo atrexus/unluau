@@ -23,6 +23,8 @@ namespace Unluau
             get { return position; }
         }
 
+        public bool SpaceChildren { get; set; }
+
         public Output(TextWriter writer)
             => this.writer = writer;
 

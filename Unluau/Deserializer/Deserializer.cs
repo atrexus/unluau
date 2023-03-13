@@ -43,7 +43,15 @@ namespace Unluau
             IList<string> strings = new List<string>(size);
 
             while (strings.Count < size)
-                strings.Add(reader.ReadASCII(reader.ReadInt32Compressed()));
+            {
+                int stringSize = reader.ReadInt32Compressed();
+
+                // Really stupid check, but Luau seems to have an issue where '\n' is added before 'GetService'.
+                if (stringSize == 13 && reader.Peek() == 10)
+                    stringSize = reader.ReadInt32Compressed();
+
+                strings.Add(reader.ReadASCII(stringSize));
+            }
 
             return strings;
         }
