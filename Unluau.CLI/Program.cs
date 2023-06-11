@@ -24,7 +24,7 @@ namespace Unluau.CLI
             [Option('o', "output", Default = null, HelpText = "The file that the decompiled script will be stored in (stdout otherwise).")]
             public string OutputFile { get; set; }
 
-            [Value(0, MetaName = "input file", HelpText = "Input bytecode file.", Required = true)]
+            [Value(0, MetaName = "input file", Default = null, HelpText = "Input bytecode file.")]
             public string InputFile { get; set; }
 
             [Option('v', "verbose", Default = false, HelpText = "Shows log messages as the decompiler is decompiling a script.")]
@@ -64,7 +64,7 @@ namespace Unluau.CLI
 
         static void RunOptions(Options options)
         {
-            using (FileStream stream = File.OpenRead(options.InputFile))
+            using (Stream stream = string.IsNullOrEmpty(options.InputFile) ? Console.OpenStandardInput() : File.OpenRead(options.InputFile))
             {
                 DecompilerOptions decompilerOptions = new DecompilerOptions()
                 {
@@ -90,6 +90,8 @@ namespace Unluau.CLI
                 {
                     errorStream.WriteLine("Unluau -> " + e.Message);
                 }
+
+                decompilerOptions.Output.Flush();
             }
         }
 

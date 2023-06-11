@@ -51,7 +51,7 @@ namespace Unluau
                 {
                     LocalAssignment assignment = block.Statements[i] as LocalAssignment;
 
-                    if (assignment.Variable.Decleration.Referenced < 2)
+                    if (assignment.Variable.Decleration.Referenced == 1)
                     {
                         block.Statements.RemoveAt(i);
                         i--;

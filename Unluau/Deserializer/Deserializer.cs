@@ -86,7 +86,7 @@ namespace Unluau
             function.Parameters = reader.ReadByte();
             function.MaxUpvalues = reader.ReadByte();
             function.Upvalues = new List<LocalExpression>(function.MaxUpvalues);
-            function.IsVararg = reader.ReadBoolean();
+            function.IsVararg = reader.ReadByte() == 1;
 
             function.Instructions = ReadInstructions();
             function.Constants = ReadConstants(strings);
@@ -113,8 +113,8 @@ namespace Unluau
                 Instruction instruction = new Instruction((int)reader.ReadUInt32());
 
                 // Optimization: check for NOP as everything following it will be screwed up
-                /*if (instruction.GetProperties().Code == OpCode.NOP)
-                    throw new DecompilerException(Stage.Deserializer, "Deserializer encountered NOP (no operation) instruction. Unable to proceed.");*/
+                if (instruction.GetProperties().Code == OpCode.NOP)
+                    throw new DecompilerException(Stage.Deserializer, "Deserializer encountered NOP (no operation) instruction. Unable to proceed.");
 
                 instructions.Add(instruction);
             }

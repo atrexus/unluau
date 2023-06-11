@@ -74,5 +74,10 @@ namespace Unluau
                 }
             }
         }
+
+        public void Flush()
+        {
+            writer.Flush();
+        }
     }
 }
