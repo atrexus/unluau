@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -94,12 +97,14 @@ namespace Unluau
             return declerations;
         }
 
-        public Decleration GetDecleration(int register)
+        public Decleration GetDecleration(int register, bool reference = true)
         {
             if (declerations.ContainsKey(register))
             {
                 var decleration = declerations[register];
-                decleration.Referenced++;
+
+                if (reference)
+                    decleration.Referenced++;
 
                 SetDecleration(register, decleration);
 
@@ -119,9 +124,9 @@ namespace Unluau
             declerations.Add(register, decleration);
         }
 
-        public Expression GetExpression(int register)
+        public Expression GetExpression(int register, bool reference = true)
         {
-            Decleration decleration = GetDecleration(register);
+            Decleration decleration = GetDecleration(register, reference);
             
             if (expressions.ContainsKey(register))
             {
@@ -134,6 +139,11 @@ namespace Unluau
         }
 
         public Expression GetExpressionValue(int register)
+        {
+            return ((LocalExpression)GetExpression(register, false)).Expression;
+        }
+
+        public Expression GetRefExpressionValue(int register)
         {
             return ((LocalExpression)GetExpression(register)).Expression;
         }

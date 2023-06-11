@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -110,11 +113,9 @@ namespace Unluau
 
             while (instructions.Count < size) 
             {
-                Instruction instruction = new Instruction((int)reader.ReadUInt32());
+                Instruction instruction = new Instruction(Convert.ToInt32(reader.ReadUInt32()));
 
-                // Optimization: check for NOP as everything following it will be screwed up
-                if (instruction.GetProperties().Code == OpCode.NOP)
-                    throw new DecompilerException(Stage.Deserializer, "Deserializer encountered NOP (no operation) instruction. Unable to proceed.");
+                // Note: Sometimes we get NOPs... No idea why
 
                 instructions.Add(instruction);
             }

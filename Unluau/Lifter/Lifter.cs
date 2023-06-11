@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,7 +54,7 @@ namespace Unluau
                     case OpCode.LOADK:
                     {
                         Constant target = properties.Code == OpCode.LOADK 
-                            ? function.Constants[instruction.D] : function.Constants[function.Instructions[++pc].Value];
+                            ? function.Constants[instruction.D] : function.GetConstant(++pc);
 
                         registers.LoadRegister(instruction.A, ConstantToExpression(target), block);
                         break;
@@ -63,14 +66,14 @@ namespace Unluau
                     }
                     case OpCode.GETGLOBAL:
                     {
-                        Constant target = function.Constants[function.Instructions[++pc].Value];
+                        Constant target = function.GetConstant(++pc);
 
                         registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block);
                         break;
                     }
                     case OpCode.SETGLOBAL:
                     {
-                        Constant target = function.Constants[function.Instructions[++pc].Value];
+                        Constant target = function.GetConstant(++pc);
 
                         block.AddStatement(new Assignment(GetConstantAsGlobal(target), registers.GetExpression(instruction.A)));
                         break;
@@ -98,7 +101,7 @@ namespace Unluau
                     case OpCode.NAMECALL:
                     case OpCode.GETTABLEKS:
                     {
-                        Constant target = function.Constants[function.Instructions[++pc].Value];
+                        Constant target = function.GetConstant(++pc);
 
                         Expression expression = new NameIndex(registers.GetExpression(instruction.B), ((StringConstant)target).Value, properties.Code == OpCode.NAMECALL);
 
@@ -218,7 +221,7 @@ namespace Unluau
                     }
                     case OpCode.SETTABLE:
                     {
-                        Expression expression = registers.GetExpressionValue(instruction.C), value = registers.GetExpression(instruction.A);
+                        Expression expression = registers.GetRefExpressionValue(instruction.C), value = registers.GetExpression(instruction.A);
                         Expression table = registers.GetExpression(instruction.B), tableValue = ((LocalExpression)table).Expression;           
 
                         if (options.InlineTableDefintions && tableValue is TableLiteral)
@@ -240,7 +243,8 @@ namespace Unluau
                     }
                     case OpCode.NEWTABLE:
                     {
-                        int arraySize = (int)function.Instructions[++pc].Value;
+                        // Todo: rewrite this stuff so it all works with 64 bit integers
+                        int arraySize = Convert.ToInt32(function.Instructions[++pc].Value);
                         int hashSize = instruction.B == 0 ? 0 : (1 << (instruction.B - 1));
 
                         TableLiteral expression;
@@ -261,7 +265,7 @@ namespace Unluau
                         TableLiteral tableLiteral = (TableLiteral)registers.GetExpressionValue(instruction.A);
 
                         for (int slot = instruction.B; slot < instruction.C; slot++)
-                            tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetExpressionValue(slot)));
+                            tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetRefExpressionValue(slot)));
 
                         // Skip next instruction because we didn't use AUX
                         pc++;

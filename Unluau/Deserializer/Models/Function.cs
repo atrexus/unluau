@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,6 +28,9 @@ namespace Unluau
 
         public Function GetFunction(int fId)
             => GlobalFunctions[fId];
+
+        public Constant GetConstant(int pc)
+            => Constants[Convert.ToInt32(Instructions[pc].Value)];
 
         public override string ToString()
         {
