@@ -36,7 +36,7 @@ There are also a variety of command line arguments available for you to use for 
 
   --version                 Display version information.
 
-  input file (pos. 0)       Required. Input bytecode file.
+  input file (pos. 0)       Input bytecode file (uses stdin if not provided).
   ```
   
   ### Can I contribute?
