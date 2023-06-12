@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.Test", "Unluau.Test\Unluau.Test.csproj", "{4ADF3B5E-F67E-4331-B20E-51E24A13534C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

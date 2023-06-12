@@ -17,39 +17,83 @@ namespace Unluau
         public bool InlineTableDefintions { get; set; } = false;
         public bool RenameUpvalues { get; set; }
         public string Version { get; set; }
+        public bool Verbose { get; set; }
+        public bool Warnings { get; set; }
         public Output Output { get; set; } = new Output();
+        public StreamWriter LogFile { get; set; }
     }
 
     public class Decompiler
     {
-        private DecompilerOptions options;
+        private DecompilerOptions _options;
         private Chunk chunk;
+        private LogManager manager;
 
         public Guid Guid { get; private set; }
 
         public Decompiler(Stream stream, DecompilerOptions options)
         {
-            this.options = options;
-            chunk = new Deserializer(stream).Deserialize();
+            // Create our logger instance for the decompiler
+            manager = new LogManager(GetLogSeverity(options));
+            manager.LogRecieved += OnLogRecieved;
+
+            _options = options;
+            chunk = new Deserializer(manager, stream).Deserialize();
 
             Guid = Guid.NewGuid();
         }
 
+        private void OnLogRecieved(object sender, LogRecievedEventArgs e)
+        {
+            if (e.Message.Severity == LogSeverity.Warn && !_options.Warnings)
+                return;
+
+            string Text = $"{DateTime.UtcNow.ToString("hh:mm:ss")} [{e.Message.Severity}] {e.Message.Source}: {e.Message.Exception?.ToString() ?? e.Message.Message}";
+
+            switch (e.Message.Severity)
+            {
+                case LogSeverity.Warn:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                case LogSeverity.Fatal:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case LogSeverity.Error:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+            }
+
+            _options.LogFile.WriteLine(Text);
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            if (e.Message.Severity == LogSeverity.Fatal)
+                Environment.Exit(1);
+        }
+
         public void Decompile()
         {
-            Lifter lifter = new Lifter(chunk, options);
+            Lifter lifter = new Lifter(chunk, _options);
 
             OuterBlock program = lifter.LiftProgram();
 
-            if (options.HeaderEnabled)
-                options.Output.WriteLine($"-- Unluau v{options.Version} guid: {Guid}");
+            if (_options.HeaderEnabled)
+                _options.Output.WriteLine($"-- Unluau v{_options.Version} guid: {Guid}");
 
-            program.Write(options.Output);
+            program.Write(_options.Output);
+            _options.Output.Flush();
         }
 
         public string Dissasemble()
         {
             return chunk.ToString();
+        }
+
+        private LogSeverity GetLogSeverity(DecompilerOptions options)
+        {
+            if (options.Verbose)
+                return LogSeverity.Debug;
+
+            return LogSeverity.Info;
         }
     }
 }

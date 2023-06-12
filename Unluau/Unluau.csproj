@@ -79,6 +79,10 @@
     <Compile Include="Lifter\Statements\WhileLoop.cs" />
     <Compile Include="Lifter\Namer.cs" />
     <Compile Include="Utilities\DecompilerException.cs" />
+    <Compile Include="Utilities\Logger\Logger.cs" />
+    <Compile Include="Utilities\Logger\LogManager.cs" />
+    <Compile Include="Utilities\Logger\LogMessage.cs" />
+    <Compile Include="Utilities\Logger\LogSeverity.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

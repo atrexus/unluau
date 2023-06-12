@@ -57,7 +57,7 @@ namespace Unluau
         {
             MoveCursor();
 
-            writer.WriteLine(value);
+            writer.Write(value + '\n');
             position = 0;
         }
 

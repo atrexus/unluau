@@ -32,6 +32,12 @@ namespace Unluau.CLI
 
             [Option('v', "verbose", Default = false, HelpText = "Shows log messages as the decompiler is decompiling a script.")]
             public bool Verbose { get; set; }
+            
+            [Option("supress-warnings", Default = false, HelpText = "Does not display warnings to the log file or console.")]
+            public bool SupressWarnings { get; set; }
+
+            [Option("logs", Default = null, HelpText = "The file in which the logs for the decompilation will go (uses stdout if not set).")]
+            public string LogFile { get; set; }
 
             #region Decompiler Configuration
 
@@ -43,6 +49,9 @@ namespace Unluau.CLI
 
             [Option("smart-variable-names", Default = true, HelpText = "Generates logical names for local variables based on their value.")]
             public bool SmartVariableNames { get; set; }
+
+            [Option("descriptive-comments", Default = false, HelpText = "Adds descriptive comments around each block (almost like debug info).")]
+            public bool ShowDescriptiveComments { get; set; }
 
             #endregion
         }
@@ -72,12 +81,15 @@ namespace Unluau.CLI
                 DecompilerOptions decompilerOptions = new DecompilerOptions()
                 {
                     Output = options.OutputFile == null ? new Output() : new Output(File.CreateText(options.OutputFile)),
-                    DescriptiveComments = options.Verbose,
+                    DescriptiveComments = options.ShowDescriptiveComments,
+                    Verbose = options.Verbose,
                     HeaderEnabled = true,
                     InlineTableDefintions = options.InlineTables,
                     RenameUpvalues = options.RenameUpvalues,
                     VariableNameGuessing = options.SmartVariableNames,
-                    Version = Version
+                    Version = Version,
+                    Warnings = !options.SupressWarnings,
+                    LogFile = string.IsNullOrEmpty(options.LogFile) ? new StreamWriter(Console.OpenStandardOutput()) : File.CreateText(options.LogFile)
                 };
 
                 try

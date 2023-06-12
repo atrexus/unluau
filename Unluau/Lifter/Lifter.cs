@@ -130,7 +130,7 @@ namespace Unluau
 
                         if (instruction.B > 0)
                         {
-                            for (int slot = 1; slot < instruction.B; ++slot)
+                            for (int slot = 1 + IsSelf(callFunction); slot < instruction.B; ++slot)
                                 arguments.Add(registers.GetExpression(instruction.A + slot));
                         }
 
@@ -388,6 +388,12 @@ namespace Unluau
             registers.FreeRegisters(block);
 
             return block;
+        }
+
+        private int IsSelf(Expression expression)
+        {
+            NameIndex nameIndex = (NameIndex)((LocalExpression)expression).Expression;
+            return nameIndex.IsSelf ? 1 : 0;
         }
 
         private Expression BuildConcat(Registers registers, int from, int to)
