@@ -45,6 +45,12 @@ namespace Unluau
 
         public override void Write(Output output)
         {
+            if (Entries.Count == 0)
+            {
+                output.Write("{}");
+                return;
+            }
+
             output.Write("{ ");
 
             bool itemsOnNewline = (IsList && Entries.Count > 10) || (IsDictionary && Entries.Count > 5);
@@ -65,11 +71,15 @@ namespace Unluau
 
                 if (entry.Key != null)
                 {
-                    if (entry.Key is NumberLiteral || entry.Key is StringLiteral)
+                    if (entry.Key is NumberLiteral)
                     {
                         output.Write("[");
                         entry.Key.Write(output);
                         output.Write("]");
+                    }
+                    else if (entry.Key is StringLiteral)
+                    {
+                        output.Write((entry.Key as StringLiteral).Value);
                     }
                     else
                         entry.Key.Write(output);

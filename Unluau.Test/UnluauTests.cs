@@ -7,6 +7,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Unluau.Test
 {
+    /// <summary>
+    /// Specifically created for the test decompilation stage
+    /// </summary>
+    public class UnluauOptions
+    {
+
+    }
+
     [TestClass]
     public class UnluauTests
     { 
@@ -24,7 +32,9 @@ namespace Unluau.Test
                 Decompiler decompiler = new Decompiler(stream, new DecompilerOptions()
                 {
                     Output = new Output(new StreamWriter(memoryStream)),
-                    HeaderEnabled = false
+                    HeaderEnabled = false,
+                    VariableNameGuessing = true,
+                    InlineTableDefintions = true
                 });
 
                 decompiler.Decompile();
@@ -33,14 +43,31 @@ namespace Unluau.Test
             }
         }
 
-        [TestMethod]
-        public void Multiple_Namecall()
+        private void GetAndAssert(string binary, string expect)
         {
-            string actual = GetCode("Binary/MultipleNamecallStatements.luau");
-
-            string expected = "local var4 = game:GetService(\"Players\")\nlocal var8 = game:GetService(\"Misc\")";
+            string actual = GetCode(binary);
+            string expected = new StreamReader(OpenRead(expect)).ReadToEnd();
 
             Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void Test_Namecall()
+        {
+            GetAndAssert("Binary/Namecall.luau", "Expect/Namecall.lua");
+        }
+
+        [TestMethod]
+        public void Test_WhileLoops()
+        {
+            GetAndAssert("Binary/WhileLoops.luau", "Expect/WhileLoops.lua");
+        }
+
+
+        [TestMethod]
+        public void Test_DictionaryTable()
+        {
+            GetAndAssert("Binary/Tables01.luau", "Expect/Tables01.lua");
         }
     }
 }

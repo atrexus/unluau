@@ -200,8 +200,8 @@ namespace Unluau
                     }
                     case OpCode.SETTABLEKS:
                     {
-                        StringConstant target = (StringConstant)function.Constants[(int)function.Instructions[++pc].Value];
-                        Expression table = registers.GetExpression(instruction.B), value = ((LocalExpression)table).Expression;
+                        StringConstant target = (StringConstant)function.Constants[function.Instructions[++pc].Value];
+                        Expression table = registers.GetExpression(instruction.B, false), value = ((LocalExpression)table).Expression;
 
                         if (options.InlineTableDefintions && value is TableLiteral)
                         {
@@ -222,7 +222,7 @@ namespace Unluau
                     case OpCode.SETTABLE:
                     {
                         Expression expression = registers.GetRefExpressionValue(instruction.C), value = registers.GetExpression(instruction.A);
-                        Expression table = registers.GetExpression(instruction.B), tableValue = ((LocalExpression)table).Expression;           
+                        Expression table = registers.GetExpression(instruction.B, false), tableValue = ((LocalExpression)table).Expression;           
 
                         if (options.InlineTableDefintions && tableValue is TableLiteral)
                         {
@@ -392,8 +392,14 @@ namespace Unluau
 
         private int IsSelf(Expression expression)
         {
-            NameIndex nameIndex = (NameIndex)((LocalExpression)expression).Expression;
-            return nameIndex.IsSelf ? 1 : 0;
+            Expression value = ((LocalExpression)expression).Expression;
+
+            if (value is NameIndex)
+            {
+                NameIndex nameIndex = (NameIndex)value;
+                return nameIndex.IsSelf ? 1 : 0;
+            }
+            return 0;
         }
 
         private Expression BuildConcat(Registers registers, int from, int to)
