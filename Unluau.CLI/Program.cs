@@ -88,9 +88,18 @@ namespace Unluau.CLI
                     RenameUpvalues = options.RenameUpvalues,
                     VariableNameGuessing = options.SmartVariableNames,
                     Version = Version,
-                    Warnings = !options.SupressWarnings,
-                    LogFile = string.IsNullOrEmpty(options.LogFile) ? new StreamWriter(Console.OpenStandardOutput()) : File.CreateText(options.LogFile)
+                    Warnings = !options.SupressWarnings
                 };
+
+                if (string.IsNullOrEmpty(options.LogFile))
+                {
+                    StreamWriter consoleWriter = new StreamWriter(Console.OpenStandardOutput());
+                    consoleWriter.AutoFlush = true;
+
+                    decompilerOptions.LogFile = consoleWriter;
+                }
+                else
+                    decompilerOptions.LogFile = File.CreateText(options.LogFile);
 
                 try
                 {

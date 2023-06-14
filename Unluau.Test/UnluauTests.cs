@@ -69,5 +69,18 @@ namespace Unluau.Test
         {
             GetAndAssert("Binary/Tables01.luau", "Expect/Tables01.lua");
         }
+
+        [TestMethod]
+        public void Test_ListTable()
+        {
+            GetAndAssert("Binary/Tables02.luau", "Expect/Tables02.lua");
+        }
+
+
+        [TestMethod]
+        public void Test_luauDecExampleBasic()
+        {
+            GetAndAssert("Binary/luauDecBasic.luau", "Expect/luauDecBasic.lua");
+        }
     }
 }

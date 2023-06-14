@@ -126,13 +126,17 @@ namespace Unluau
 
             while (instructions.Count < size) 
             {
-                Instruction instruction = new Instruction((int)reader.ReadUInt32());
+                Instruction instruction = new Instruction(reader.ReadUInt32());
+                OpProperties properties = instruction.GetProperties();
 
-                // Note: Sometimes we get NOPs... No idea why
-                if (instruction.GetProperties().Code == OpCode.NOP)
-                    logger.Warning("Encountered NOP instruction. This instruction could lead to minor issues.");
+                // Note: Sometimes we get NOPs...
+                if (properties.Code == OpCode.NOP)
+                    logger.Warning($"Encountered unexpected NOP instruction.");
 
                 instructions.Add(instruction);
+
+                if (properties.HasAux)
+                    instructions.Add(new Instruction(reader.ReadUInt32()));
             }
                 
             return instructions;
@@ -154,7 +158,15 @@ namespace Unluau
 
         private Constant ReadConstant(IList<string> strings, IList<Constant> constants)
         {
-            switch ((ConstantType)reader.ReadByte())
+            int c = reader.ReadByte();
+
+            if (!Enum.IsDefined(typeof(ConstantType), c))
+            {
+                logger.Fatal("Constant of type " + c + "is not defined");
+                return null;
+            }
+
+            switch ((ConstantType)c)
             {
                 case ConstantType.Nil:
                     return new NilConstant();
@@ -191,9 +203,10 @@ namespace Unluau
                     return new TableConstant(keys);
                 case ConstantType.Closure:
                     return new ClosureConstant(reader.ReadInt32Compressed());
-                default:
-                    throw new DecompilerException(Stage.Deserializer, "unexpected constant kind");
             }
+
+            // Should never happen
+            return null;
         }
 
         private IList<int> GetFunctions(IList<Function> functions)

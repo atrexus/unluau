@@ -128,11 +128,10 @@ namespace Unluau
 
                         Expression callFunction = registers.GetExpression(instruction.A);
 
-                        if (instruction.B > 0)
-                        {
-                            for (int slot = 1 + IsSelf(callFunction); slot < instruction.B; ++slot)
-                                arguments.Add(registers.GetExpression(instruction.A + slot));
-                        }
+                        int numArgs = instruction.B > 0 ? instruction.B : (registers.Top - instruction.A) + 1;
+
+                        for (int slot = 1 + IsSelf(callFunction); slot < numArgs; ++slot)
+                            arguments.Add(registers.GetExpression(instruction.A + slot));
 
                         FunctionCall call = new FunctionCall(callFunction, arguments);
 
@@ -200,7 +199,7 @@ namespace Unluau
                     }
                     case OpCode.SETTABLEKS:
                     {
-                        StringConstant target = (StringConstant)function.Constants[function.Instructions[++pc].Value];
+                        StringConstant target = (StringConstant)function.GetConstant(++pc);
                         Expression table = registers.GetExpression(instruction.B, false), value = ((LocalExpression)table).Expression;
 
                         if (options.InlineTableDefintions && value is TableLiteral)
@@ -264,7 +263,7 @@ namespace Unluau
                     {
                         TableLiteral tableLiteral = (TableLiteral)registers.GetExpressionValue(instruction.A);
 
-                        for (int slot = instruction.B; slot < instruction.C; slot++)
+                        for (int slot = instruction.B; slot <= instruction.C; slot++)
                             tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetRefExpressionValue(slot)));
 
                         // Skip next instruction because we didn't use AUX

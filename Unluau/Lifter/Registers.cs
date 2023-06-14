@@ -12,6 +12,7 @@ namespace Unluau
     public class Registers
     {
         public int Count { get; private set; }
+        public int Top { get; private set; }
 
         private IDictionary<int, Decleration> declerations;
         private IDictionary<int, Expression> expressions;
@@ -41,6 +42,8 @@ namespace Unluau
 
             SetDecleration(register, decleration);
             SetExpression(register, local);
+
+            Top = register;
 
             block.AddStatement(new LocalAssignment(local));
         }
