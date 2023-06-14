@@ -38,3 +38,12 @@ There are also a variety of command line arguments available for you to use for 
   input file (pos. 0)       Input bytecode file (uses stdin if not provided).
   ```
   
+## Benchmarking
+To really show the power of Unluau, I've run it on various scripts to compare its performance to some of the other luau decompilers out there. As of now I have decompiled the same luau binaries on Unluau and [luauDec](https://github.com/xgladius/luauDec) and recorded the results here.
+| Test Name  | Unluau Result | luaDec Result |
+| ---------- | ------------- | ------------- |
+| [luauDecBasic.lua](Unluau.Test/Expect/luauDecBasic.lua)  | Success | Success |
+| [Namecall.lua](Unluau.Test/Expect/Namecall.lua)  | Success  | Failure: did not crash but did not add nodes for the two local assignments. This is most likely due to the fact that they were never referenced. |
+| [Tables01.lua](Unluau.Test/Expect/Tables01.lua)  | Success  | Failure: Segmentation Fault |
+| [Tables02.lua](Unluau.Test/Expect/Tables02.lua)  | Success  | Failure: Segmentation Fault |
+| [WhileLoops.lua](Unluau.Test/Expect/WhileLoops.lua)  | Success  | Failure: Segmentation Fault |
