@@ -14,7 +14,7 @@ namespace Unluau.CLI
     {
         private static readonly TextWriter errorStream = Console.Error;
 
-        private static string Version = "0.0.2-alpha";
+        private static string Version = "0.0.3-alpha";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.

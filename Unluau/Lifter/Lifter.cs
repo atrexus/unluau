@@ -204,6 +204,9 @@ namespace Unluau
 
                         if (options.InlineTableDefintions && value is TableLiteral)
                         {
+                            if (((LocalExpression)table).Decleration.Referenced == 1)
+                                value = registers.GetRefExpressionValue(instruction.B);
+
                             TableLiteral tableLiteral = (TableLiteral)value;
 
                             if (tableLiteral.MaxEntries > tableLiteral.Entries.Count)
