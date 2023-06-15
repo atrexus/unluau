@@ -22,6 +22,12 @@ There are also a variety of command line arguments available for you to use for 
   -v, --verbose             (Default: false) Shows log messages as the
                             decompiler is decompiling a script.
 
+  --supress-warnings        (Default: false) Does not display warnings to the
+                            log file or console.
+
+  --logs                    The file in which the logs for the decompilation
+                            will go (uses stdout if not set).
+
   --inline-tables           (Default: false) Inlines table definitions. Usually
                             leads to cleaner code.
 
@@ -30,6 +36,9 @@ There are also a variety of command line arguments available for you to use for 
 
   --smart-variable-names    (Default: true) Generates logical names for local
                             variables based on their value.
+
+  --descriptive-comments    (Default: false) Adds descriptive comments around
+                            each block (almost like debug info).
 
   --help                    Display this help screen.
 
