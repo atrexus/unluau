@@ -74,6 +74,7 @@
     <Compile Include="Lifter\Statements\IfElse.cs" />
     <Compile Include="Lifter\Statements\LocalAssignment.cs" />
     <Compile Include="Lifter\Statements\OuterBlock.cs" />
+    <Compile Include="Lifter\Statements\Return.cs" />
     <Compile Include="Lifter\Statements\Statement.cs" />
     <Compile Include="Lifter\Statements\StatementExpression.cs" />
     <Compile Include="Lifter\Statements\WhileLoop.cs" />

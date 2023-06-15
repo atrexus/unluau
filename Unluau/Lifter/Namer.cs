@@ -99,9 +99,7 @@ namespace Unluau
                 .Where(d => d.Name.StartsWith(name + "_v"))
                 .ToList();
 
-            int count;
-            if ((count = matchList.Count) != 0)
-                name += "_v" + ++count;
+            name += "_v" + matchList.Count;
 
             return name;
         }

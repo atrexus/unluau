@@ -200,7 +200,7 @@ namespace Unluau
                     case OpCode.SETTABLEKS:
                     {
                         StringConstant target = (StringConstant)function.GetConstant(++pc);
-                        Expression table = registers.GetExpression(instruction.B, false), value = ((LocalExpression)table).Expression;
+                        Expression table = registers.GetExpression(instruction.B), value = ((LocalExpression)table).Expression;
 
                         if (options.InlineTableDefintions && value is TableLiteral)
                         {
@@ -371,14 +371,24 @@ namespace Unluau
                         }
 
                         registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclerations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters)), block);
-                        
-                        // Note: functions should always appear, even if they're never referenced.
-                        registers.GetDecleration(instruction.A).Referenced++;
                         break;
                     }
                     case OpCode.GETUPVAL:
                     {
                         registers.LoadRegister(instruction.A, function.Upvalues[instruction.B], block);
+                        break;
+                    }
+                    case OpCode.RETURN:
+                    {
+                        IList<Expression> expressions = new List<Expression>();
+
+                        int numArgs = instruction.B > 0 ? instruction.B - 1: registers.Top - instruction.A + 1;
+
+                        for (int slot = 0; slot < numArgs; ++slot)
+                            expressions.Add(registers.GetExpression(instruction.A + slot));
+
+                        if (numArgs > 0)
+                            block.AddStatement(new Return(expressions));
                         break;
                     }
                 }

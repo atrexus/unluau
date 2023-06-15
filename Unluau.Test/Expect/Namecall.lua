@@ -1,2 +1,2 @@
-local PlayersService = game:GetService("Players")
-local MiscService = game:GetService("Misc")
+local PlayersService_v0 = game:GetService("Players")
+local MiscService_v0 = game:GetService("Misc")
