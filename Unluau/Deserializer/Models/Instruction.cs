@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +10,7 @@ namespace Unluau
 {
     public class Instruction
     {
-        private int _value;
+        private uint _value;
 
         public OpProperties GetProperties()
         {
@@ -20,9 +23,8 @@ namespace Unluau
             throw new DecompilerException(Stage.Deserializer, $"unhandled operation code ({code})");
         }
 
-        public int Value { 
+        public uint Value { 
             get { return _value; } 
-            private set { _value = value; } 
         }
 
         public byte A
@@ -35,12 +37,12 @@ namespace Unluau
             => (byte)((_value >> 24) & 0xFF);
 
         public int D
-            => _value >> 16;
+            => (int)(_value >> 16);
 
         public int E
-            => _value >> 8;
+            => (int)(_value >> 8);
 
-        public Instruction(int value)
-            => Value = value;
+        public Instruction(uint value)
+            => _value = value;
     }
 }

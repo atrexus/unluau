@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,11 +22,12 @@ namespace Unluau
 
         public override void Write(Output output)
         {
-            if (((LocalExpression)Value).Expression is Closure)
+            if (Value is LocalExpression && ((LocalExpression)Value).Expression is Closure)
             {
                 output.Write("function ");
                 Variable.Write(output);
-                Value.Write(output);
+
+                ((LocalExpression)Value).Expression.Write(output);
             }
             else
             {

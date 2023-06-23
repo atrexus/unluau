@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,7 +14,7 @@ namespace Unluau.CLI
     {
         private static readonly TextWriter errorStream = Console.Error;
 
-        private static string Version = "0.0.2-alpha";
+        private static string Version = "0.0.3-alpha";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.
@@ -24,11 +27,17 @@ namespace Unluau.CLI
             [Option('o', "output", Default = null, HelpText = "The file that the decompiled script will be stored in (stdout otherwise).")]
             public string OutputFile { get; set; }
 
-            [Value(0, MetaName = "input file", Default = null, HelpText = "Input bytecode file.")]
+            [Value(0, MetaName = "input file", Default = null, HelpText = "Input bytecode file (uses stdin if not provided).")]
             public string InputFile { get; set; }
 
             [Option('v', "verbose", Default = false, HelpText = "Shows log messages as the decompiler is decompiling a script.")]
             public bool Verbose { get; set; }
+            
+            [Option("supress-warnings", Default = false, HelpText = "Does not display warnings to the log file or console.")]
+            public bool SupressWarnings { get; set; }
+
+            [Option("logs", Default = null, HelpText = "The file in which the logs for the decompilation will go (uses stdout if not set).")]
+            public string LogFile { get; set; }
 
             #region Decompiler Configuration
 
@@ -40,6 +49,9 @@ namespace Unluau.CLI
 
             [Option("smart-variable-names", Default = true, HelpText = "Generates logical names for local variables based on their value.")]
             public bool SmartVariableNames { get; set; }
+
+            [Option("descriptive-comments", Default = false, HelpText = "Adds descriptive comments around each block (almost like debug info).")]
+            public bool ShowDescriptiveComments { get; set; }
 
             #endregion
         }
@@ -69,13 +81,25 @@ namespace Unluau.CLI
                 DecompilerOptions decompilerOptions = new DecompilerOptions()
                 {
                     Output = options.OutputFile == null ? new Output() : new Output(File.CreateText(options.OutputFile)),
-                    DescriptiveComments = options.Verbose,
-                    HeaderEnabled = true,
+                    DescriptiveComments = options.ShowDescriptiveComments,
+                    Verbose = options.Verbose,
+                    HeaderEnabled = false,
                     InlineTableDefintions = options.InlineTables,
                     RenameUpvalues = options.RenameUpvalues,
                     VariableNameGuessing = options.SmartVariableNames,
-                    Version = Version
+                    Version = Version,
+                    Warnings = !options.SupressWarnings
                 };
+
+                if (string.IsNullOrEmpty(options.LogFile))
+                {
+                    StreamWriter consoleWriter = new StreamWriter(Console.OpenStandardOutput());
+                    consoleWriter.AutoFlush = true;
+
+                    decompilerOptions.LogFile = consoleWriter;
+                }
+                else
+                    decompilerOptions.LogFile = File.CreateText(options.LogFile);
 
                 try
                 {
@@ -92,6 +116,7 @@ namespace Unluau.CLI
                 }
 
                 decompilerOptions.Output.Flush();
+                decompilerOptions.LogFile.Flush();
             }
         }
 

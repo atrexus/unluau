@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -54,7 +57,7 @@ namespace Unluau
         {
             MoveCursor();
 
-            writer.WriteLine(value);
+            writer.Write(value + '\n');
             position = 0;
         }
 

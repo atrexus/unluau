@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -75,6 +78,10 @@ namespace Unluau
                     return "<=";
                 case BinaryOperation.CompareLt:
                     return "<";
+                case BinaryOperation.And:
+                    return "and";
+                case BinaryOperation.Or:
+                    return "or";
             }
 
             throw new DecompilerException(Stage.Lifter, "'BinaryOperationChar' got unexpected binary operation");

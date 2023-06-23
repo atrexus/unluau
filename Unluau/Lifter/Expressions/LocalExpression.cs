@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +22,7 @@ namespace Unluau
 
         public override void Write(Output output)
         {
-            if (Decleration.Referenced > 1)
+            if (Decleration.Referenced != 1)
                 output.Write(Decleration.Name);
             else
                 Expression.Write(output);

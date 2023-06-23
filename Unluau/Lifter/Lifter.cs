@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,7 +33,13 @@ namespace Unluau
             Function main = chunk.Functions[chunk.MainIndex];
             Registers registers = CreateRegisters(main);
 
-           return new OuterBlock(LiftBlock(main, registers));
+            var block = new OuterBlock(LiftBlock(main, registers));
+
+            // Note: these value doesn't get cleared after each test in Unluau.Test so we have to do it
+            // manually here.
+            Decleration.IdCounter = 0;
+
+            return block;
         }
 
         private Block LiftBlock(Function function, Registers registers, int pcStart = 0, int pcStop = -1)
@@ -51,7 +60,7 @@ namespace Unluau
                     case OpCode.LOADK:
                     {
                         Constant target = properties.Code == OpCode.LOADK 
-                            ? function.Constants[instruction.D] : function.Constants[function.Instructions[++pc].Value];
+                            ? function.Constants[instruction.D] : function.GetConstant(++pc);
 
                         registers.LoadRegister(instruction.A, ConstantToExpression(target), block);
                         break;
@@ -63,14 +72,14 @@ namespace Unluau
                     }
                     case OpCode.GETGLOBAL:
                     {
-                        Constant target = function.Constants[function.Instructions[++pc].Value];
+                        Constant target = function.GetConstant(++pc);
 
                         registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block);
                         break;
                     }
                     case OpCode.SETGLOBAL:
                     {
-                        Constant target = function.Constants[function.Instructions[++pc].Value];
+                        Constant target = function.GetConstant(++pc);
 
                         block.AddStatement(new Assignment(GetConstantAsGlobal(target), registers.GetExpression(instruction.A)));
                         break;
@@ -98,7 +107,7 @@ namespace Unluau
                     case OpCode.NAMECALL:
                     case OpCode.GETTABLEKS:
                     {
-                        Constant target = function.Constants[function.Instructions[++pc].Value];
+                        Constant target = function.GetConstant(++pc);
 
                         Expression expression = new NameIndex(registers.GetExpression(instruction.B), ((StringConstant)target).Value, properties.Code == OpCode.NAMECALL);
 
@@ -125,11 +134,10 @@ namespace Unluau
 
                         Expression callFunction = registers.GetExpression(instruction.A);
 
-                        if (instruction.B > 0)
-                        {
-                            for (int slot = 1; slot < instruction.B; ++slot)
-                                arguments.Add(registers.GetExpression(instruction.A + slot));
-                        }
+                        int numArgs = instruction.B > 0 ? instruction.B : (registers.Top - instruction.A) + 1;
+
+                        for (int slot = 1 + IsSelf(callFunction); slot < numArgs; ++slot)
+                            arguments.Add(registers.GetExpression(instruction.A + slot));
 
                         FunctionCall call = new FunctionCall(callFunction, arguments);
 
@@ -141,7 +149,17 @@ namespace Unluau
                     }
                     case OpCode.MOVE:
                     {
-                        registers.MoveRegister(instruction.B, instruction.A);
+                        var fromExpression = registers.GetExpression(instruction.B);
+                        var toExpression = registers.GetExpression(instruction.A);
+
+                        // If our target register is empty, then load into that register
+                        if (toExpression is null)
+                            registers.LoadRegister(instruction.A, fromExpression, block);
+                        else
+                        {
+                            // Now create the reassignment
+                            block.AddStatement(new Assignment(toExpression, fromExpression));
+                        }
                         break;
                     }
                     case OpCode.LOADNIL:
@@ -197,11 +215,14 @@ namespace Unluau
                     }
                     case OpCode.SETTABLEKS:
                     {
-                        StringConstant target = (StringConstant)function.Constants[(int)function.Instructions[++pc].Value];
+                        StringConstant target = (StringConstant)function.GetConstant(++pc);
                         Expression table = registers.GetExpression(instruction.B), value = ((LocalExpression)table).Expression;
 
                         if (options.InlineTableDefintions && value is TableLiteral)
                         {
+                            if (((LocalExpression)table).Decleration.Referenced == 1)
+                                value = registers.GetRefExpressionValue(instruction.B);
+
                             TableLiteral tableLiteral = (TableLiteral)value;
 
                             if (tableLiteral.MaxEntries > tableLiteral.Entries.Count)
@@ -218,8 +239,8 @@ namespace Unluau
                     }
                     case OpCode.SETTABLE:
                     {
-                        Expression expression = registers.GetExpressionValue(instruction.C), value = registers.GetExpression(instruction.A);
-                        Expression table = registers.GetExpression(instruction.B), tableValue = ((LocalExpression)table).Expression;           
+                        Expression expression = registers.GetRefExpressionValue(instruction.C), value = registers.GetExpression(instruction.A);
+                        Expression table = registers.GetExpression(instruction.B, false), tableValue = ((LocalExpression)table).Expression;           
 
                         if (options.InlineTableDefintions && tableValue is TableLiteral)
                         {
@@ -240,7 +261,8 @@ namespace Unluau
                     }
                     case OpCode.NEWTABLE:
                     {
-                        int arraySize = (int)function.Instructions[++pc].Value;
+                        // Todo: rewrite this stuff so it all works with 64 bit integers
+                        int arraySize = Convert.ToInt32(function.Instructions[++pc].Value);
                         int hashSize = instruction.B == 0 ? 0 : (1 << (instruction.B - 1));
 
                         TableLiteral expression;
@@ -260,8 +282,8 @@ namespace Unluau
                     {
                         TableLiteral tableLiteral = (TableLiteral)registers.GetExpressionValue(instruction.A);
 
-                        for (int slot = instruction.B; slot < instruction.C; slot++)
-                            tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetExpressionValue(slot)));
+                        for (int slot = instruction.B; slot <= instruction.C; slot++)
+                            tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetRefExpressionValue(slot)));
 
                         // Skip next instruction because we didn't use AUX
                         pc++;
@@ -301,7 +323,7 @@ namespace Unluau
                         bool auxUsed = false;
                         Expression condition = GetCondition(registers, instruction, function.Instructions[pc + 1], function.Constants, ref auxUsed);
 
-                        Statement statement = new IfElse(condition, LiftBlock(function, registers, auxUsed ? pc + 2 : pc + 1, (pc += instruction.D) + 1));
+                        Statement statement = new IfElse(condition, LiftBlock(function, new Registers(registers), auxUsed ? pc + 2 : pc + 1, (pc += instruction.D) + 1));
 
                         Instruction nextInstruction = function.Instructions[pc];
                         switch (nextInstruction.GetProperties().Code)
@@ -368,14 +390,24 @@ namespace Unluau
                         }
 
                         registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclerations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters)), block);
-                        
-                        // Note: functions should always appear, even if they're never referenced.
-                        registers.GetDecleration(instruction.A).Referenced++;
                         break;
                     }
                     case OpCode.GETUPVAL:
                     {
                         registers.LoadRegister(instruction.A, function.Upvalues[instruction.B], block);
+                        break;
+                    }
+                    case OpCode.RETURN:
+                    {
+                        IList<Expression> expressions = new List<Expression>();
+
+                        int numArgs = instruction.B > 0 ? instruction.B - 1: registers.Top - instruction.A + 1;
+
+                        for (int slot = 0; slot < numArgs; ++slot)
+                            expressions.Add(registers.GetExpression(instruction.A + slot));
+
+                        if (numArgs > 0)
+                            block.AddStatement(new Return(expressions));
                         break;
                     }
                 }
@@ -384,6 +416,18 @@ namespace Unluau
             registers.FreeRegisters(block);
 
             return block;
+        }
+
+        private int IsSelf(Expression expression)
+        {
+            Expression value = ((LocalExpression)expression).Expression;
+
+            if (value is NameIndex)
+            {
+                NameIndex nameIndex = (NameIndex)value;
+                return nameIndex.IsSelf ? 1 : 0;
+            }
+            return 0;
         }
 
         private Expression BuildConcat(Registers registers, int from, int to)

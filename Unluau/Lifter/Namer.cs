@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -96,9 +99,7 @@ namespace Unluau
                 .Where(d => d.Name.StartsWith(name + "_v"))
                 .ToList();
 
-            int count;
-            if ((count = matchList.Count) != 0)
-                name += "_v" + ++count;
+            name += "_v" + matchList.Count;
 
             return name;
         }

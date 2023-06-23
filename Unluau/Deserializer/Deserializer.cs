@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,11 +12,15 @@ namespace Unluau
     public class Deserializer
     {
         private BytecodeReader reader;
+        private Logger logger;
 
         private const byte MinVesion = 3, MaxVersion = 3;
 
-        public Deserializer(Stream stream)
-            => reader = new BytecodeReader(stream);
+        public Deserializer(LogManager manager, Stream stream)
+        {
+            logger = new Logger(manager, "Deserializer");
+            reader = new BytecodeReader(stream);
+        }
 
         public Chunk Deserialize()
         {
@@ -23,11 +30,11 @@ namespace Unluau
 
             // The rest of the bytecode is the error message
             if (version == 0)
-                throw new DecompilerException(Stage.Deserializer, reader.ReadASCII((int)(reader.Stream.Length - 1)));
+                logger.Fatal(reader.ReadASCII((int)(reader.Stream.Length - 1)));
             
             // Make sure we have a valid bytecode version (so in range)
             if (version < MinVesion || version > MaxVersion)
-                throw new DecompilerException(Stage.Deserializer, "bytecode version mismatch");
+                logger.Error($"Bytecode version mismatch, expected version {MinVesion}...{MaxVersion}");
 
             IList<string> strings = ReadStrings();
             chunk.Functions = ReadFunctions(strings);
@@ -42,6 +49,8 @@ namespace Unluau
 
             IList<string> strings = new List<string>(size);
 
+            logger.Debug($"Reading {size} strings from the string table");
+
             while (strings.Count < size)
             {
                 int stringSize = reader.ReadInt32Compressed();
@@ -49,6 +58,7 @@ namespace Unluau
                 // Really stupid check, but Luau seems to have an issue where '\n' is added before 'GetService'.
                 if (stringSize == 13 && reader.Peek() == 10)
                     stringSize = reader.ReadInt32Compressed();
+                
 
                 strings.Add(reader.ReadASCII(stringSize));
             }
@@ -70,6 +80,8 @@ namespace Unluau
 
             IList<Function> functions = new List<Function>(size);
 
+            logger.Debug($"Reading {size} functions from main bytecode pool");
+
             while (functions.Count < size)
                 functions.Add(ReadFunction(functions, strings));
 
@@ -81,6 +93,8 @@ namespace Unluau
             Function function = new Function();
 
             function.Id = functions.Count;
+
+            logger.Debug("Reading basic function prototype information");
 
             function.MaxStackSize = reader.ReadByte();
             function.Parameters = reader.ReadByte();
@@ -108,18 +122,23 @@ namespace Unluau
 
             IList<Instruction> instructions = new List<Instruction>(size);
 
+            logger.Debug($"Reading {size} instructions from function prototype body");
+
             while (instructions.Count < size) 
             {
-                Instruction instruction = new Instruction((int)reader.ReadUInt32());
+                Instruction instruction = new Instruction(reader.ReadUInt32());
+                OpProperties properties = instruction.GetProperties();
 
-                // Optimization: check for NOP as everything following it will be screwed up
-                if (instruction.GetProperties().Code == OpCode.NOP)
-                    throw new DecompilerException(Stage.Deserializer, "Deserializer encountered NOP (no operation) instruction. Unable to proceed.");
+                // Note: Sometimes we get NOPs...
+                if (properties.Code == OpCode.NOP)
+                    logger.Warning($"Encountered unexpected NOP instruction.");
 
                 instructions.Add(instruction);
+
+                if (properties.HasAux)
+                    instructions.Add(new Instruction(reader.ReadUInt32()));
             }
                 
-
             return instructions;
         }
 
@@ -129,6 +148,8 @@ namespace Unluau
 
             IList<Constant> constants = new List<Constant>(size);
 
+            logger.Debug($"Reading {size} constants from function prototype body");
+
             while (constants.Count < size)
                 constants.Add(ReadConstant(strings, constants));
 
@@ -137,7 +158,15 @@ namespace Unluau
 
         private Constant ReadConstant(IList<string> strings, IList<Constant> constants)
         {
-            switch ((ConstantType)reader.ReadByte())
+            int c = reader.ReadByte();
+
+            if (!Enum.IsDefined(typeof(ConstantType), c))
+            {
+                logger.Fatal("Constant of type " + c + "is not defined");
+                return null;
+            }
+
+            switch ((ConstantType)c)
             {
                 case ConstantType.Nil:
                     return new NilConstant();
@@ -174,9 +203,10 @@ namespace Unluau
                     return new TableConstant(keys);
                 case ConstantType.Closure:
                     return new ClosureConstant(reader.ReadInt32Compressed());
-                default:
-                    throw new DecompilerException(Stage.Deserializer, "unexpected constant kind");
             }
+
+            // Should never happen
+            return null;
         }
 
         private IList<int> GetFunctions(IList<Function> functions)

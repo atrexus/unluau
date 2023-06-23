@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +11,7 @@ namespace Unluau
 {
     public class Decleration
     {
-        public static int IdCounter = 1;
+        public static int IdCounter = 0;
 
         public string Name { get; set; }
         public int Register { get; set; }

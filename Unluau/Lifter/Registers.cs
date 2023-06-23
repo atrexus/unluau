@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +11,9 @@ namespace Unluau
 {
     public class Registers
     {
-        public int Count { get; private set; }
+        public int Count { get; private set; } = 0;
+        public int Top { get; private set; }
+        public bool ReassignOccupiedRegisters { get; set; } = false;
 
         private IDictionary<int, Decleration> declerations;
         private IDictionary<int, Expression> expressions;
@@ -30,6 +35,17 @@ namespace Unluau
             : this(function, new Dictionary<int, Decleration>(), new Dictionary<int, Expression>(), options)
         { }
 
+        public Registers(Registers registers)
+        {
+            Count = registers.Count;
+
+            declerations = new Dictionary<int,Decleration>(registers.declerations);
+            expressions = new Dictionary<int, Expression>(registers.expressions);
+            options = registers.options;
+
+            namer = new Namer(this);
+        }
+
         public void LoadRegister(int register, Expression expression, Block block)
         {
             Decleration decleration = namer.CreateDecleration(register, expression, block, !options.VariableNameGuessing);
@@ -38,6 +54,8 @@ namespace Unluau
 
             SetDecleration(register, decleration);
             SetExpression(register, local);
+
+            Top = register;
 
             block.AddStatement(new LocalAssignment(local));
         }
@@ -94,12 +112,14 @@ namespace Unluau
             return declerations;
         }
 
-        public Decleration GetDecleration(int register)
+        public Decleration GetDecleration(int register, bool reference = true)
         {
             if (declerations.ContainsKey(register))
             {
                 var decleration = declerations[register];
-                decleration.Referenced++;
+
+                if (reference)
+                    decleration.Referenced++;
 
                 SetDecleration(register, decleration);
 
@@ -119,9 +139,9 @@ namespace Unluau
             declerations.Add(register, decleration);
         }
 
-        public Expression GetExpression(int register)
+        public Expression GetExpression(int register, bool reference = true)
         {
-            Decleration decleration = GetDecleration(register);
+            Decleration decleration = GetDecleration(register, reference);
             
             if (expressions.ContainsKey(register))
             {
@@ -134,6 +154,11 @@ namespace Unluau
         }
 
         public Expression GetExpressionValue(int register)
+        {
+            return ((LocalExpression)GetExpression(register, false)).Expression;
+        }
+
+        public Expression GetRefExpressionValue(int register)
         {
             return ((LocalExpression)GetExpression(register)).Expression;
         }

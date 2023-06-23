@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) societall. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,7 +38,7 @@ namespace Unluau
             }
 
             if (HasVararg)
-                output.Write(", ...");
+                output.Write($"{(Arguments.Count > 0 ? ", " : "")}...");
 
             output.WriteLine(")");
 
