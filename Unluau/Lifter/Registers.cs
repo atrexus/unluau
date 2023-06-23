@@ -34,6 +34,17 @@ namespace Unluau
             : this(function, new Dictionary<int, Decleration>(), new Dictionary<int, Expression>(), options)
         { }
 
+        public Registers(Registers registers)
+        {
+            Count = registers.Count;
+
+            declerations = new Dictionary<int,Decleration>(registers.declerations);
+            expressions = new Dictionary<int, Expression>(registers.expressions);
+            options = registers.options;
+
+            namer = new Namer(this);
+        }
+
         public void LoadRegister(int register, Expression expression, Block block)
         {
             Decleration decleration = namer.CreateDecleration(register, expression, block, !options.VariableNameGuessing);

@@ -78,6 +78,10 @@ namespace Unluau
                     return "<=";
                 case BinaryOperation.CompareLt:
                     return "<";
+                case BinaryOperation.And:
+                    return "and";
+                case BinaryOperation.Or:
+                    return "or";
             }
 
             throw new DecompilerException(Stage.Lifter, "'BinaryOperationChar' got unexpected binary operation");

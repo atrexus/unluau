@@ -11,7 +11,7 @@ namespace Unluau
 {
     public class Decleration
     {
-        public static int IdCounter = 1;
+        public static int IdCounter = 0;
 
         public string Name { get; set; }
         public int Register { get; set; }

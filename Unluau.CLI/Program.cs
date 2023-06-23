@@ -83,7 +83,7 @@ namespace Unluau.CLI
                     Output = options.OutputFile == null ? new Output() : new Output(File.CreateText(options.OutputFile)),
                     DescriptiveComments = options.ShowDescriptiveComments,
                     Verbose = options.Verbose,
-                    HeaderEnabled = true,
+                    HeaderEnabled = false,
                     InlineTableDefintions = options.InlineTables,
                     RenameUpvalues = options.RenameUpvalues,
                     VariableNameGuessing = options.SmartVariableNames,
@@ -116,6 +116,7 @@ namespace Unluau.CLI
                 }
 
                 decompilerOptions.Output.Flush();
+                decompilerOptions.LogFile.Flush();
             }
         }
 

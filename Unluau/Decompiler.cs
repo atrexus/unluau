@@ -67,7 +67,10 @@ namespace Unluau
             Console.ForegroundColor = ConsoleColor.Gray;
 
             if (e.Message.Severity == LogSeverity.Fatal)
+            {
+                _options.LogFile.Flush();
                 Environment.Exit(1);
+            }
         }
 
         public void Decompile()

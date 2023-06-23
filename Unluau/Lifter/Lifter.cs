@@ -33,7 +33,13 @@ namespace Unluau
             Function main = chunk.Functions[chunk.MainIndex];
             Registers registers = CreateRegisters(main);
 
-           return new OuterBlock(LiftBlock(main, registers));
+            var block = new OuterBlock(LiftBlock(main, registers));
+
+            // Note: these value doesn't get cleared after each test in Unluau.Test so we have to do it
+            // manually here.
+            Decleration.IdCounter = 0;
+
+            return block;
         }
 
         private Block LiftBlock(Function function, Registers registers, int pcStart = 0, int pcStop = -1)
@@ -143,7 +149,17 @@ namespace Unluau
                     }
                     case OpCode.MOVE:
                     {
-                        registers.MoveRegister(instruction.B, instruction.A);
+                        var fromExpression = registers.GetExpression(instruction.B);
+                        var toExpression = registers.GetExpression(instruction.A);
+
+                        // If our target register is empty, then load into that register
+                        if (toExpression is null)
+                            registers.LoadRegister(instruction.A, fromExpression, block);
+                        else
+                        {
+                            // Now create the reassignment
+                            block.AddStatement(new Assignment(toExpression, fromExpression));
+                        }
                         break;
                     }
                     case OpCode.LOADNIL:
@@ -307,7 +323,7 @@ namespace Unluau
                         bool auxUsed = false;
                         Expression condition = GetCondition(registers, instruction, function.Instructions[pc + 1], function.Constants, ref auxUsed);
 
-                        Statement statement = new IfElse(condition, LiftBlock(function, registers, auxUsed ? pc + 2 : pc + 1, (pc += instruction.D) + 1));
+                        Statement statement = new IfElse(condition, LiftBlock(function, new Registers(registers), auxUsed ? pc + 2 : pc + 1, (pc += instruction.D) + 1));
 
                         Instruction nextInstruction = function.Instructions[pc];
                         switch (nextInstruction.GetProperties().Code)

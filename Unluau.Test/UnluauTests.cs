@@ -34,7 +34,8 @@ namespace Unluau.Test
                     Output = new Output(new StreamWriter(memoryStream)),
                     HeaderEnabled = false,
                     VariableNameGuessing = true,
-                    InlineTableDefintions = true
+                    InlineTableDefintions = true,
+                    RenameUpvalues = true
                 });
 
                 decompiler.Decompile();
@@ -76,11 +77,16 @@ namespace Unluau.Test
             GetAndAssert("Binary/Tables02.luau", "Expect/Tables02.lua");
         }
 
-
         [TestMethod]
         public void Test_luauDecExampleBasic()
         {
             GetAndAssert("Binary/luauDecBasic.luau", "Expect/luauDecBasic.lua");
+        }
+
+        [TestMethod]
+        public void Test_BasicUpvalues()
+        {
+            GetAndAssert("Binary/Upvalue01.luau", "Expect/Upvalue01.lua");
         }
     }
 }

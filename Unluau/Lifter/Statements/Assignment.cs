@@ -22,7 +22,7 @@ namespace Unluau
 
         public override void Write(Output output)
         {
-            if (((LocalExpression)Value).Expression is Closure)
+            if (Value is LocalExpression && ((LocalExpression)Value).Expression is Closure)
             {
                 output.Write("function ");
                 Variable.Write(output);
