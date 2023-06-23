@@ -56,3 +56,5 @@ To really show the power of Unluau, I've run it on various scripts to compare it
 | [Tables01.lua](Unluau.Test/Expect/Tables01.lua)  | Success  | Failure: Segmentation Fault |
 | [Tables02.lua](Unluau.Test/Expect/Tables02.lua)  | Success  | Failure: Segmentation Fault |
 | [WhileLoops.lua](Unluau.Test/Expect/WhileLoops.lua)  | Success  | Failure: Segmentation Fault |
+
+More tests can be reviewed [here](Unluau.Test/Expect).
