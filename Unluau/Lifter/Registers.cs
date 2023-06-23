@@ -11,8 +11,9 @@ namespace Unluau
 {
     public class Registers
     {
-        public int Count { get; private set; }
+        public int Count { get; private set; } = 0;
         public int Top { get; private set; }
+        public bool ReassignOccupiedRegisters { get; set; } = false;
 
         private IDictionary<int, Decleration> declerations;
         private IDictionary<int, Expression> expressions;

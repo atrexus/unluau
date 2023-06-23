@@ -7,14 +7,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Unluau.Test
 {
-    /// <summary>
-    /// Specifically created for the test decompilation stage
-    /// </summary>
-    public class UnluauOptions
-    {
-
-    }
-
     [TestClass]
     public class UnluauTests
     { 
@@ -88,5 +80,31 @@ namespace Unluau.Test
         {
             GetAndAssert("Binary/Upvalue01.luau", "Expect/Upvalue01.lua");
         }
+
+        [TestMethod]
+        public void Test_LocalReassignment()
+        {
+            GetAndAssert("Binary/LocalReassign.luau", "Expect/LocalReassign.lua");
+        }
+
+        [TestMethod]
+        public void Test_StringWithEscapeSequences()
+        {
+            GetAndAssert("Binary/String01.luau", "Expect/String01.lua");
+        }
+        
+        [TestMethod]
+        public void Test_StringWithEscapeSequencesAndLong()
+        {
+            GetAndAssert("Binary/String02.luau", "Expect/String02.lua");
+        }
+
+        [TestMethod]
+        public void Test_BasicVararg()
+        {
+            GetAndAssert("Binary/Vararg01.luau", "Expect/Vararg01.lua");
+        }
+
+        // TODO: Add test for Vararg02
     }
 }

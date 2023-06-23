@@ -38,7 +38,7 @@ namespace Unluau
             }
 
             if (HasVararg)
-                output.Write(", ...");
+                output.Write($"{(Arguments.Count > 0 ? ", " : "")}...");
 
             output.WriteLine(")");
 
