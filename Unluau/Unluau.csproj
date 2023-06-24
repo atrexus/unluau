@@ -55,6 +55,7 @@
     <Compile Include="Lifter\Expressions\Closure.cs" />
     <Compile Include="Lifter\Expressions\Expression.cs" />
     <Compile Include="Lifter\Expressions\ExpressionIndex.cs" />
+    <Compile Include="Lifter\Expressions\ExpressionList.cs" />
     <Compile Include="Lifter\Expressions\FunctionCall.cs" />
     <Compile Include="Lifter\Expressions\Global.cs" />
     <Compile Include="Lifter\Expressions\LocalExpression.cs" />

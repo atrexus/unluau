@@ -303,8 +303,28 @@ namespace Unluau
                         break;
                     }
                     case OpCode.GETVARARGS:
-                    {
-                        registers.LoadRegister(instruction.A, new Vararg(), block);
+                    { 
+                        int count = instruction.B - 1;
+
+                        if (count > 0)
+                        {
+                            ExpressionList expressions = new ExpressionList(count);
+
+                            for (int i = 0; i < count; ++i)
+                            {
+                                int register = instruction.A + i;
+
+                                expressions.Append(registers.LoadTempRegister(register, new Vararg(), block));
+
+                                // All of the variables need to be referenced more than once so that we don't end up 
+                                // printing '...' for each of their references.
+                                registers.GetDeclerationDict()[register].Referenced = 2;
+                            }
+
+                            block.AddStatement(new LocalAssignment(expressions, new Vararg()));
+                        }
+                        else
+                            registers.LoadRegister(instruction.A, new Vararg(), block);
                         break;
                     }
                     case OpCode.JUMPIF:

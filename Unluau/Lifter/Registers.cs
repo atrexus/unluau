@@ -48,6 +48,14 @@ namespace Unluau
 
         public void LoadRegister(int register, Expression expression, Block block)
         {
+            LocalExpression local = LoadTempRegister(register, expression, block);
+
+            block.AddStatement(new LocalAssignment(local));
+        }
+
+        // Literally just loads a register but doesn't create a local assignment for it. Mainly used for GETVARARGS
+        public LocalExpression LoadTempRegister(int register, Expression expression, Block block)
+        {
             Decleration decleration = namer.CreateDecleration(register, expression, block, !options.VariableNameGuessing);
 
             LocalExpression local = new LocalExpression(expression, decleration);
@@ -57,7 +65,7 @@ namespace Unluau
 
             Top = register;
 
-            block.AddStatement(new LocalAssignment(local));
+            return local;
         }
 
         public void FreeRegisters(Block block)
@@ -69,10 +77,13 @@ namespace Unluau
                 {
                     LocalAssignment assignment = block.Statements[i] as LocalAssignment;
 
-                    if (assignment.Variable.Decleration.Referenced == 1)
+                    if (assignment.TryGetVariable(out LocalExpression variable))
                     {
-                        block.Statements.RemoveAt(i);
-                        i--;
+                        if (variable.Decleration.Referenced == 1)
+                        {
+                            block.Statements.RemoveAt(i);
+                            i--;
+                        }
                     }
                 }
             }
