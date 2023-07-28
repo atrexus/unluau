@@ -110,6 +110,11 @@ namespace Unluau.Test
         {
             GetAndAssert("Binary/Vararg02.luau", "Expect/Vararg02.lua");
         }
-        // TODO: Add test for Vararg02
+
+        [TestMethod]
+        public void Test_StringInterpolation()
+        {
+            GetAndAssert("Binary/StringInterpolation.luau", "Expect/StringInterpolation.lua");
+        }
     }
 }

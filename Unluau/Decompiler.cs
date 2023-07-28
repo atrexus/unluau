@@ -56,7 +56,7 @@ namespace Unluau
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     break;
                 case LogSeverity.Fatal:
-                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
                     break;
                 case LogSeverity.Error:
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -69,7 +69,7 @@ namespace Unluau
             if (e.Message.Severity == LogSeverity.Fatal)
             {
                 _options.LogFile.Flush();
-                Environment.Exit(1);
+                throw new Exception(Text);
             }
         }
 
