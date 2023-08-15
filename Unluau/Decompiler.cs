@@ -16,11 +16,11 @@ namespace Unluau
         public bool HeaderEnabled { get; set; } = true;
         public bool InlineTableDefintions { get; set; } = false;
         public bool RenameUpvalues { get; set; }
-        public string Version { get; set; }
+        public string? Version { get; set; }
         public bool Verbose { get; set; }
         public bool Warnings { get; set; }
         public Output Output { get; set; } = new Output();
-        public StreamWriter LogFile { get; set; }
+        public StreamWriter? LogFile { get; set; }
     }
 
     public class Decompiler
@@ -43,7 +43,7 @@ namespace Unluau
             Guid = Guid.NewGuid();
         }
 
-        private void OnLogRecieved(object sender, LogRecievedEventArgs e)
+        private void OnLogRecieved(object? sender, LogRecievedEventArgs e)
         {
             if (e.Message.Severity == LogSeverity.Warn && !_options.Warnings)
                 return;
@@ -63,7 +63,7 @@ namespace Unluau
                     break;
             }
 
-            _options.LogFile.WriteLine(Text);
+            _options.LogFile!.WriteLine(Text);
             Console.ForegroundColor = ConsoleColor.Gray;
 
             if (e.Message.Severity == LogSeverity.Fatal)

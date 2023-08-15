@@ -17,7 +17,6 @@ namespace Unluau
     public class Namer
     {
         private static int _closureCount = 1;
-        private readonly int _maxDepthThreshold = 999;
 
         private Registers registers;
 
@@ -62,7 +61,7 @@ namespace Unluau
 
         private Decleration createNamedDecleration(int register, Expression expression, Block block)
         {
-            string name = getName(expression);
+            string? name = getName(expression);
 
             if (name != null)
                 return new Decleration(register, updateName(name), block.Statements.Count);
@@ -70,18 +69,15 @@ namespace Unluau
             return createRegularDecleration(register, expression, block);
         }
 
-        private string getName(Expression expression)
+        private string? getName(Expression expression)
         {
-            if (expression is NameIndex)
-            {
-                NameIndex nameIndex = expression as NameIndex;
-
+            NameIndex? nameIndex;
+            if ((nameIndex = expression as NameIndex) != null)
                 return nameIndex.Name;
-            }
-            else if (expression is FunctionCall)
-            {
-                FunctionCall call = expression as FunctionCall;
 
+            FunctionCall? call;
+            if ((call = expression as FunctionCall) != null)
+            {
                 string[] names = call.GetNames();
 
                 // Note: Roblox uses 'game:GetService' to load modules. We can rename variables that contain

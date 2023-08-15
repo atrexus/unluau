@@ -7,9 +7,9 @@ namespace Unluau
 {
     public class StringLiteral : Expression, IComparable<string>
     {
-        private string _value;
+        private string? _value;
         public string Value {
-            get => _value;
+            get => _value!;
             set {
                 _value = value;
 
@@ -34,10 +34,7 @@ namespace Unluau
             output.Write($"\"{Value}\"");
         }
 
-        public int CompareTo(string other)
-        {
-            return Value.CompareTo(other);
-        }
+        public int CompareTo(string? other) => Value.CompareTo(other);
 
         public override string[] GetNames()
         {
