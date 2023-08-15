@@ -18,15 +18,17 @@ namespace Unluau
     {
         private LogSeverity _severity;
 
-        public event EventHandler<LogRecievedEventArgs> LogRecieved;
+        public event EventHandler<LogRecievedEventArgs>? LogRecieved;
 
         public LogManager(LogSeverity severity)
-            => _severity = severity;
+        {
+            _severity = severity;
+        }
 
         public void SendLog(LogSeverity severity, LogRecievedEventArgs args)
         {
             if (_severity >= severity)
-                LogRecieved.Invoke(null, args);
+                LogRecieved!.Invoke(null, args);
         }
     }
 }

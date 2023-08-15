@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using CommandLine;
 using CommandLine.Text;
 
@@ -14,7 +15,7 @@ namespace Unluau.CLI
     {
         private static readonly TextWriter errorStream = Console.Error;
 
-        private static string Version = "0.0.3-alpha";
+        private static string Version = "0.0.4-alpha";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.
@@ -25,19 +26,19 @@ namespace Unluau.CLI
             public bool Dissasemble { get; set; }
 
             [Option('o', "output", Default = null, HelpText = "The file that the decompiled script will be stored in (stdout otherwise).")]
-            public string OutputFile { get; set; }
+            public string? OutputFile { get; set; }
 
             [Value(0, MetaName = "input file", Default = null, HelpText = "Input bytecode file (uses stdin if not provided).")]
-            public string InputFile { get; set; }
+            public string? InputFile { get; set; }
 
             [Option('v', "verbose", Default = false, HelpText = "Shows log messages as the decompiler is decompiling a script.")]
             public bool Verbose { get; set; }
-            
+
             [Option("supress-warnings", Default = false, HelpText = "Does not display warnings to the log file or console.")]
             public bool SupressWarnings { get; set; }
 
             [Option("logs", Default = null, HelpText = "The file in which the logs for the decompilation will go (uses stdout if not set).")]
-            public string LogFile { get; set; }
+            public string? LogFile { get; set; }
 
             #region Decompiler Configuration
 
@@ -122,7 +123,7 @@ namespace Unluau.CLI
 
         static void HandleParseError<T>(ParserResult<T> result, IEnumerable<Error> errors)
         {
-            HelpText helpText = null;
+            HelpText? helpText = null;
 
             if (errors.IsVersion())
                 helpText = new HelpText("Unluau " + Version);

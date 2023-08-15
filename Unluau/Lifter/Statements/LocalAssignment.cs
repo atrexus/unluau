@@ -11,26 +11,48 @@ namespace Unluau
 {
     public class LocalAssignment : Statement
     {
-        public LocalExpression Variable { get; private set; }
+        public Expression Expression { get; private set; }
+        public Expression Value { get; private set; }
 
-        public LocalAssignment(LocalExpression variable)
-            => Variable = variable;
+        public LocalAssignment(LocalExpression expression)
+        {
+            Expression = expression;
+            Value = expression.Expression;
+        }
+
+        public LocalAssignment(Expression expression, Expression value)
+        {
+            Expression = expression;
+            Value = value;
+        }
+
+        public bool TryGetVariable(out LocalExpression variable)
+        {
+            if (Expression is LocalExpression)
+            {
+                variable = Expression as LocalExpression;
+                return true;
+            }
+
+            variable = null;
+            return false;
+        }
 
         public override void Write(Output output)
         {
             output.Write("local ");
 
-            if (Variable.Expression is Closure)
+            if (Value is Closure)
             {
                 output.Write("function ");
-                Variable.Write(output);
-                Variable.Expression.Write(output);
+                Expression.Write(output);
+                Value.Write(output);
             }
             else
             {
-                Variable.Write(output);
+                Expression.Write(output);
                 output.Write(" = ");
-                Variable.Expression.Write(output);
+                Value.Write(output);
             }
         }
     }

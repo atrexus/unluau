@@ -1,18 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31624.102
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.CLI", "Unluau.CLI\Unluau.CLI.csproj", "{F157804B-C10E-40BC-9687-5FEFC9B201AB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau", "Unluau\Unluau.csproj", "{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{685DC56D-DEF0-4F09-B2C4-24177D4239EE}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.Test", "Unluau.Test\Unluau.Test.csproj", "{4ADF3B5E-F67E-4331-B20E-51E24A13534C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.Test", "Unluau.Test\Unluau.Test.csproj", "{4ADF3B5E-F67E-4331-B20E-51E24A13534C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau", "Unluau\Unluau.csproj", "{82385E30-D0D4-4122-BC2E-83E9E9EF6106}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.CLI", "Unluau.CLI\Unluau.CLI.csproj", "{58145ECB-D686-4C80-8E30-8526F48BE409}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,18 +20,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F157804B-C10E-40BC-9687-5FEFC9B201AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F157804B-C10E-40BC-9687-5FEFC9B201AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F157804B-C10E-40BC-9687-5FEFC9B201AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F157804B-C10E-40BC-9687-5FEFC9B201AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A7D84B6-2C36-4895-9AD1-94575EA2FA76}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82385E30-D0D4-4122-BC2E-83E9E9EF6106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82385E30-D0D4-4122-BC2E-83E9E9EF6106}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82385E30-D0D4-4122-BC2E-83E9E9EF6106}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82385E30-D0D4-4122-BC2E-83E9E9EF6106}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58145ECB-D686-4C80-8E30-8526F48BE409}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58145ECB-D686-4C80-8E30-8526F48BE409}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58145ECB-D686-4C80-8E30-8526F48BE409}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58145ECB-D686-4C80-8E30-8526F48BE409}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
