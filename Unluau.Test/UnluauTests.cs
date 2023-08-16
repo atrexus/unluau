@@ -1,10 +1,7 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -142,7 +139,6 @@ namespace Unluau.Test
             GetAndAssert("Binary/StringInterpolation.luau", "Expect/StringInterpolation01.lua");
         }
 
-
         [TestMethod]
         public void Test_StringInterpolation()
         {
@@ -150,6 +146,12 @@ namespace Unluau.Test
             { 
                 StringInterpolation = true 
             });
+        }
+
+        [TestMethod]
+        public void Test_BinaryOperations()
+        {
+            GetAndAssert("Binary/BinaryExpressions.luau", "Expect/BinaryExpressions.lua");
         }
     }
 }

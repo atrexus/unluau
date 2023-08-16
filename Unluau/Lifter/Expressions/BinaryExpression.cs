@@ -37,10 +37,47 @@ namespace Unluau
 
         public override void Write(Output output)
         {
+            output.Write("(");
             Left.Write(output);
             output.Write($" {BinaryOperationChar(Operation)} ");
             Right.Write(output);
+            output.Write(")");
         }
+
+/*        private int GetBinaryOperationPrescedence(Expression expression)
+        {
+            if (expression is LocalExpression local && local.Expression is BinaryExpression binaryExpression)
+            {
+                switch (binaryExpression.Operation)
+                {
+                    case BinaryOperation.And:
+                    case BinaryOperation.Or:
+                        return 1;
+                    case BinaryOperation.CompareNe:
+                    case BinaryOperation.CompareEq:
+                    case BinaryOperation.CompareGe:
+                    case BinaryOperation.CompareGt:
+                    case BinaryOperation.CompareLe:
+                    case BinaryOperation.CompareLt:
+                        return 2;
+                    case BinaryOperation.Concat:
+                        return 3;
+                    case BinaryOperation.Add:
+                    case BinaryOperation.Subtract:
+                        return 4;
+                    case BinaryOperation.Mulitply:
+                    case BinaryOperation.Divide:
+                        return 5;
+                    case BinaryOperation.Modulus:
+                    case BinaryOperation.Power:
+                        return 6;
+                    default:
+                        return 0;
+                }
+            }
+            else
+                return 0;
+        }*/
 
         public static string BinaryOperationChar(BinaryOperation operation)
         {
