@@ -17,3 +17,4 @@ function f2(arg1)
    _ENV.print = arg1
    print = arg1
 end
+

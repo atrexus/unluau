@@ -32,7 +32,7 @@ namespace Unluau.Test
 
                 decompiler.Decompile();
 
-                return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length).Trim();
+                return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
             }
         }
 

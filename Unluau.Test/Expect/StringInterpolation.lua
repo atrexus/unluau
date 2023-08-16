@@ -1,1 +1,1 @@
-﻿print("message %*":format(os.clock()))
+print("message %*":format(os.clock()))
