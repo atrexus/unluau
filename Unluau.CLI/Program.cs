@@ -54,6 +54,9 @@ namespace Unluau.CLI
             [Option("descriptive-comments", Default = false, HelpText = "Adds descriptive comments around each block (almost like debug info).")]
             public bool ShowDescriptiveComments { get; set; }
 
+            [Option("string-interpolation", Default = false, HelpText = "Will output interpolated strings rather than using format().")]
+            public bool StringInterpolation { get; set; }
+
             #endregion
         }
 
@@ -89,7 +92,8 @@ namespace Unluau.CLI
                     RenameUpvalues = options.RenameUpvalues,
                     VariableNameGuessing = options.SmartVariableNames,
                     Version = Version,
-                    Warnings = !options.SupressWarnings
+                    Warnings = !options.SupressWarnings,
+                    PerferStringInterpolation = options.StringInterpolation
                 };
 
                 if (string.IsNullOrEmpty(options.LogFile))

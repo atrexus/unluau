@@ -107,9 +107,32 @@ namespace Unluau
                     case OpCode.NAMECALL:
                     case OpCode.GETTABLEKS:
                     {
+                        bool isNamecall = properties.Code == OpCode.NAMECALL;
+                        
                         Constant target = function.GetConstant(++pc);
+                        string targetValue = (target as StringConstant)!.Value;
 
-                        Expression expression = new NameIndex(registers.GetExpression(instruction.B), ((StringConstant)target).Value, properties.Code == OpCode.NAMECALL);
+                        Expression expression = new NameIndex(registers.GetExpression(instruction.B), targetValue, isNamecall);
+
+                        // This is a namecall and the function name is format we need to account for string interpolation
+                        if (isNamecall && targetValue == "format")
+                        {
+                            // Extract the name index from the expression
+                            NameIndex? nameIndex = expression as NameIndex;
+
+                            if (options.PerferStringInterpolation)
+                            {
+                                // If we perfer string interpolation set the expression as an interpolated string
+                                string format = (((LocalExpression)nameIndex!.Expression).Expression as StringLiteral)!.Value;
+                                expression = new InterpolatedStringLiteral(format, new List<Expression>());
+                            } 
+                            else
+                            {
+                                // Otherwise add an expression group around the string literal
+                                nameIndex!.Expression = new ExpressionGroup(nameIndex!.Expression);
+                                expression = nameIndex;
+                            }
+                        }
 
                         registers.LoadRegister(instruction.A, expression, block);
                         break;
@@ -137,9 +160,24 @@ namespace Unluau
                         int numArgs = instruction.B > 0 ? instruction.B : (registers.Top - instruction.A) + 1;
 
                         for (int slot = 1 + IsSelf(callFunction); slot < numArgs; ++slot)
-                            arguments.Add(registers.GetExpression(instruction.A + slot));
+                        {
+                            Expression expression = registers.GetExpression(instruction.A + slot);
 
-                        FunctionCall call = new FunctionCall(callFunction, arguments);
+                            if (expression != null)
+                                arguments.Add(expression);
+                        }
+
+                        Expression call = new FunctionCall(callFunction, arguments);
+
+                        // Note: we do this for string interpolation to work
+                        var callFunctionValue = ((LocalExpression)callFunction).Expression;
+                        if (callFunctionValue is InterpolatedStringLiteral)
+                        {
+                            InterpolatedStringLiteral literal = (InterpolatedStringLiteral)callFunctionValue;
+
+                            literal.Arguments = arguments;
+                            call = literal;
+                        }
 
                         if (instruction.C - 1 == 0)
                             block.AddStatement(call);

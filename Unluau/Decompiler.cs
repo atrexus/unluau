@@ -11,6 +11,7 @@ namespace Unluau
 {
     public class DecompilerOptions
     {
+        public bool PerferStringInterpolation { get; set; } = true;
         public bool VariableNameGuessing { get; set; }
         public bool DescriptiveComments { get; set; }
         public bool HeaderEnabled { get; set; } = true;
