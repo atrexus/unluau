@@ -10,7 +10,7 @@ indent_style = space
 indent_size = 4
 insert_final_newline = true
 charset = utf-8-bom
-file_header_template = Copyright (c) societall. All Rights Reserved.\nLicensed under the Apache License, Version 2.0
+file_header_template = Copyright (c) Valence. All Rights Reserved.\nLicensed under the Apache License, Version 2.0
 ###############################
 # .NET Coding Conventions     #
 ###############################
