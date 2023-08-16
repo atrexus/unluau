@@ -112,6 +112,18 @@ namespace Unluau.Test
         }
 
         [TestMethod]
+        public void Test_ExpressionAndVararg()
+        {
+            GetAndAssert("Binary/Vararg03.luau", "Expect/Vararg03.lua");
+        }
+
+        [TestMethod]
+        public void Test_ExpressionAndExtraVararg()
+        {
+            GetAndAssert("Binary/Vararg04.luau", "Expect/Vararg04.lua");
+        }
+
+        [TestMethod]
         public void Test_StringInterpolation()
         {
             GetAndAssert("Binary/StringInterpolation.luau", "Expect/StringInterpolation.lua");
