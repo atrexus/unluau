@@ -7,6 +7,15 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Unluau.Test
 {
+    public struct TestSettings
+    {
+        public bool StringInterpolation { get; set; } = false;
+
+        public TestSettings()
+        {
+        }
+    }
+
     [TestClass]
     public class UnluauTests
     { 
@@ -15,7 +24,7 @@ namespace Unluau.Test
             return File.OpenRead($"../../../{projectPath}");
         }
 
-        private string GetCode(string FileName)
+        private string GetCode(string FileName, TestSettings settings)
         {
             MemoryStream memoryStream = new MemoryStream();
 
@@ -27,18 +36,19 @@ namespace Unluau.Test
                     HeaderEnabled = false,
                     VariableNameGuessing = true,
                     InlineTableDefintions = true,
-                    RenameUpvalues = true
+                    RenameUpvalues = true,
+                    PerferStringInterpolation = settings.StringInterpolation
                 });
 
                 decompiler.Decompile();
 
-                return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length).Trim();
+                return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
             }
         }
 
-        private void GetAndAssert(string binary, string expect)
+        private void GetAndAssert(string binary, string expect, TestSettings? settings = null)
         {
-            string actual = GetCode(binary);
+            string actual = GetCode(binary, (TestSettings)(settings is null ? new TestSettings() : settings));
             string expected = new StreamReader(OpenRead(expect)).ReadToEnd();
 
             Assert.AreEqual(expected, actual);
@@ -112,9 +122,31 @@ namespace Unluau.Test
         }
 
         [TestMethod]
+        public void Test_ExpressionAndVararg()
+        {
+            GetAndAssert("Binary/Vararg03.luau", "Expect/Vararg03.lua");
+        }
+
+        [TestMethod]
+        public void Test_ExpressionAndExtraVararg()
+        {
+            GetAndAssert("Binary/Vararg04.luau", "Expect/Vararg04.lua");
+        }
+
+        [TestMethod]
+        public void Test_StringInterpolationWithFormat()
+        {
+            GetAndAssert("Binary/StringInterpolation.luau", "Expect/StringInterpolation01.lua");
+        }
+
+
+        [TestMethod]
         public void Test_StringInterpolation()
         {
-            GetAndAssert("Binary/StringInterpolation.luau", "Expect/StringInterpolation.lua");
+            GetAndAssert("Binary/StringInterpolation.luau", "Expect/StringInterpolation02.lua", new TestSettings() 
+            { 
+                StringInterpolation = true 
+            });
         }
     }
 }

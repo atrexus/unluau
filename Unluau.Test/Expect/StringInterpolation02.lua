@@ -1,0 +1,1 @@
+print(`message {os.clock()}`)
