@@ -1,4 +1,4 @@
-local var2 = 1
-print(var2)
-var2 = 2
-print(var2)
+local var0 = 1
+print(var0)
+var0 = 2
+print(var0)

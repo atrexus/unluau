@@ -35,9 +35,9 @@ namespace Unluau
 
             var block = new OuterBlock(LiftBlock(main, registers));
 
-            // Note: these value doesn't get cleared after each test in Unluau.Test so we have to do it
+            // Note: these values doesn't get cleared after each test in Unluau.Test so we have to do it
             // manually here.
-            Decleration.IdCounter = 0;
+            Decleration.ResetCounters();
 
             return block;
         }
@@ -366,7 +366,7 @@ namespace Unluau
                             {
                                 int register = instruction.A + i;
 
-                                expressions.Append(registers.LoadTempRegister(register, new Vararg(), block));
+                                expressions.Append(registers.LoadTempRegister(register, new Vararg(), block, Decleration.DeclerationType.Local));
 
                                 // All of the variables need to be referenced more than once so that we don't end up 
                                 // printing '...' for each of their references.
@@ -442,7 +442,10 @@ namespace Unluau
                             switch ((CaptureType)capture.A)
                             {
                                 case CaptureType.Value:
+                                    var type = options.RenameUpvalues ? Decleration.DeclerationType.Upvalue : Decleration.DeclerationType.Local;
+
                                     expression = (LocalExpression)registers.GetExpression(capture.B);
+                                    expression.Decleration.Type = type;
                                     break;
                                 case CaptureType.Upvalue:
                                     // We've got an existing upvalue
@@ -451,12 +454,6 @@ namespace Unluau
                             }
 
                             expression.Decleration.Referenced++;
-
-                            if (options.RenameUpvalues)
-                            {
-                                expression.Decleration.Name = "upval" + ++upvalueId;
-                                Decleration.IdCounter--;
-                            }
                             
                             newFunction.Upvalues.Add(expression);
                         }
@@ -466,7 +463,9 @@ namespace Unluau
                     }
                     case OpCode.GETUPVAL:
                     {
-                        registers.LoadRegister(instruction.A, function.Upvalues[instruction.B], block);
+                        LocalExpression expression = function.Upvalues[instruction.B];
+
+                        registers.LoadRegister(instruction.A, expression, block, expression.Decleration.Type);
                         break;
                     }
                     case OpCode.RETURN:

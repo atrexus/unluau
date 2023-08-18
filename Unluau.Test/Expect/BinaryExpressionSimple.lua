@@ -1,2 +1,2 @@
-local var4 = x * (y + z)
-local var11 = (x - w) * (y + z)
+local var0 = x * (y + z)
+local var1 = (x - w) * (y + z)

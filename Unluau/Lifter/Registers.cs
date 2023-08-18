@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Unluau.Decleration;
 
 namespace Unluau
 {
@@ -46,17 +47,17 @@ namespace Unluau
             namer = new Namer(this);
         }
 
-        public void LoadRegister(int register, Expression expression, Block block)
+        public void LoadRegister(int register, Expression expression, Block block, Decleration.DeclerationType type = Decleration.DeclerationType.Local)
         {
-            LocalExpression local = LoadTempRegister(register, expression, block);
+            LocalExpression local = LoadTempRegister(register, expression, block, type);
 
             block.AddStatement(new LocalAssignment(local));
         }
 
         // Literally just loads a register but doesn't create a local assignment for it. Mainly used for GETVARARGS
-        public LocalExpression LoadTempRegister(int register, Expression expression, Block block)
+        public LocalExpression LoadTempRegister(int register, Expression expression, Block block, Decleration.DeclerationType type)
         {
-            Decleration decleration = namer.CreateDecleration(register, expression, block, !options.VariableNameGuessing);
+            Decleration decleration = namer.CreateDecleration(register, expression, block, type, !options.VariableNameGuessing);
 
             LocalExpression local = new LocalExpression(expression, decleration);
 
@@ -70,7 +71,12 @@ namespace Unluau
 
         public void FreeRegisters(Block block)
         {
+            int localsCount = 0;
+            int upvaluesCount = 0;
+            int closuresCount = 0;
+
             // Eliminate all dead local assignments
+            // TODO: Fix this horrendous code 
             for (int i = 0; i < block.Statements.Count; i++)
             {
                 if (block.Statements[i] is LocalAssignment)
@@ -83,6 +89,44 @@ namespace Unluau
                         {
                             block.Statements.RemoveAt(i);
                             i--;
+                        }
+                        else
+                        {
+                            // Update the ID of the variable
+                            switch (variable.Decleration.Type)
+                            {
+                                case DeclerationType.Local:
+                                    declerations[variable.Decleration.Register].Id = localsCount++;
+                                    break;
+                                case DeclerationType.Upvalue:
+                                    declerations[variable.Decleration.Register].Id = upvaluesCount++;
+                                    break;
+                                case DeclerationType.Closure:
+                                    declerations[variable.Decleration.Register].Id = closuresCount++;
+                                    break;
+                            }
+                        }
+                    }
+                    else if (assignment.TryGetVariables(out ExpressionList expressions))
+                    {
+                        foreach (Expression expression in expressions.Expressions)
+                        {
+                            if (expression is LocalExpression local)
+                            {
+                                // Update the ID of the variable
+                                switch (local.Decleration.Type)
+                                {
+                                    case DeclerationType.Local:
+                                        declerations[local.Decleration.Register].Id = localsCount++;
+                                        break;
+                                    case DeclerationType.Upvalue:
+                                        declerations[local.Decleration.Register].Id = upvaluesCount++;
+                                        break;
+                                    case DeclerationType.Closure:
+                                        declerations[local.Decleration.Register].Id = closuresCount++;
+                                        break;
+                                }
+                            }
                         }
                     }
                 }

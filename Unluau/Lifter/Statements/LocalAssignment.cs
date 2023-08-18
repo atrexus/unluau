@@ -38,6 +38,18 @@ namespace Unluau
             return false;
         }
 
+        public bool TryGetVariables(out ExpressionList variable)
+        {
+            if (Expression is ExpressionList)
+            {
+                variable = Expression as ExpressionList;
+                return true;
+            }
+
+            variable = null;
+            return false;
+        }
+
         public override void Write(Output output)
         {
             output.Write("local ");

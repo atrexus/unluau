@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Unluau.Decleration;
 
 namespace Unluau
 {
@@ -25,12 +26,12 @@ namespace Unluau
             this.registers = registers; 
         }
         
-        public Decleration CreateDecleration(int register, Expression expression, Block block, bool isRegular = true)
+        public Decleration CreateDecleration(int register, Expression expression, Block block, DeclerationType type, bool isRegular = true)
         {
             if (isRegular)
-                return createRegularDecleration(register, expression, block);
+                return createRegularDecleration(register, expression, block, type);
 
-            return createNamedDecleration(register, expression, block);
+            return createNamedDecleration(register, expression, block, type);
         }
 
         public void PurifyVariableNames()
@@ -51,22 +52,22 @@ namespace Unluau
             }
         }
 
-        private Decleration createRegularDecleration(int register, Expression expression, Block block)
+        private Decleration createRegularDecleration(int register, Expression expression, Block block, DeclerationType type)
         {
             if (expression is Closure)
-                return new Decleration(register, "fun" + _closureCount++, block.Statements.Count);
+                return new Decleration(register, block.Statements.Count, DeclerationType.Closure);
 
-            return new Decleration(register, block.Statements.Count);
+            return new Decleration(register, block.Statements.Count, type);
         }
 
-        private Decleration createNamedDecleration(int register, Expression expression, Block block)
+        private Decleration createNamedDecleration(int register, Expression expression, Block block, DeclerationType type)
         {
             string? name = getName(expression);
 
             if (name != null)
                 return new Decleration(register, updateName(name), block.Statements.Count);
             
-            return createRegularDecleration(register, expression, block);
+            return createRegularDecleration(register, expression, block, type);
         }
 
         private string? getName(Expression expression)

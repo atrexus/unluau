@@ -13,4 +13,4 @@ local var55 = x % (y - z)
 local var60 = x % y ^ z
 local var65 = (x % y) ^ z
 local var70 = x ^ y % z
-local var75 = x ^ (y % z)
+local var15 = x ^ (y % z)
