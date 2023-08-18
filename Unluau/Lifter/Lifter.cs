@@ -210,6 +210,15 @@ namespace Unluau
                         registers.LoadRegister(instruction.A, new BooleanLiteral(instruction.B == 1), block);
                         break;
                     }
+
+                    // Uses register for right hand expression
+                    case OpCode.ADD:
+                    case OpCode.SUB:
+                    case OpCode.MUL:
+                    case OpCode.DIV:
+                    case OpCode.MOD:
+                    case OpCode.POW:
+                    // Uses constant for right hand expression
                     case OpCode.ADDK:
                     case OpCode.SUBK:
                     case OpCode.MULK:
@@ -217,23 +226,28 @@ namespace Unluau
                     case OpCode.MODK:
                     case OpCode.POWK:
                     {
-                        Expression expression = new BinaryExpression(registers.GetExpression(instruction.B), BinaryExpression.GetBinaryOperation(properties.Code), 
-                            ConstantToExpression(function.Constants[instruction.C]));
+                        Expression right =  (properties.Code >= OpCode.ADDK) ? ConstantToExpression(function.Constants[instruction.C]) 
+                            : registers.GetExpression(instruction.C);
+                        Expression left = registers.GetExpression(instruction.B);
 
-                        registers.LoadRegister(instruction.A, expression, block);
-                        break;
-                    }
-                    case OpCode.ADD:
-                    case OpCode.SUB:
-                    case OpCode.MUL:
-                    case OpCode.DIV:
-                    case OpCode.MOD:
-                    case OpCode.POW:
-                    {
-                        Expression expression = new BinaryExpression(registers.GetExpression(instruction.B), BinaryExpression.GetBinaryOperation(properties.Code), 
-                            registers.GetExpression(instruction.C));
+                        // Get the equivalent binary operation for the opcode
+                        BinaryExpression.BinaryOperation operation = BinaryExpression.GetBinaryOperation(properties.Code);
 
-                        registers.LoadRegister(instruction.A, expression, block);
+                        // Get the prescedence of the left and right hand expressions and the current operation
+                        int leftPresedence = BinaryExpression.GetBinaryOperationPrescedence(left), rightPrescedence = BinaryExpression.GetBinaryOperationPrescedence(right);
+                        int currentPrescedence = BinaryExpression.GetBinaryOperationPrescedence(operation);
+                        
+                        // If the left hand expression has a lower prescedence than the current operation, we need to wrap it in an expression group
+                        if (leftPresedence < currentPrescedence && leftPresedence > 0)
+                            left = new ExpressionGroup(left);
+
+                        // If the right hand expression has a lower prescedence than the current operation, we need to wrap it in an expression group
+                        if (rightPrescedence < currentPrescedence && rightPrescedence > 0)
+                            right = new ExpressionGroup(right);
+
+                        BinaryExpression binary = new BinaryExpression(left, operation, right);
+
+                        registers.LoadRegister(instruction.A, binary, block);
                         break;
                     }
                     case OpCode.CONCAT:

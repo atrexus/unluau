@@ -152,6 +152,8 @@ namespace Unluau.Test
         public void Test_BinaryOperations()
         {
             GetAndAssert("Binary/BinaryExpressions.luau", "Expect/BinaryExpressions.lua");
+
+            GetAndAssert("Binary/BinaryExpressionSimple.luau", "Expect/BinaryExpressionSimple.lua");
         }
     }
 }
