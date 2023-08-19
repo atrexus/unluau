@@ -10,9 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.Test", "Unluau.Test\Unluau.Test.csproj", "{4ADF3B5E-F67E-4331-B20E-51E24A13534C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau", "Unluau\Unluau.csproj", "{82385E30-D0D4-4122-BC2E-83E9E9EF6106}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau", "Unluau\Unluau.csproj", "{82385E30-D0D4-4122-BC2E-83E9E9EF6106}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.CLI", "Unluau.CLI\Unluau.CLI.csproj", "{58145ECB-D686-4C80-8E30-8526F48BE409}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.CLI", "Unluau.CLI\Unluau.CLI.csproj", "{58145ECB-D686-4C80-8E30-8526F48BE409}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
