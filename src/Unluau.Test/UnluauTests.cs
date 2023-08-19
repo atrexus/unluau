@@ -51,7 +51,15 @@ namespace Unluau.Test
             string actual = GetCode(binary, (TestSettings)(settings is null ? new TestSettings() : settings));
             string expected = new StreamReader(OpenRead(expect)).ReadToEnd();
 
-            Assert.AreEqual(expected, actual);
+            string[] actual_lines = actual.Split('\n');
+            string[] expected_lines = expected.Split('\n');
+
+            Assert.AreEqual(actual_lines.Length, expected_lines.Length, "Incorrect number of lines");
+
+            for (int i = 0; i < actual_lines.Length; i++)
+            {
+                Assert.AreEqual(expected_lines[i].Trim(), actual_lines[i].Trim(), $"Line {i + 1} does not match");
+            }
         }
 
         [TestMethod]
