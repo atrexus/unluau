@@ -49,3 +49,5 @@ There are also a variety of command line arguments available for you to use for 
   
 ## Benchmarking
 To ensure Unluau supports as many Luau language features possible we have created a test suite of various scripts that must pass after every commit to the main branch. These tests can be viewed [here](Unluau.Test/Expect).
+
+If you want to test some of your own scripts but don't know how to generate luau binaries, check out [luau-workspace](https://github.com/valencefun/luau-workspace).
