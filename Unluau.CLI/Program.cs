@@ -13,9 +13,7 @@ namespace Unluau.CLI
 {
     class Program
     {
-        private static readonly TextWriter errorStream = Console.Error;
-
-        private static string Version = "0.0.4-alpha";
+        private static string Version = "0.0.6-alpha";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.
@@ -117,7 +115,12 @@ namespace Unluau.CLI
                 }
                 catch (DecompilerException e)
                 {
-                    errorStream.WriteLine("Unluau -> " + e.Message);
+                    Console.Error.WriteLine("An error occured when decompiling: \t" + e.Message);
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine($"\tAn unknown error occured while decompiling the script: {e.Message}\n" +
+                        $"Please create an issue at the GitHub repository here: https://github.com/valencefun/unluau/issues");
                 }
 
                 decompilerOptions.Output.Flush();

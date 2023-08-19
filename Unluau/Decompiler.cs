@@ -66,12 +66,6 @@ namespace Unluau
 
             _options.LogFile!.WriteLine(Text);
             Console.ForegroundColor = ConsoleColor.Gray;
-
-            if (e.Message.Severity == LogSeverity.Fatal)
-            {
-                _options.LogFile.Flush();
-                throw new Exception(Text);
-            }
         }
 
         public void Decompile()

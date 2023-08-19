@@ -30,7 +30,7 @@ namespace Unluau
 
             // The rest of the bytecode is the error message
             if (version == 0)
-                logger.Fatal(reader.ReadASCII((int)(reader.Stream.Length - 1)));
+                throw new DecompilerException(Stage.Deserializer, reader.ReadASCII((int)(reader.Stream.Length - 1)));
             
             // Make sure we have a valid bytecode version (so in range)
             if (version < MinVesion || version > MaxVersion)
