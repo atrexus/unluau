@@ -8,6 +8,9 @@ The command line interface has a plethora of options availble to customize the b
 * [Input](#input)
 * [Output](#output--o---output)
 * [Dissasemble](#dissasemble--d---dissasemble)
+* [Verbose](#verbose--v---verbose)
+* [Supress Warnings](#supress-warnings---supress-warnings)
+* [Logs](#logs---logs)
 
 ### Input
 A single, optional, argument that determines the source of the bytecode to decompile. To decompile a file your command should look something like this:
@@ -55,3 +58,13 @@ end
 
 Main Function: 1
 ```
+The dissasembled output shows us information about each function defined in the script. We get to see instruction data (operation code and operands), line info, debug information (function names, etc.), registers, upvalues, and constants. This feature is most useful to us for debugging so you shouldn't expect to use this option if you are here to decompile scripts.
+
+### Verbose `(-v, --verbose)`
+If provided Unluau will enter a verbose mode and will display additional information about the decompilation process. In specific, logs will be written to a desired output stream. This option is most useful for debugging and not something you should be using often.
+
+### Supress Warnings `(--supress-warnings)`
+If the decompiler is in verbose mode and this option is provided, warning logs will not be written to the output stream. It is recommended that you use this option only when needed as warning messages usually contain vital information.
+
+### Logs `(--logs)`
+This option specifies the output stream for the decompilation logs. If this option is not specified then the logs will get printed to standard out, otherwise they will be written to the specified file.
