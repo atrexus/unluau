@@ -31,4 +31,27 @@ end
 
 print(Closure)
 ```
-And we run unluau
+The dissasembled output for the script would be the following:
+```
+0 param(s), 2 slot(s), 0 upvalue(s), 2 constant(s), 0 function(s)
+function Closure() -- line 1 through 2
+   GETIMPORT         0 1
+      AUX        1073741824
+   LOADN             1 1
+   CALL              0 2 1
+   RETURN            0 1 0
+end
+
+0+ param(s), 3 slot(s), 0 upvalue(s), 3 constant(s), 1 function(s)
+function main(...) -- line 1 through 5
+   PREPVARARGS       0 0 0
+   DUPCLOSURE        0 0
+   GETIMPORT         1 2
+      AUX        1074790400
+   MOVE              2 0 0
+   CALL              1 2 1
+   RETURN            0 1 0
+end
+
+Main Function: 1
+```
