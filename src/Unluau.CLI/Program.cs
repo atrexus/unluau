@@ -52,7 +52,7 @@ namespace Unluau.CLI
             [Option("descriptive-comments", Default = false, HelpText = "Adds descriptive comments around each block (almost like debug info).")]
             public bool ShowDescriptiveComments { get; set; }
 
-            [Option("string-interpolation", Default = false, HelpText = "Will output interpolated strings rather than using format().")]
+            [Option("string-interpolation", Default = true, HelpText = "Will disable interpolated strings and will perfer format().")]
             public bool StringInterpolation { get; set; }
 
             #endregion
