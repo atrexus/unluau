@@ -28,6 +28,7 @@ namespace Unluau
                 Variable.Write(output);
 
                 ((LocalExpression)Value).Expression.Write(output);
+                output.WriteLine();
             }
             else
             {

@@ -59,6 +59,7 @@ namespace Unluau
                 output.Write("function ");
                 Expression.Write(output);
                 Value.Write(output);
+                output.WriteLine();
             }
             else
             {
