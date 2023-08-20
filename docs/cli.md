@@ -11,6 +11,7 @@ The command line interface has a plethora of options availble to customize the b
 * [Verbose](#verbose--v---verbose)
 * [Supress Warnings](#supress-warnings---supress-warnings)
 * [Logs](#logs---logs)
+* [Inline Tables](#inline-tables---inline-tables)
 
 ### Input
 A single, optional, argument that determines the source of the bytecode to decompile. To decompile a file your command should look something like this:
@@ -19,13 +20,13 @@ unluau <inputfile.luau>
 ```
 If you don't end up providing an input file, you will need to provide it via `stdin` (standard input).
 
-### Output `(-o, --output)`
+### Output `-o, --output`
 You can direct the output of the decompiler to a file using ``-o`` or `--output`. If this option is not used then the output will just go to stdout (standard out). An example of this option in use can be found below:
 ```
 unluau inputfile.luau -o outputfile.lua
 ```
 
-### Dissasemble `(-d, --dissasemble)`
+### Dissasemble `-d, --dissasemble`
 When provided, this option will print a dissasembled version of the "assembled" luau machine code to standard out. In simple words it converts the machine code to a somewhat readable format. For example, lets say we have the following script compiled in `Closure.luau`:
 ```lua
 local function Closure()
@@ -60,11 +61,27 @@ Main Function: 1
 ```
 The dissasembled output shows us information about each function defined in the script. We get to see instruction data (operation code and operands), line info, debug information (function names, etc.), registers, upvalues, and constants. This feature is most useful to us for debugging so you shouldn't expect to use this option if you are here to decompile scripts.
 
-### Verbose `(-v, --verbose)`
+### Verbose `-v, --verbose`
 If provided Unluau will enter a verbose mode and will display additional information about the decompilation process. In specific, logs will be written to a desired output stream. This option is most useful for debugging and not something you should be using often.
 
-### Supress Warnings `(--supress-warnings)`
+### Supress Warnings `--supress-warnings`
 If the decompiler is in verbose mode and this option is provided, warning logs will not be written to the output stream. It is recommended that you use this option only when needed as warning messages usually contain vital information.
 
-### Logs `(--logs)`
+### Logs `--logs`
 This option specifies the output stream for the decompilation logs. If this option is not specified then the logs will get printed to standard out, otherwise they will be written to the specified file.
+
+### Inline Tables `--inline-tables`
+Tells the decompiler to inline table definitions. Naturally the decompiler has no way of knowing if the initial values of have been assigned via individual assignment or the table constructor `{}`. By enabling this option the decompiler will prioritize the table constructor over individual assignments.
+
+The script below is an example of a script decompiled without the flag:
+```lua
+local var0 = {}
+var0[1] = 1
+var0[2] = 2
+var0[3] = 3
+var0[4] = 4
+```
+And now with the flag enabled:
+```lua
+local var0 = { 1, 2, 3, 4 }
+```
