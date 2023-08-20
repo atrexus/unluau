@@ -119,8 +119,11 @@ namespace Unluau.CLI
                 }
                 catch (Exception e)
                 {
-                    Console.Error.WriteLine($"\tAn unknown error occured while decompiling the script: {e.Message}\n" +
-                        $"Please create an issue at the GitHub repository here: https://github.com/valencefun/unluau/issues");
+                    Console.Error.WriteLine($"An unknown error occured while decompiling the script: {e.Message}\n");
+                    if (options.Verbose)
+                        Console.Error.WriteLine(e.StackTrace);
+                    Console.Error.WriteLine($"Please create an issue at the GitHub repository here: https://github.com/valencefun/unluau/issues");
+
                 }
 
                 decompilerOptions.Output.Flush();

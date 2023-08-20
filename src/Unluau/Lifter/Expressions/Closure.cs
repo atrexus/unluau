@@ -44,7 +44,7 @@ namespace Unluau
 
             Block.Write(output);
 
-            output.WriteLine("end");
+            output.Write("end");
         }
     }
 }

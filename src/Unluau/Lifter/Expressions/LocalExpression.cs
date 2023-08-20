@@ -25,7 +25,12 @@ namespace Unluau
             if (Decleration.Referenced != 1)
                 output.Write(Decleration.Name);
             else
+            {
+                if (Expression is Closure)
+                    output.Write("function");
+
                 Expression.Write(output);
+            }
         }
 
         public override string[] GetNames()
