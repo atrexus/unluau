@@ -14,12 +14,14 @@ namespace Unluau
         public IList<Decleration> Arguments { get; protected set; }
         public bool HasVararg { get; protected set; }
         public Block Block { get; protected set; }
+        public int FunctionId { get; protected set; }
 
-        public Closure(IList<Decleration> arguments, bool hasVararg, Block block)
+        public Closure(IList<Decleration> arguments, bool hasVararg, Block block, int fId)
         {
             Arguments = arguments;
             HasVararg = hasVararg;
             Block = block;
+            FunctionId = fId;
         }
 
         public override void Write(Output output)

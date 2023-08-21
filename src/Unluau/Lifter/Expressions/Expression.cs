@@ -16,5 +16,18 @@ namespace Unluau
         {
             return null;
         }
+
+        public Expression? GetValue()
+        {
+            if (this is LocalExpression local)
+            {
+                if (local.Expression is null)
+                    return null;
+
+                return local.Expression.GetValue();
+            }
+
+            return this;
+        }
     }
 }

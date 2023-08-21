@@ -106,13 +106,14 @@ namespace Unluau
                     }
                     case OpCode.NAMECALL:
                     case OpCode.GETTABLEKS:
-                    {
-                        bool isNamecall = properties.Code == OpCode.NAMECALL;
-                        
+                    {   
                         Constant target = function.GetConstant(++pc);
                         string targetValue = (target as StringConstant)!.Value;
 
-                        Expression expression = new NameIndex(registers.GetExpression(instruction.B), targetValue, isNamecall);
+                        bool isNamecall = properties.Code == OpCode.NAMECALL;
+                        Expression nameExpression = registers.GetExpression(instruction.B);
+
+                        Expression expression = new NameIndex(nameExpression, targetValue, isNamecall);
 
                         // This is a namecall and the function name is format we need to account for string interpolation
                         if (isNamecall && targetValue == "format")
@@ -277,14 +278,14 @@ namespace Unluau
                     case OpCode.SETTABLEKS:
                     {
                         StringConstant target = (StringConstant)function.GetConstant(++pc);
-                        Expression table = registers.GetExpression(instruction.B), value = ((LocalExpression)table).Expression;
+                        Expression table = registers.GetExpression(instruction.B), tableValue = ((LocalExpression)table).Expression;
 
-                        if (options.InlineTableDefintions && value is TableLiteral)
+                        if (options.InlineTableDefintions && tableValue is TableLiteral)
                         {
                             if (((LocalExpression)table).Decleration.Referenced == 1)
-                                value = registers.GetRefExpressionValue(instruction.B);
+                                tableValue = registers.GetRefExpressionValue(instruction.B);
 
-                            TableLiteral tableLiteral = (TableLiteral)value;
+                            TableLiteral tableLiteral = (TableLiteral)tableValue;
 
                             if (tableLiteral.MaxEntries > tableLiteral.Entries.Count)
                             {
@@ -436,7 +437,9 @@ namespace Unluau
                     case OpCode.NEWCLOSURE:
                     case OpCode.DUPCLOSURE:
                     {
-                        Function newFunction = function.GetFunction(properties.Code == OpCode.DUPCLOSURE ? (function.Constants[instruction.D] as ClosureConstant).Value : instruction.D);
+                        int functionId = properties.Code == OpCode.DUPCLOSURE ? ((ClosureConstant)function.Constants[instruction.D]).Value : instruction.D;
+
+                        Function newFunction = function.GetFunction(functionId);
                         Registers newRegisters = CreateRegisters(newFunction);
 
                         while (newFunction.Upvalues.Count < newFunction.MaxUpvalues)
@@ -446,7 +449,7 @@ namespace Unluau
                             if (capture.GetProperties().Code != OpCode.CAPTURE)
                                 throw new DecompilerException(Stage.Lifter, "Expected capture instruction following NEWCLOSURE/DUPCLOSURE");
 
-                            LocalExpression expression = null;
+                            LocalExpression? expression;
 
                             switch ((CaptureType)capture.A)
                             {
@@ -460,14 +463,16 @@ namespace Unluau
                                     // We've got an existing upvalue
                                     expression = function.Upvalues[capture.B];
                                     break;
+                                default:
+                                    throw new DecompilerException(Stage.Lifter, $"Unknown capture type {capture.A}");
                             }
 
-                            expression.Decleration.Referenced++;
+                            expression!.Decleration.Referenced++;
                             
                             newFunction.Upvalues.Add(expression);
                         }
 
-                        registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclerations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters)), block);
+                        registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclerations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters), functionId), block);
                         break;
                     }
                     case OpCode.GETUPVAL:
@@ -492,7 +497,7 @@ namespace Unluau
                     }
                     default:
                     {
-                        // If we don't handle the instruction and it has an auxiliarly value, we need to skip it
+                        // If we don't handle the instruction and it has an auxiliary value, we need to skip it
                         if (properties.HasAux)
                             pc++;
                         break;

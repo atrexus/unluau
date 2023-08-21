@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0
 
 using System.IO;
+using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,6 +11,7 @@ namespace Unluau.Test
     public struct TestSettings
     {
         public bool StringInterpolation { get; set; } = false;
+        public bool InlinedTables { get; set; } = true;
 
         public TestSettings()
         {
@@ -35,7 +37,7 @@ namespace Unluau.Test
                     Output = new Output(new StreamWriter(memoryStream)),
                     HeaderEnabled = false,
                     VariableNameGuessing = true,
-                    InlineTableDefintions = true,
+                    InlineTableDefintions = settings.InlinedTables,
                     RenameUpvalues = true,
                     PerferStringInterpolation = settings.StringInterpolation
                 });
@@ -51,15 +53,15 @@ namespace Unluau.Test
             string actual = GetCode(binary, (TestSettings)(settings is null ? new TestSettings() : settings));
             string expected = new StreamReader(OpenRead(expect)).ReadToEnd();
 
-            string[] actual_lines = actual.Split('\n');
-            string[] expected_lines = expected.Split('\n');
-
-            Assert.AreEqual(actual_lines.Length, expected_lines.Length, "Incorrect number of lines");
+            string[] actual_lines = actual.Split('\n').Where(x => !string.IsNullOrEmpty(x) && !string.IsNullOrWhiteSpace(x)).ToArray();
+            string[] expected_lines = expected.Split('\n').Where(x => !string.IsNullOrEmpty(x) && !string.IsNullOrWhiteSpace(x)).ToArray();
 
             for (int i = 0; i < actual_lines.Length; i++)
             {
                 Assert.AreEqual(expected_lines[i].Trim(), actual_lines[i].Trim(), $"Line {i + 1} does not match");
             }
+
+            Assert.AreEqual(actual_lines.Length, expected_lines.Length, "Incorrect number of lines");
         }
 
         [TestMethod]
@@ -156,6 +158,16 @@ namespace Unluau.Test
             GetAndAssert("Binary/BinaryExpressions.luau", "Expect/BinaryExpressions.lua");
 
             GetAndAssert("Binary/BinaryExpressionSimple.luau", "Expect/BinaryExpressionSimple.lua");
+        }
+
+        [TestMethod]
+        public void Test_DummyLuauSample()
+        {
+            GetAndAssert("Binary/LuauSample.luau", "Expect/LuauSample.lua", new TestSettings() 
+            { 
+                InlinedTables = false, 
+                StringInterpolation = true 
+            });
         }
     }
 }

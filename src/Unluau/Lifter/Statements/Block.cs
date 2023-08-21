@@ -12,9 +12,15 @@ namespace Unluau
     public class Block : Statement
     {
         public IList<Statement> Statements { get; protected set; }
+        
+        private Function Function { get; set; }
+        private IDictionary<int, Expression> _definitions = new Dictionary<int, Expression>();
 
         public Block(IList<Statement> statements)
-            => Statements = statements;
+        {
+            Statements = statements;
+            
+        }
 
         public Block()
             : this(new List<Statement>())
@@ -32,6 +38,23 @@ namespace Unluau
         public void AddStatement(Statement statement)
         {
             Statements.Add(statement);
+
+            Expression? value = null;
+
+            if (statement is Assignment assignment)
+                value = assignment.Value;
+            else if (statement is LocalAssignment local)
+                value = local.Value;
+
+            if (value is not null && value is Closure closure)
+            {
+
+            }
+        }
+
+        public void UpdateMethod(NameIndex nameIndex)
+        {
+              //if (_metatableMethods.Contains(nameIndex))
         }
 
         public void AddStatement(Expression statement)
