@@ -24,17 +24,22 @@ namespace Unluau
         {
             if (Decleration.Referenced != 1)
                 output.Write(Decleration.Name);
-            else
+            else if (Expression != null)
             {
                 if (Expression is Closure)
                     output.Write("function");
 
                 Expression.Write(output);
             }
+            else
+                output.Write(Decleration.Name);
         }
 
         public override string[] GetNames()
         {
+            if (Expression is null)
+                return new string[] { Decleration.Name };
+
             return Expression.GetNames();
         }
     }

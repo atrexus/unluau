@@ -32,12 +32,12 @@ namespace Unluau
                 if (argument is null)
                     continue;
 
-                argument.Write(output);
-
                 if (first)
                     first = false;
                 else
-                    output.Write(",");
+                    output.Write(", ");
+
+                argument.Write(output);
             }
 
             output.Write(")");
@@ -51,10 +51,17 @@ namespace Unluau
             {
                 foreach (Expression expression in Arguments)
                 {
-                    string[] exprNames = expression is null ? null : expression.GetNames();
+                    // If expression is null we can't get names from it
+                    if (expression is null)
+                        continue;
 
-                    if (exprNames != null)
-                        names = names.Concat(exprNames).ToArray();
+                    if (expression is LocalExpression local && local.Expression != null)
+                    {
+                        string[] expressionNames = local.Expression.GetNames();
+
+                        if (expressionNames != null)
+                            names = names.Concat(expressionNames).ToArray();
+                    }          
                 }
             }
 

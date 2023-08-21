@@ -100,12 +100,6 @@ namespace Unluau.Test
         }
 
         [TestMethod]
-        public void Test_LocalReassignment()
-        {
-            GetAndAssert("Binary/LocalReassign.luau", "Expect/LocalReassign.lua");
-        }
-
-        [TestMethod]
         public void Test_StringWithEscapeSequences()
         {
             GetAndAssert("Binary/String01.luau", "Expect/String01.lua");

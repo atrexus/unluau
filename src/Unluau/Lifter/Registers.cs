@@ -47,7 +47,7 @@ namespace Unluau
             namer = new Namer(this);
         }
 
-        public void LoadRegister(int register, Expression expression, Block block, Decleration.DeclerationType type = Decleration.DeclerationType.Local)
+        public void LoadRegister(int register, Expression expression, Block block, DeclerationType type = DeclerationType.Local)
         {
             LocalExpression local = LoadTempRegister(register, expression, block, type);
 
@@ -55,7 +55,7 @@ namespace Unluau
         }
 
         // Literally just loads a register but doesn't create a local assignment for it. Mainly used for GETVARARGS
-        public LocalExpression LoadTempRegister(int register, Expression expression, Block block, Decleration.DeclerationType type)
+        public LocalExpression LoadTempRegister(int register, Expression expression, Block block, DeclerationType type)
         {
             Decleration decleration = namer.CreateDecleration(register, expression, block, type, !options.VariableNameGuessing);
 
@@ -90,7 +90,7 @@ namespace Unluau
                             block.Statements.RemoveAt(i);
                             i--;
                         }
-                        else
+                        else if (declerations.ContainsKey(variable.Decleration.Register))
                         {
                             // Update the ID of the variable
                             switch (variable.Decleration.Type)
@@ -111,7 +111,7 @@ namespace Unluau
                     {
                         foreach (Expression expression in expressions.Expressions)
                         {
-                            if (expression is LocalExpression local)
+                            if (expression is LocalExpression local && declerations.ContainsKey(local.Decleration.Register))
                             {
                                 // Update the ID of the variable
                                 switch (local.Decleration.Type)
@@ -142,11 +142,18 @@ namespace Unluau
         {
             Decleration decleration;
 
-            if ((decleration = GetDecleration(register)) != null)
+            if ((decleration = GetDecleration(register, false)) != null)
             {
-                if (decleration.Referenced < 1)
-                    block.Statements.RemoveAt(decleration.Location);
+                /*if (decleration.Referenced == 1)
+                    block.Statements.RemoveAt(decleration.Location);*/
+                // Remove decleration and expression
+                declerations.Remove(register);
+                expressions.Remove(register);
             }
+
+            /*            // Remove decleration and expression
+                        declerations.Remove(register);
+                        expressions.Remove(register);*/
         }
 
         public void MoveRegister(int fromRegister, int toRegister)

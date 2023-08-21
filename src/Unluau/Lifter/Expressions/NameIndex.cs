@@ -30,7 +30,14 @@ namespace Unluau
 
         public override string[] GetNames()
         {
-            return Expression.GetNames().Append(Name).ToArray();
+            string[] names = Expression.GetNames();
+
+            if (names is null)
+            {
+                return new string[] { Name };
+            }
+
+            return names.Append(Name).ToArray();
         }
     }
 }

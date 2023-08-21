@@ -161,11 +161,20 @@ namespace Unluau
 
                         for (int slot = 1 + IsSelf(callFunction); slot < numArgs; ++slot)
                         {
-                            Expression expression = registers.GetExpression(instruction.A + slot);
+                            int register = instruction.A + slot;
+                            Expression expression = registers.GetExpression(register);
 
                             if (expression != null)
+                            {
                                 arguments.Add(expression);
+
+                                registers.FreeRegister(register, block);
+                            }
+                            
                         }
+
+                        // Free the function register
+                        registers.FreeRegister(instruction.A, block);
 
                         Expression call = new FunctionCall(callFunction, arguments);
 
