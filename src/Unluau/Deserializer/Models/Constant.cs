@@ -82,6 +82,11 @@ namespace Unluau
 		public StringConstant(string value)
 			: base(ConstantType.String, value)
 		{ }
+
+        public override string ToString()
+        {
+            return $"\"{Value}\"";
+        }
 	}
 
 	public class ImportConstant : Constant<IList<StringConstant>>
@@ -89,6 +94,11 @@ namespace Unluau
 		public ImportConstant(IList<StringConstant> names)
 			: base(ConstantType.Import, names)
 		{ }
+
+        public override string ToString()
+        {
+            return $"[{string.Join(",", Value)}]";
+        }
 	}
 
 	public class TableConstant : Constant<IList<Constant>>
@@ -96,6 +106,11 @@ namespace Unluau
 		public TableConstant(IList<Constant> keys)
 			: base(ConstantType.Table, keys)
 		{ }
+
+        public override string ToString()
+        {
+            return $"{{{string.Join(", ", Value)}}}";
+        }
 	}
 
 	public class ClosureConstant : Constant<int>

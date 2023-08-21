@@ -51,7 +51,9 @@ namespace Unluau
         {
             LocalExpression local = LoadTempRegister(register, expression, block, type);
 
-            block.AddStatement(new LocalAssignment(local));
+            var assignment = new LocalAssignment(local);
+
+            block.AddStatement(assignment);
         }
 
         // Literally just loads a register but doesn't create a local assignment for it. Mainly used for GETVARARGS

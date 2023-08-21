@@ -84,6 +84,19 @@ namespace Unluau
             if (DebugInfo != null)
                 builder.Append("\n" + DebugInfo.ToString());
 
+
+
+            // Display constants
+            builder.Append($"\n   constants ({Constants.Count})\n");
+
+            for (int i = 0; i < Constants.Count; i++)
+            {
+                Constant constant = Constants[i];
+
+                var format = string.Format("      {0, -10} {1, -10} {2, -10}", i + 1, constant.Type.ToString().ToLower(), constant);
+                builder.Append(format + "\n");
+            }
+
             builder.Append("end\n");
 
             return builder.ToString();
