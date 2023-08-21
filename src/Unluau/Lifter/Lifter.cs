@@ -490,6 +490,13 @@ namespace Unluau
                             block.AddStatement(new Return(expressions));
                         break;
                     }
+                    default:
+                    {
+                        // If we don't handle the instruction and it has an auxiliarly value, we need to skip it
+                        if (properties.HasAux)
+                            pc++;
+                        break;
+                    }
                 }
             }
 
