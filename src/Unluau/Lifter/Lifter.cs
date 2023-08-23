@@ -405,7 +405,8 @@ namespace Unluau
                         bool auxUsed = false;
                         Expression condition = GetCondition(registers, instruction, function.Instructions[pc + 1], function.Constants, ref auxUsed);
 
-                        Statement statement = new IfElse(condition, LiftBlock(function, new Registers(registers), auxUsed ? pc + 2 : pc + 1, (pc += instruction.D) + 1));
+                        Registers newRegisters = new Registers(registers);
+                        Statement statement = new IfElse(condition, LiftBlock(function, newRegisters, auxUsed ? pc + 2 : pc + 1, (pc += instruction.D) + 1));
 
                         Instruction nextInstruction = function.Instructions[pc];
                         switch (nextInstruction.GetProperties().Code)
@@ -428,6 +429,37 @@ namespace Unluau
 
                                 statement = new WhileLoop(ifElse.Condition, ifElse.IfBody);
                                 break;
+                            }
+                        }
+
+                        // Check if the current instruction is a simple jump instruction
+                        if ((properties.Code == OpCode.JUMPIF || properties.Code == OpCode.JUMPIFNOT) && statement is IfElse)
+                        {
+                            // These are the two instructions that are always used for `and` and `or` statements.
+                            // We need to check if the register that the unary operator references is the same as 
+                            // the one being reassigned in the body of the if statement.
+                            byte register = instruction.A;
+                            IfElse ifElse = (IfElse)statement;
+
+                            // If our condition is a unary expression and the body of the if statement is a local assignment
+                            // we can go on to check if the unary expression is referencing the same register as the local assignment.
+                            if (ifElse.IfBody.Statements.Count == 1
+                                && ifElse.IfBody.Statements.First() is LocalAssignment localAssignment)
+                            {
+                                LocalExpression? expression = localAssignment.Expression as LocalExpression;
+                                UnaryExpression? unaryCondition = ifElse.Condition as UnaryExpression;
+
+                                if (expression!.Decleration.Register == register)
+                                {
+                                    // We know that the current jump instruction represents an `and` or `or` statement.
+                                    Expression left = unaryCondition is null ? ifElse.Condition : unaryCondition!.Expression; 
+                                    Expression right = expression!.Expression;
+
+                                    var operation = unaryCondition is null ? BinaryExpression.BinaryOperation.And : BinaryExpression.BinaryOperation.Or;
+
+                                    registers.LoadRegister(register, new BinaryExpression(left, operation, right), block);
+                                    break;
+                                }
                             }
                         }
 

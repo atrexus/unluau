@@ -169,5 +169,11 @@ namespace Unluau.Test
                 StringInterpolation = true 
             });
         }
+
+        [TestMethod]
+        public void Test_BooleanAssignment()
+        {
+            GetAndAssert("Binary/BooleanAssign01.luau", "Expect/BooleanAssign01.lua");
+        }
     }
 }
