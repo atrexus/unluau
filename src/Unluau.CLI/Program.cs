@@ -13,7 +13,7 @@ namespace Unluau.CLI
 {
     class Program
     {
-        private static string Version = "0.0.6-alpha";
+        private static string Version = "0.0.7-alpha";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.
@@ -142,7 +142,7 @@ namespace Unluau.CLI
                 helpText = HelpText.AutoBuild(result, h =>
                 {
                     h.Heading = $"Unluau {Version}";
-                    h.Copyright = $"Copyright (c) {DateTime.Now.Year} societal";
+                    h.Copyright = $"Copyright (c) {DateTime.Now.Year} Valence";
                     return h;
                 }, e => e);
             }
