@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,20 +14,25 @@ namespace Unluau
     {
         private BytecodeReader reader;
         private Logger logger;
+        private byte version, typesVersion;
+        private OpCodeEncoding encoding;
 
-        private const byte MinVesion = 3, MaxVersion = 3;
+        private const byte MinVesion = 3, MaxVersion = 4;
+        private const byte TypeVersion = 1;
 
-        public Deserializer(LogManager manager, Stream stream)
+        public Deserializer(LogManager manager, Stream stream, OpCodeEncoding encoding)
         {
             logger = new Logger(manager, "Deserializer");
             reader = new BytecodeReader(stream);
+
+            this.encoding = encoding;
         }
 
         public Chunk Deserialize()
         {
             Chunk chunk = new Chunk();
 
-            byte version = reader.ReadByte();
+            version = reader.ReadByte();
 
             // The rest of the bytecode is the error message
             if (version == 0)
@@ -35,6 +41,9 @@ namespace Unluau
             // Make sure we have a valid bytecode version (so in range)
             if (version < MinVesion || version > MaxVersion)
                 logger.Error($"Bytecode version mismatch, expected version {MinVesion}...{MaxVersion}");
+
+            if (version >= 4)
+                typesVersion = reader.ReadByte();
 
             IList<string> strings = ReadStrings();
             chunk.Functions = ReadFunctions(strings);
@@ -102,6 +111,23 @@ namespace Unluau
             function.Upvalues = new List<LocalExpression>(function.MaxUpvalues);
             function.IsVararg = reader.ReadByte() == 1;
 
+            if (version >= 4)
+            {
+                function.Flags = reader.ReadByte();
+
+                int typesSize = reader.ReadInt32Compressed();
+
+                if (typesSize > 0 && typesVersion == TypeVersion)
+                {
+                    function.Types = reader.ReadBytes(typesSize);
+
+                    // Todo: remove these retarded assert function defs
+                    Debug.Assert(typesSize == 2 + function.Parameters);
+                    Debug.Assert(function.Types[0] == (int)BytecodeTypes.Function);
+                    Debug.Assert(function.Types[1] == function.Parameters);
+                }
+            }
+
             function.Instructions = ReadInstructions();
             function.Constants = ReadConstants(strings);
             function.Functions = GetFunctions(functions);
@@ -126,7 +152,7 @@ namespace Unluau
 
             while (instructions.Count < size) 
             {
-                Instruction instruction = new Instruction(reader.ReadUInt32());
+                Instruction instruction = new Instruction(reader.ReadUInt32(), encoding);
                 OpProperties properties = instruction.GetProperties();
 
                 // Note: Sometimes we get NOPs...

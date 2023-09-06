@@ -55,6 +55,9 @@ namespace Unluau.CLI
             [Option("string-interpolation", Default = true, HelpText = "Will disable interpolated strings and will perfer format().")]
             public bool StringInterpolation { get; set; }
 
+            [Option("encoding", Default = OpCodeEncoding.None, HelpText = "Set the encoding format of the operation codes in the luau binary.")]
+            public OpCodeEncoding Encoding { get; set; }
+
             #endregion
         }
 
@@ -91,7 +94,8 @@ namespace Unluau.CLI
                     VariableNameGuessing = options.SmartVariableNames,
                     Version = Version,
                     Warnings = !options.SupressWarnings,
-                    PerferStringInterpolation = options.StringInterpolation
+                    PerferStringInterpolation = options.StringInterpolation,
+                    Encoding = options.Encoding
                 };
 
                 if (string.IsNullOrEmpty(options.LogFile))
