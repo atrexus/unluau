@@ -12,6 +12,7 @@ The command line interface has a plethora of options availble to customize the b
 * [Supress Warnings](#supress-warnings---supress-warnings)
 * [Logs](#logs---logs)
 * [Inline Tables](#inline-tables---inline-tables)
+* [Rename Upvalues](#rename-upvalues---rename-upvalues)
 
 ### Input
 A single, optional, argument that determines the source of the bytecode to decompile. To decompile a file your command should look something like this:
@@ -84,4 +85,14 @@ var0[4] = 4
 And now with the flag enabled:
 ```lua
 local var0 = { 1, 2, 3, 4 }
+```
+
+### Rename Upvalues `--rename-upvalues`
+Renames local variables that are defined outside of the closure that they are being referenced in. Unluau will rename them to `upvalue{x}` to help distinguish from regular variables.
+```lua
+local upvalue0 = 1
+
+local function f()
+    return upvalue0
+end
 ```
