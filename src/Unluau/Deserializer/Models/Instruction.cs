@@ -51,7 +51,7 @@ namespace Unluau
                 switch (_encoding)
                 {
                     case OpCodeEncoding.Client:
-                        rawCode -= 0x63;
+                        rawCode *= 203u;
                         break;
                 }
 
