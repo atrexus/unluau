@@ -11,16 +11,16 @@ namespace Unluau
     public class Instruction
     {
         private uint _value;
+        private OpCodeEncoding _encoding;
 
         public OpProperties GetProperties()
         {
-            OpCode code = (OpCode)(Value & 0xFF);
             OpProperties properties;
 
-            if (OpProperties.Map.TryGetValue(code, out properties))
+            if (OpProperties.Map.TryGetValue(Code, out properties))
                 return properties;
 
-            throw new DecompilerException(Stage.Deserializer, $"unhandled operation code ({code})");
+            throw new DecompilerException(Stage.Deserializer, $"unhandled operation code ({Code})");
         }
 
         public uint Value { 
@@ -42,7 +42,28 @@ namespace Unluau
         public int E
             => (int)(_value >> 8);
 
-        public Instruction(uint value)
-            => _value = value;
+        public OpCode Code
+        {
+            get
+            {
+                uint rawCode = Value & 0xFF;
+
+                switch (_encoding)
+                {
+                    case OpCodeEncoding.Client:
+                        rawCode *= 203u;
+                        break;
+                }
+
+                return (OpCode)rawCode;
+            }
+            private set { }
+        }
+
+        public Instruction(uint value, OpCodeEncoding encoding = OpCodeEncoding.None)
+        {
+            _value = value;
+            _encoding = encoding;
+        }
     }
 }

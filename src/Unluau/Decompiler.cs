@@ -20,6 +20,7 @@ namespace Unluau
         public string? Version { get; set; }
         public bool Verbose { get; set; }
         public bool Warnings { get; set; }
+        public OpCodeEncoding Encoding { get; set; }
         public Output Output { get; set; } = new Output();
         public StreamWriter? LogFile { get; set; }
     }
@@ -39,7 +40,7 @@ namespace Unluau
             manager.LogRecieved += OnLogRecieved;
 
             _options = options;
-            chunk = new Deserializer(manager, stream).Deserialize();
+            chunk = new Deserializer(manager, stream, options.Encoding).Deserialize();
 
             Guid = Guid.NewGuid();
         }
