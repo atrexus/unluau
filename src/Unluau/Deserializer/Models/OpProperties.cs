@@ -361,8 +361,27 @@ namespace Unluau
         JUMPXEQKN,
         JUMPXEQKS,
 
+        // IDIV: compute floor division between two source registers and put the result into target register
+        // A: target register
+        // B: source register 1
+        // C: source register 2
+        IDIV,
+
+        // IDIVK compute floor division between the source register and a constant and put the result into target register
+        // A: target register
+        // B: source register
+        // C: constant table index (0..255)
+        IDIVK,
+
         // Enum entry for number of opcodes, not a valid opcode by itself!
         COUNT
+    }
+
+    public enum OpCodeEncoding
+    {
+        None,
+        Client,
+        Studio
     }
 
     public class OpProperties
@@ -461,6 +480,8 @@ namespace Unluau
             { OpCode.JUMPXEQKB, new OpProperties(OpCode.JUMPXEQKB, OpMode.iAD, true) },
             { OpCode.JUMPXEQKN, new OpProperties(OpCode.JUMPXEQKN, OpMode.iAD, true) },
             { OpCode.JUMPXEQKS, new OpProperties(OpCode.JUMPXEQKS, OpMode.iAD, true) },
+            { OpCode.IDIV, new OpProperties(OpCode.IDIV, OpMode.iABC, false) },
+            { OpCode.IDIVK, new OpProperties(OpCode.IDIVK, OpMode.iABC, false) },
         };
     }
 }

@@ -16,6 +16,8 @@ namespace Unluau
         public byte MaxUpvalues { get; set; }
         public IList<LocalExpression> Upvalues { get; set; }
         public bool IsVararg { get; set; }
+        public byte Flags { get; set; }
+        public byte[] Types { get; set; }
         public int LineDefined { get; set; }
         public string DebugName { get; set; }
         public IList<Constant> Constants { get; set; }

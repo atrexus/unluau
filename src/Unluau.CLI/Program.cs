@@ -13,7 +13,7 @@ namespace Unluau.CLI
 {
     class Program
     {
-        private static string Version = "0.0.6-alpha";
+        private static string Version = "0.0.7-alpha";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.
@@ -55,6 +55,9 @@ namespace Unluau.CLI
             [Option("string-interpolation", Default = true, HelpText = "Will disable interpolated strings and will perfer format().")]
             public bool StringInterpolation { get; set; }
 
+            [Option("encoding", Default = OpCodeEncoding.None, HelpText = "Set the encoding format of the operation codes in the luau binary.")]
+            public OpCodeEncoding Encoding { get; set; }
+
             #endregion
         }
 
@@ -91,7 +94,8 @@ namespace Unluau.CLI
                     VariableNameGuessing = options.SmartVariableNames,
                     Version = Version,
                     Warnings = !options.SupressWarnings,
-                    PerferStringInterpolation = options.StringInterpolation
+                    PerferStringInterpolation = options.StringInterpolation,
+                    Encoding = options.Encoding
                 };
 
                 if (string.IsNullOrEmpty(options.LogFile))
@@ -142,7 +146,7 @@ namespace Unluau.CLI
                 helpText = HelpText.AutoBuild(result, h =>
                 {
                     h.Heading = $"Unluau {Version}";
-                    h.Copyright = $"Copyright (c) {DateTime.Now.Year} societal";
+                    h.Copyright = $"Copyright (c) {DateTime.Now.Year} Valence";
                     return h;
                 }, e => e);
             }
