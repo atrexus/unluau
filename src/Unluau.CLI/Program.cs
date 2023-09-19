@@ -119,7 +119,7 @@ namespace Unluau.CLI
                 }
                 catch (DecompilerException e)
                 {
-                    Console.Error.WriteLine("An error occured when decompiling: \t" + e.Message);
+                    Console.Error.WriteLine("An error occured when decompiling: " + e.Message);
                 }
                 catch (Exception e)
                 {
