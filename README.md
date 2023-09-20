@@ -9,3 +9,6 @@ Unluau is still in early alpha and is receiving updates frequently. You can down
 ## Usage
 After downloading the latest version in the [releases](https://github.com/valencefun/UnluauNET/releases) tab, you can refer to the manuals below to familiarize yourself with the different binaries availible to you.
 * [Unluau CLI](docs/cli.md)
+
+## Contributing
+If you would like to implement a feature or fix a bug that we haven't gotten around to fixing, feel free to send a pull request and we will review it immediately. If you would like to contribute but don't know where to start, check out some of the known issues [here](https://github.com/valencefun/unluau/issues). We are passionate about open source learning and strongly suggest you get involved!
