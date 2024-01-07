@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Serilog;
 
 namespace Unluau
 {
@@ -18,60 +19,31 @@ namespace Unluau
         public bool InlineTableDefintions { get; set; } = false;
         public bool RenameUpvalues { get; set; }
         public string? Version { get; set; }
-        public bool Verbose { get; set; }
-        public bool Warnings { get; set; }
         public OpCodeEncoding Encoding { get; set; }
         public Output Output { get; set; } = new Output();
-        public StreamWriter? LogFile { get; set; }
+        public ILogger? Logger { get; set; }
     }
 
     public class Decompiler
     {
-        private DecompilerOptions _options;
-        private Chunk chunk;
-        private LogManager manager;
+        private readonly DecompilerOptions _options;
+        private readonly Chunk _chunk;
 
         public Guid Guid { get; private set; }
 
         public Decompiler(Stream stream, DecompilerOptions options)
         {
-            // Create our logger instance for the decompiler
-            manager = new LogManager(GetLogSeverity(options));
-            manager.LogRecieved += OnLogRecieved;
+            Log.Logger = options.Logger!;
 
             _options = options;
-            chunk = new Deserializer(manager, stream, options.Encoding).Deserialize();
+            _chunk = new Deserializer(stream, options.Encoding).Deserialize();
 
             Guid = Guid.NewGuid();
         }
 
-        private void OnLogRecieved(object? sender, LogRecievedEventArgs e)
-        {
-            if (e.Message.Severity == LogSeverity.Warn && !_options.Warnings)
-                return;
-
-            string Text = $"{DateTime.UtcNow.ToString("hh:mm:ss")} [{e.Message.Severity}] {e.Message.Source}: {e.Message.Exception?.ToString() ?? e.Message.Message}";
-
-            switch (e.Message.Severity)
-            {
-                case LogSeverity.Warn:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    break;
-                case LogSeverity.Fatal:
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    break;
-                case LogSeverity.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    break;
-            }
-
-            _options.LogFile!.WriteLine(Text);
-            Console.ForegroundColor = ConsoleColor.Gray;
-        }
-
         public void Decompile()
         {
-            Lifter lifter = new Lifter(chunk, _options);
+            Lifter lifter = new Lifter(_chunk, _options);
 
             OuterBlock program = lifter.LiftProgram();
 
@@ -82,17 +54,6 @@ namespace Unluau
             _options.Output.Flush();
         }
 
-        public string Dissasemble()
-        {
-            return chunk.ToString();
-        }
-
-        private LogSeverity GetLogSeverity(DecompilerOptions options)
-        {
-            if (options.Verbose)
-                return LogSeverity.Debug;
-
-            return LogSeverity.Info;
-        }
+        public string Dissasemble() => _chunk.ToString();
     }
 }

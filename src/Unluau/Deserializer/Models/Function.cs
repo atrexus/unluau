@@ -23,8 +23,8 @@ namespace Unluau
         public IList<Constant> Constants { get; set; }
         public IList<Instruction> Instructions { get; set; }
         public IList<int> Functions { get; set; }
-        public LineInfo LineInfo { get; set; }
-        public DebugInfo DebugInfo { get; set; }
+        public LineInfo? LineInfo { get; set; }
+        public DebugInfo? DebugInfo { get; set; }
 
         public IList<Function> GlobalFunctions { get; set; }
 
