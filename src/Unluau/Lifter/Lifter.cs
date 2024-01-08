@@ -639,7 +639,6 @@ namespace Unluau
             IDictionary<int, Decleration> declerations = LoadDeclerations(function);
             IDictionary<int, Expression> expressions = LoadExpressions(declerations);
 
-
             return new Registers(function, declerations, expressions, options);
         }
 
