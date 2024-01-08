@@ -62,26 +62,26 @@ namespace Unluau
                         Constant target = properties.Code == OpCode.LOADK 
                             ? function.Constants[instruction.D] : function.GetConstant(++pc);
 
-                        registers.LoadRegister(instruction.A, ConstantToExpression(target), block);
+                        registers.LoadRegister(instruction.A, ConstantToExpression(target), block, pc);
                         break;
                     }
                     case OpCode.LOADN:
                     {
-                        registers.LoadRegister(instruction.A, new NumberLiteral(instruction.D), block);
+                        registers.LoadRegister(instruction.A, new NumberLiteral(instruction.D), block, pc);
                         break;
                     }
                     case OpCode.GETGLOBAL:
                     {
                         Constant target = function.GetConstant(++pc);
 
-                        registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block);
+                        registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block, pc);
                         break;
                     }
                     case OpCode.SETGLOBAL:
                     {
                         Constant target = function.GetConstant(++pc);
 
-                        block.AddStatement(new Assignment(GetConstantAsGlobal(target), registers.GetExpression(instruction.A)));
+                        block.AddStatement(new Assignment(GetConstantAsGlobal(target), registers.GetExpression(instruction.A)), pc);
                         break;
                     }
                     case OpCode.GETIMPORT:
@@ -95,10 +95,10 @@ namespace Unluau
                             if (target.Value.Count > 2)
                                 expression = new NameIndex(expression, target.Value[2].Value);
 
-                            registers.LoadRegister(instruction.A, expression, block);
+                            registers.LoadRegister(instruction.A, expression, block, pc);
                         } 
                         else
-                            registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block);
+                            registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block, pc);
                         
                         // Skip next instruction (we used the constant instead of AUX)
                         pc++;
@@ -135,21 +135,21 @@ namespace Unluau
                             }
                         }
 
-                        registers.LoadRegister(instruction.A, expression, block);
+                        registers.LoadRegister(instruction.A, expression, block, pc);
                         break;
                     }
                     case OpCode.GETTABLEN:
                     {
                         ExpressionIndex index = new ExpressionIndex(registers.GetExpression(instruction.B), new NumberLiteral(instruction.C + 1));
 
-                        registers.LoadRegister(instruction.A, index, block);
+                        registers.LoadRegister(instruction.A, index, block, pc);
                         break;
                     }
                     case OpCode.GETTABLE:
                     {
                         ExpressionIndex expressionIndex = new ExpressionIndex(registers.GetExpression(instruction.B), registers.GetExpression(instruction.C));
 
-                        registers.LoadRegister(instruction.A, expressionIndex, block);
+                        registers.LoadRegister(instruction.A, expressionIndex, block, pc);
                         break;
                     }
                     case OpCode.CALL:
@@ -190,9 +190,9 @@ namespace Unluau
                         }
 
                         if (instruction.C - 1 == 0)
-                            block.AddStatement(call);
+                            block.AddStatement(call, pc);
                         else
-                            registers.LoadRegister(instruction.A, call, block);
+                            registers.LoadRegister(instruction.A, call, block, pc);
                         break;
                     }
                     case OpCode.MOVE:
@@ -202,22 +202,22 @@ namespace Unluau
 
                         // If our target register is empty, then load into that register
                         if (toExpression is null)
-                            registers.LoadRegister(instruction.A, fromExpression, block);
+                            registers.LoadRegister(instruction.A, fromExpression, block, pc);
                         else
                         {
                             // Now create the reassignment
-                            block.AddStatement(new Assignment(toExpression, fromExpression));
+                            block.AddStatement(new Assignment(toExpression, fromExpression), pc);
                         }
                         break;
                     }
                     case OpCode.LOADNIL:
                     {
-                        registers.LoadRegister(instruction.A, new NilLiteral(), block);
+                        registers.LoadRegister(instruction.A, new NilLiteral(), block, pc);
                         break;
                     }
                     case OpCode.LOADB:
                     {
-                        registers.LoadRegister(instruction.A, new BooleanLiteral(instruction.B == 1), block);
+                        registers.LoadRegister(instruction.A, new BooleanLiteral(instruction.B == 1), block, pc);
                         break;
                     }
 
@@ -257,7 +257,7 @@ namespace Unluau
 
                         BinaryExpression binary = new BinaryExpression(left, operation, right);
 
-                        registers.LoadRegister(instruction.A, binary, block);
+                        registers.LoadRegister(instruction.A, binary, block, pc);
                         break;
                     }
                     case OpCode.CONCAT:
@@ -265,14 +265,14 @@ namespace Unluau
                         // Kinda annoying, gotta unravel the whole TING
                         Expression expression = BuildConcat(registers, instruction.B, instruction.C);
 
-                        registers.LoadRegister(instruction.A, expression, block);
+                        registers.LoadRegister(instruction.A, expression, block, pc);
                         break;
                     }
                     case OpCode.NOT:
                     case OpCode.LENGTH:
                     case OpCode.MINUS:
                     {
-                        registers.LoadRegister(instruction.A, registers.GetExpression(instruction.B), block);
+                        registers.LoadRegister(instruction.A, registers.GetExpression(instruction.B), block, pc);
                         break;
                     }
                     case OpCode.SETTABLEKS:
@@ -296,7 +296,7 @@ namespace Unluau
 
                         NameIndex nameIndex = new NameIndex(table, target.Value);
 
-                        block.AddStatement(new Assignment(nameIndex, registers.GetExpression(instruction.A)));
+                        block.AddStatement(new Assignment(nameIndex, registers.GetExpression(instruction.A)), pc);
                         break;
                     }
                     case OpCode.SETTABLE:
@@ -318,7 +318,7 @@ namespace Unluau
                         if (expression is NumberLiteral || expression is StringLiteral)
                             expression = new ExpressionIndex(table, expression);
 
-                        block.AddStatement(new Assignment(expression, value));
+                        block.AddStatement(new Assignment(expression, value), pc);
                         break;
                     }
                     case OpCode.NEWTABLE:
@@ -337,7 +337,7 @@ namespace Unluau
                         if (options.InlineTableDefintions && hashSize > 0)
                             expression.MaxEntries = hashSize;
 
-                        registers.LoadRegister(instruction.A, expression, block);
+                        registers.LoadRegister(instruction.A, expression, block, pc);
                         break;
                     }
                     case OpCode.SETLIST:
@@ -361,7 +361,7 @@ namespace Unluau
                             tableLiteral.MaxEntries = target.Value.Count;
                         
 
-                        registers.LoadRegister(instruction.A, tableLiteral, block);
+                        registers.LoadRegister(instruction.A, tableLiteral, block, pc);
                         break;
                     }
                     case OpCode.GETVARARGS:
@@ -383,10 +383,10 @@ namespace Unluau
                                 registers.GetDeclerationDict()[register].Referenced = 2;
                             }
 
-                            block.AddStatement(new LocalAssignment(expressions, new Vararg()));
+                            block.AddStatement(new LocalAssignment(expressions, new Vararg()), pc);
                         }
                         else
-                            registers.LoadRegister(instruction.A, new Vararg(), block);
+                            registers.LoadRegister(instruction.A, new Vararg(), block, pc);
                         break;
                     }
                     case OpCode.JUMPIF:
@@ -405,15 +405,44 @@ namespace Unluau
                         bool auxUsed = false;
                         Expression condition = GetCondition(registers, instruction, function.Instructions[pc + 1], function.Constants, ref auxUsed);
 
+                        // If the next instruction is a JUMPBACK instruction, then we must be dealing with a repeat..until loop.
+                        Instruction nextInstruction = function.Instructions[pc + 1];
+                        if (nextInstruction.GetProperties().Code == OpCode.JUMPBACK)
+                        {
+                            // We need to invert the condition, because repeat..until loops are reversed.
+                            condition = InvertCondition(condition);
+
+                            Block body = new();
+
+                            // Now we need to take all of the statements created after the inital program counter, and add them to our block.
+                            for (int i = pc + nextInstruction.D; i < pc + 1; ++i)
+                            {
+                                if (block.PcMap.ContainsKey(i))
+                                {
+                                    var stmt = block.PcMap[i];
+
+                                    block.Statements.Remove(stmt);
+                                    block.PcMap.Remove(i);
+
+                                    body.AddStatement(stmt, i);
+                                }
+                            }
+
+                            registers.FreeRegisters(body);
+
+                            block.AddStatement(new RepeatUntil(condition, body), pc);
+                            break;
+                        }
+
                         Registers newRegisters = new Registers(registers);
                         Statement statement = new IfElse(condition, LiftBlock(function, newRegisters, auxUsed ? pc + 2 : pc + 1, (pc += instruction.D) + 1));
 
-                        Instruction nextInstruction = function.Instructions[pc];
+                        nextInstruction = function.Instructions[pc];
                         switch (nextInstruction.GetProperties().Code)
                         {
                             case OpCode.JUMP:
                             {
-                                IfElse ifElse = statement as IfElse;
+                                IfElse ifElse = (IfElse)statement;
 
                                 ifElse.ElseBody = LiftBlock(function, registers, pc + 1, (pc += nextInstruction.D) + 1);
                                 Block elseBodyBlock = ifElse.ElseBody as Block; // We know it has to be a block
@@ -425,7 +454,7 @@ namespace Unluau
                             }
                             case OpCode.JUMPBACK:
                             {
-                                IfElse ifElse = statement as IfElse;
+                                IfElse ifElse = (IfElse)statement;
 
                                 statement = new WhileLoop(ifElse.Condition, ifElse.IfBody);
                                 break;
@@ -457,13 +486,13 @@ namespace Unluau
 
                                     var operation = unaryCondition is null ? BinaryExpression.BinaryOperation.And : BinaryExpression.BinaryOperation.Or;
 
-                                    registers.LoadRegister(register, new BinaryExpression(left, operation, right), block);
+                                    registers.LoadRegister(register, new BinaryExpression(left, operation, right), block, pc);
                                     break;
                                 }
                             }
                         }
 
-                        block.AddStatement(statement);
+                        block.AddStatement(statement, pc);
                         break;
                     }
                     case OpCode.NEWCLOSURE:
@@ -504,14 +533,14 @@ namespace Unluau
                             newFunction.Upvalues.Add(expression);
                         }
 
-                        registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclerations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters), functionId), block);
+                        registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclerations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters), functionId), block, pc);
                         break;
                     }
                     case OpCode.GETUPVAL:
                     {
                         LocalExpression expression = function.Upvalues[instruction.B];
 
-                        registers.LoadRegister(instruction.A, expression, block, expression.Decleration.Type);
+                        registers.LoadRegister(instruction.A, expression, block, pc, expression.Decleration.Type);
                         break;
                     }
                     case OpCode.RETURN:
@@ -524,7 +553,7 @@ namespace Unluau
                             expressions.Add(registers.GetExpression(instruction.A + slot));
 
                         if (numArgs > 0)
-                            block.AddStatement(new Return(expressions));
+                            block.AddStatement(new Return(expressions), pc);
                         break;
                     }
                     default:
@@ -590,6 +619,19 @@ namespace Unluau
             }
 
             return new BinaryExpression(registers.GetExpression(instruction.A), operation, right);
+        }
+
+        private Expression InvertCondition(Expression expression)
+        {
+            if (expression is UnaryExpression unary)
+            {
+                if (unary.Operation == UnaryExpression.UnaryOperation.Not)
+                    return unary.Expression;
+            }
+            else 
+                return new UnaryExpression(expression, UnaryExpression.UnaryOperation.Not);
+
+            return expression;
         }
 
         private Registers CreateRegisters(Function function)

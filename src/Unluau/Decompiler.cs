@@ -21,7 +21,7 @@ namespace Unluau
         public string? Version { get; set; }
         public OpCodeEncoding Encoding { get; set; }
         public Output Output { get; set; } = new Output();
-        public ILogger? Logger { get; set; }
+        public ILogger Logger { get; set; } = new LoggerConfiguration().CreateLogger();
     }
 
     public class Decompiler

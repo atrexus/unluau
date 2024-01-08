@@ -47,13 +47,13 @@ namespace Unluau
             namer = new Namer(this);
         }
 
-        public void LoadRegister(int register, Expression expression, Block block, DeclerationType type = DeclerationType.Local)
+        public void LoadRegister(int register, Expression expression, Block block, int pc, DeclerationType type = DeclerationType.Local)
         {
             LocalExpression local = LoadTempRegister(register, expression, block, type);
 
             var assignment = new LocalAssignment(local);
 
-            block.AddStatement(assignment);
+            block.AddStatement(assignment, pc);
         }
 
         // Literally just loads a register but doesn't create a local assignment for it. Mainly used for GETVARARGS

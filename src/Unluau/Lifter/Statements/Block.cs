@@ -12,14 +12,14 @@ namespace Unluau
     public class Block : Statement
     {
         public IList<Statement> Statements { get; protected set; }
-        
-        private Function Function { get; set; }
+        public IDictionary<int, Statement> PcMap { get; protected set; }
+
         private IDictionary<int, Expression> _definitions = new Dictionary<int, Expression>();
 
         public Block(IList<Statement> statements)
         {
             Statements = statements;
-            
+            PcMap = new Dictionary<int, Statement>();   
         }
 
         public Block()
@@ -35,9 +35,10 @@ namespace Unluau
             output.Unindent();
         }
 
-        public void AddStatement(Statement statement)
+        public void AddStatement(Statement statement, int pc)
         {
             Statements.Add(statement);
+            PcMap.Add(pc, statement);
 
             Expression? value = null;
 
@@ -54,12 +55,9 @@ namespace Unluau
 
         public void UpdateMethod(NameIndex nameIndex)
         {
-              //if (_metatableMethods.Contains(nameIndex))
+            //if (_metatableMethods.Contains(nameIndex))
         }
 
-        public void AddStatement(Expression statement)
-        {
-            Statements.Add(new StatementExpression(statement));
-        }
+        public void AddStatement(Expression statement, int pc) => AddStatement(new StatementExpression(statement), pc);
     }
 }
