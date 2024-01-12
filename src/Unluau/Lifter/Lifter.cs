@@ -198,6 +198,7 @@ namespace Unluau
                     }
                     case OpCode.MOVE:
                     {
+                        //Console.WriteLine($"{pc}, {function.DebugName}");
                         var fromExpression = registers.GetExpression(instruction.B);
 
                         // If our target register is empty, then load into that register
@@ -568,7 +569,8 @@ namespace Unluau
                         for (int slot = 0; slot < numArgs; ++slot)
                             expressions.Add(registers.GetExpression(instruction.A + slot));
 
-                        block.AddStatement(new Return(expressions), pc);
+                        if (pc + 1 < function.Instructions.Count || expressions.Count > 0)
+                            block.AddStatement(new Return(expressions), pc);
                         break;
                     }
                     default:

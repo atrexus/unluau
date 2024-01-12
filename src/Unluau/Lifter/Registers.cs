@@ -190,7 +190,7 @@ namespace Unluau
                 return decleration;
             }
 
-            throw new DecompilerException(Stage.Lifter, $"No decleration found for register {register}");
+            return null;
         }
 
         public bool IsEmpty(int register) => !(declerations.ContainsKey(register) && expressions.ContainsKey(register));
@@ -216,7 +216,7 @@ namespace Unluau
                 return expressions[register];
             }
 
-            throw new DecompilerException(Stage.Lifter, $"No expression found for register {register}");
+            return null;
         }
 
         public Expression GetExpressionValue(int register)
