@@ -8,12 +8,14 @@ using System.IO;
 using System.Runtime.InteropServices;
 using CommandLine;
 using CommandLine.Text;
+using Serilog;
+using Serilog.Events;
 
 namespace Unluau.CLI
 {
     class Program
     {
-        private static string Version = "0.0.7-alpha";
+        private static string Version = "0.0.8-alpha";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.
@@ -32,11 +34,11 @@ namespace Unluau.CLI
             [Option('v', "verbose", Default = false, HelpText = "Shows log messages as the decompiler is decompiling a script.")]
             public bool Verbose { get; set; }
 
-            [Option("supress-warnings", Default = false, HelpText = "Does not display warnings to the log file or console.")]
-            public bool SupressWarnings { get; set; }
-
             [Option("logs", Default = null, HelpText = "The file in which the logs for the decompilation will go (uses stdout if not set).")]
             public string? LogFile { get; set; }
+
+            [Option("log-level", Default = LogEventLevel.Verbose, HelpText = "The minimum log level to use.")]
+            public LogEventLevel LogLevel { get; set; }
 
             #region Decompiler Configuration
 
@@ -46,7 +48,7 @@ namespace Unluau.CLI
             [Option("rename-upvalues", Default = true, HelpText = "Renames upvalues to \"upval{x}\" to help distinguish from regular local variables.")]
             public bool RenameUpvalues { get; set; }
 
-            [Option("smart-variable-names", Default = true, HelpText = "Generates logical names for local variables based on their value.")]
+            [Option("smart-variable-names", Default = false, HelpText = "Generates logical names for local variables based on their value.")]
             public bool SmartVariableNames { get; set; }
 
             [Option("descriptive-comments", Default = false, HelpText = "Adds descriptive comments around each block (almost like debug info).")]
@@ -83,30 +85,29 @@ namespace Unluau.CLI
         {
             using (Stream stream = string.IsNullOrEmpty(options.InputFile) ? Console.OpenStandardInput() : File.OpenRead(options.InputFile))
             {
+                var logConfig = new LoggerConfiguration();
+
+                if (string.IsNullOrEmpty(options.LogFile))
+                    logConfig.WriteTo.Console(options.LogLevel);           
+                else
+                    logConfig.WriteTo.File(options.OutputFile!, options.LogLevel);
+
+                logConfig.MinimumLevel.Is(options.LogLevel);
+                
                 DecompilerOptions decompilerOptions = new DecompilerOptions()
                 {
                     Output = options.OutputFile == null ? new Output() : new Output(File.CreateText(options.OutputFile)),
                     DescriptiveComments = options.ShowDescriptiveComments,
-                    Verbose = options.Verbose,
-                    HeaderEnabled = false,
+                    HeaderEnabled = true,
                     InlineTableDefintions = options.InlineTables,
                     RenameUpvalues = options.RenameUpvalues,
                     VariableNameGuessing = options.SmartVariableNames,
                     Version = Version,
-                    Warnings = !options.SupressWarnings,
                     PerferStringInterpolation = options.StringInterpolation,
-                    Encoding = options.Encoding
+                    Encoding = options.Encoding,
                 };
 
-                if (string.IsNullOrEmpty(options.LogFile))
-                {
-                    StreamWriter consoleWriter = new StreamWriter(Console.OpenStandardOutput());
-                    consoleWriter.AutoFlush = true;
-
-                    decompilerOptions.LogFile = consoleWriter;
-                }
-                else
-                    decompilerOptions.LogFile = File.CreateText(options.LogFile);
+                Log.Logger = decompilerOptions.Logger = logConfig.CreateLogger();
 
                 try
                 {
@@ -119,19 +120,14 @@ namespace Unluau.CLI
                 }
                 catch (DecompilerException e)
                 {
-                    Console.Error.WriteLine("An error occured when decompiling: \t" + e.Message);
+                    Log.Fatal(e, "Decompilation error");
                 }
                 catch (Exception e)
                 {
-                    Console.Error.WriteLine($"An unknown error occured while decompiling the script: {e.Message}\n");
-                    if (options.Verbose)
-                        Console.Error.WriteLine(e.StackTrace);
-                    Console.Error.WriteLine($"Please create an issue at the GitHub repository here: https://github.com/valencefun/unluau/issues");
-
+                    Log.Fatal(e, "Unexpected error; please report here: https://github.com/atrexus/unluau/issues");
                 }
 
-                decompilerOptions.Output.Flush();
-                decompilerOptions.LogFile.Flush();
+                Log.CloseAndFlush();
             }
         }
 

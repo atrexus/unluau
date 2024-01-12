@@ -23,13 +23,13 @@ namespace Unluau
         public IList<Constant> Constants { get; set; }
         public IList<Instruction> Instructions { get; set; }
         public IList<int> Functions { get; set; }
-        public LineInfo LineInfo { get; set; }
-        public DebugInfo DebugInfo { get; set; }
+        public LineInfo? LineInfo { get; set; }
+        public DebugInfo? DebugInfo { get; set; }
 
         public IList<Function> GlobalFunctions { get; set; }
 
         public Function GetFunction(int fId)
-            => GlobalFunctions[fId];
+            => GlobalFunctions[Functions[fId]];
 
         public Constant GetConstant(int pc)
             => Constants[Convert.ToInt32(Instructions[pc].Value)];
@@ -40,7 +40,7 @@ namespace Unluau
 
             builder.Append($"{Parameters}{(IsVararg ? "+" : string.Empty)} param(s), {MaxStackSize} slot(s), {MaxUpvalues} upvalue(s), {Constants.Count} constant(s), {Functions.Count} function(s)\n");
 
-            builder.Append($"function {(DebugName == null ? "main" : DebugName)}(");
+            builder.Append($"function {(string.IsNullOrEmpty(DebugName) ? "main" : DebugName)}(");
 
             for (int i = 0; i < Parameters; i++)
             {
@@ -63,6 +63,8 @@ namespace Unluau
             {
                 Instruction instruction = Instructions[i];
 
+                builder.Append(i.ToString("000"));
+
                 switch (instruction.GetProperties().Mode)
                 {
                     case OpMode.iABC:
@@ -80,13 +82,14 @@ namespace Unluau
                 }
 
                 if (instruction.GetProperties().HasAux)
+                {
+                    builder.Append((i + 1).ToString("000"));
                     builder.Append(string.Format("   {0, -10}\t {1, 5}\n", "   AUX", (int)Instructions[++i].Value));
+                }
             }
 
             if (DebugInfo != null)
                 builder.Append("\n" + DebugInfo.ToString());
-
-
 
             // Display constants
             builder.Append($"\n   constants ({Constants.Count})\n");
@@ -99,7 +102,7 @@ namespace Unluau
                 builder.Append(format + "\n");
             }
 
-            builder.Append("end\n");
+            builder.Append($"end -- function id: {Id}\n");
 
             return builder.ToString();
         }

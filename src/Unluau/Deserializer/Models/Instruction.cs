@@ -15,9 +15,7 @@ namespace Unluau
 
         public OpProperties GetProperties()
         {
-            OpProperties properties;
-
-            if (OpProperties.Map.TryGetValue(Code, out properties))
+            if (OpProperties.Map.TryGetValue(Code, out var properties))
                 return properties;
 
             throw new DecompilerException(Stage.Deserializer, $"unhandled operation code ({Code})");
@@ -37,7 +35,7 @@ namespace Unluau
             => (byte)((_value >> 24) & 0xFF);
 
         public int D
-            => (int)(_value >> 16);
+            => (int)_value >> 16;
 
         public int E
             => (int)(_value >> 8);

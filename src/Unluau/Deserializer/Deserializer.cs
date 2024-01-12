@@ -7,22 +7,21 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Serilog;
 
 namespace Unluau
 {
     public class Deserializer
     {
         private BytecodeReader reader;
-        private Logger logger;
         private byte version, typesVersion;
         private OpCodeEncoding encoding;
 
         private const byte MinVesion = 3, MaxVersion = 4;
         private const byte TypeVersion = 1;
 
-        public Deserializer(LogManager manager, Stream stream, OpCodeEncoding encoding)
+        public Deserializer(Stream stream, OpCodeEncoding encoding)
         {
-            logger = new Logger(manager, "Deserializer");
             reader = new BytecodeReader(stream);
 
             this.encoding = encoding;
@@ -40,12 +39,12 @@ namespace Unluau
             
             // Make sure we have a valid bytecode version (so in range)
             if (version < MinVesion || version > MaxVersion)
-                logger.Error($"Bytecode version mismatch, expected version {MinVesion}...{MaxVersion}");
+                throw new DecompilerException(Stage.Deserializer, $"Bytecode version mismatch, expected version {MinVesion}...{MaxVersion}");
 
             if (version >= 4)
                 typesVersion = reader.ReadByte();
 
-            IList<string> strings = ReadStrings();
+            var strings = ReadStrings();
             chunk.Functions = ReadFunctions(strings);
             chunk.MainIndex = reader.ReadInt32Compressed();
 
@@ -58,15 +57,15 @@ namespace Unluau
 
             IList<string> strings = new List<string>(size);
 
-            logger.Debug($"Reading {size} strings from the string table");
+            Log.Debug($"Reading {size} strings from the string table");
 
             while (strings.Count < size)
             {
                 int stringSize = reader.ReadInt32Compressed();
 
                 // Really stupid check, but Luau seems to have an issue where '\n' is added before 'GetService'.
-                if (stringSize == 13 && reader.Peek() == 10)
-                    stringSize = reader.ReadInt32Compressed();
+/*                if (stringSize == 13 && reader.Peek() == 10)
+                    stringSize = reader.ReadInt32Compressed();*/
                 
 
                 strings.Add(reader.ReadASCII(stringSize));
@@ -80,7 +79,7 @@ namespace Unluau
         {
             int id = reader.ReadInt32Compressed();
 
-            return id == 0 || id > strings.Count ? null : strings[id - 1];
+            return id == 0 || id > strings.Count ? string.Empty : strings[id - 1];
         }
 
         private IList<Function> ReadFunctions(IList<string> strings)
@@ -89,7 +88,7 @@ namespace Unluau
 
             IList<Function> functions = new List<Function>(size);
 
-            logger.Debug($"Reading {size} functions from main bytecode pool");
+            Log.Debug($"Reading {size} functions from main bytecode pool");
 
             while (functions.Count < size)
                 functions.Add(ReadFunction(functions, strings));
@@ -103,7 +102,7 @@ namespace Unluau
 
             function.Id = functions.Count;
 
-            logger.Debug("Reading basic function prototype information");
+            Log.Debug("Reading basic function prototype information");
 
             function.MaxStackSize = reader.ReadByte();
             function.Parameters = reader.ReadByte();
@@ -130,7 +129,7 @@ namespace Unluau
 
             function.Instructions = ReadInstructions();
             function.Constants = ReadConstants(strings);
-            function.Functions = GetFunctions(functions);
+            function.Functions = ReadFunctions();
             function.GlobalFunctions = functions;
 
             function.LineDefined = reader.ReadInt32Compressed();
@@ -148,7 +147,7 @@ namespace Unluau
 
             IList<Instruction> instructions = new List<Instruction>(size);
 
-            logger.Debug($"Reading {size} instructions from function prototype body");
+            Log.Debug($"Reading {size} instructions from function prototype body");
 
             while (instructions.Count < size) 
             {
@@ -157,7 +156,7 @@ namespace Unluau
 
                 // Note: Sometimes we get NOPs...
                 if (properties.Code == OpCode.NOP)
-                    logger.Warning($"Encountered unexpected NOP instruction.");
+                    Log.Warning($"Encountered unexpected NOP instruction.");
 
                 instructions.Add(instruction);
 
@@ -174,7 +173,7 @@ namespace Unluau
 
             IList<Constant> constants = new List<Constant>(size);
 
-            logger.Debug($"Reading {size} constants from function prototype body");
+            Log.Debug($"Reading {size} constants from function prototype body");
 
             while (constants.Count < size)
                 constants.Add(ReadConstant(strings, constants));
@@ -187,12 +186,11 @@ namespace Unluau
             int c = reader.ReadByte();
 
             if (!Enum.IsDefined(typeof(ConstantType), c))
-            {
-                logger.Fatal("Constant of type " + c + "is not defined");
-                return null;
-            }
+                throw new DecompilerException(Stage.Deserializer, $"Constant is not defined ({c})");
+            
+            ConstantType constantType = (ConstantType)c;
 
-            switch ((ConstantType)c)
+            switch (constantType)
             {
                 case ConstantType.Nil:
                     return new NilConstant();
@@ -232,10 +230,10 @@ namespace Unluau
             }
 
             // Should never happen
-            return null;
+            throw new DecompilerException(Stage.Deserializer, $"No constant returned for type ({constantType})");
         }
 
-        private IList<int> GetFunctions(IList<Function> functions)
+        private IList<int> ReadFunctions()
         {
             int size = reader.ReadInt32Compressed();
 
@@ -247,13 +245,15 @@ namespace Unluau
             return newFunctions;
         }
 
-        private LineInfo ReadLineInfo(int instructions)
+        private LineInfo? ReadLineInfo(int instructions)
         {
-            LineInfo lineInfo = null;
+            LineInfo? lineInfo = null;
 
             // Line info needs to be enabled
             if (reader.ReadBoolean())
             {
+                Log.Debug("Line information is enabled, reading.");
+
                 lineInfo = new LineInfo();
 
                 lineInfo.LineGapLog = reader.ReadByte();
@@ -278,17 +278,21 @@ namespace Unluau
                     lineInfo.AbsLineInfoList.Add(lastLine);
                 }
             }
+            else
+                Log.Debug("Line information is disabled, skipping.");
 
             return lineInfo;
         }
 
-        private DebugInfo ReadDebugInfo(IList<string> strings)
+        private DebugInfo? ReadDebugInfo(IList<string> strings)
         {
-            DebugInfo debugInfo = null;
+            DebugInfo? debugInfo = null;
 
             // Line info needs to be enabled
             if (reader.ReadBoolean())
             {
+                Log.Debug("Debug information is enabled, reading.");
+
                 debugInfo = new DebugInfo();
 
                 int sizeVars = reader.ReadInt32Compressed();
@@ -317,6 +321,8 @@ namespace Unluau
                 debugInfo.Locals = localVariables;
                 debugInfo.Upvalues = upvalues;
             }
+            else
+                Log.Debug("Debug information is disabled, skipping.");
 
             return debugInfo;
         }

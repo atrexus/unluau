@@ -163,6 +163,12 @@ namespace Unluau
                     return BinaryOperation.CompareLe;
                 case OpCode.JUMPIFNOTLT:
                     return BinaryOperation.CompareLt;
+                case OpCode.ORK:
+                case OpCode.OR:
+                    return BinaryOperation.Or;
+                case OpCode.ANDK:
+                case OpCode.AND:
+                    return BinaryOperation.And;
             }
 
             throw new DecompilerException(Stage.Lifter, "'GetBinaryOperation' got unexpected operation code");

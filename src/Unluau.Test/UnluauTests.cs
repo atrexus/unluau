@@ -175,5 +175,11 @@ namespace Unluau.Test
         {
             GetAndAssert("Binary/BooleanAssign01.luau", "Expect/BooleanAssign01.lua");
         }
+
+        [TestMethod]
+        public void Test_RepeatUntil()
+        {
+            GetAndAssert("Binary/RepeatUntil01.luau", "Expect/RepeatUntil01.lua");
+        }
     }
 }
