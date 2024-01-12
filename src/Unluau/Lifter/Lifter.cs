@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -198,15 +199,14 @@ namespace Unluau
                     case OpCode.MOVE:
                     {
                         var fromExpression = registers.GetExpression(instruction.B);
-                        var toExpression = registers.GetExpression(instruction.A);
 
                         // If our target register is empty, then load into that register
-                        if (toExpression is null)
+                        if (registers.IsEmpty(instruction.A))
                             registers.LoadRegister(instruction.A, fromExpression, block, pc);
                         else
                         {
                             // Now create the reassignment
-                            block.AddStatement(new Assignment(toExpression, fromExpression), pc);
+                            block.AddStatement(new Assignment(registers.GetExpression(instruction.A), fromExpression), pc);
                         }
                         break;
                     }
@@ -228,6 +228,8 @@ namespace Unluau
                     case OpCode.DIV:
                     case OpCode.MOD:
                     case OpCode.POW:
+                    case OpCode.AND: 
+                    case OpCode.OR:
                     // Uses constant for right hand expression
                     case OpCode.ADDK:
                     case OpCode.SUBK:
@@ -235,7 +237,10 @@ namespace Unluau
                     case OpCode.DIVK:
                     case OpCode.MODK:
                     case OpCode.POWK:
+                    case OpCode.ANDK:
+                    case OpCode.ORK:
                     {
+                        //Console.WriteLine($"{properties.Code >= OpCode.ADDK}   {properties.Code}");
                         Expression right =  (properties.Code >= OpCode.ADDK) ? ConstantToExpression(function.Constants[instruction.C]) 
                             : registers.GetExpression(instruction.C);
                         Expression left = registers.GetExpression(instruction.B);
@@ -499,21 +504,31 @@ namespace Unluau
                     case OpCode.DUPCLOSURE:
                     {
                         int functionId = properties.Code == OpCode.DUPCLOSURE ? ((ClosureConstant)function.Constants[instruction.D]).Value : instruction.D;
-
-                        Function newFunction = function.GetFunction(functionId);
+                        
+                        Function newFunction = properties.Code == OpCode.DUPCLOSURE ? function.GlobalFunctions[functionId] : function.GetFunction(functionId);
                         Registers newRegisters = CreateRegisters(newFunction);
+
+                        Console.WriteLine(newFunction.Id);
 
                         while (newFunction.Upvalues.Count < newFunction.MaxUpvalues)
                         {
                             Instruction capture = function.Instructions[++pc];
+                            var captureProperties = capture.GetProperties();
+                            var captureType = (CaptureType)capture.A;
 
-                            if (capture.GetProperties().Code != OpCode.CAPTURE)
-                                throw new DecompilerException(Stage.Lifter, "Expected capture instruction following NEWCLOSURE/DUPCLOSURE");
+                            if (captureProperties.Code != OpCode.CAPTURE)
+                                throw new DecompilerException(Stage.Lifter, $"Expected capture instruction following NEWCLOSURE/DUPCLOSURE (fId: {function.Id}, code: {captureProperties.Code}, pc: {pc})");
 
                             LocalExpression? expression;
 
-                            switch ((CaptureType)capture.A)
+                            switch (captureType)
                             {
+                                case CaptureType.Reference:
+                                    // We can only have reference capture types when creating a new closure. 
+                                    if (properties.Code == OpCode.DUPCLOSURE)
+                                        throw new DecompilerException(Stage.Lifter, $"Invalid reference capture type when duplicating closure");
+
+                                    goto case CaptureType.Value;
                                 case CaptureType.Value:
                                     var type = options.RenameUpvalues ? Decleration.DeclerationType.Upvalue : Decleration.DeclerationType.Local;
 
@@ -530,6 +545,7 @@ namespace Unluau
 
                             expression!.Decleration.Referenced++;
                             
+                            // Add the upvalue to our new function
                             newFunction.Upvalues.Add(expression);
                         }
 
@@ -552,8 +568,7 @@ namespace Unluau
                         for (int slot = 0; slot < numArgs; ++slot)
                             expressions.Add(registers.GetExpression(instruction.A + slot));
 
-                        if (numArgs > 0)
-                            block.AddStatement(new Return(expressions), pc);
+                        block.AddStatement(new Return(expressions), pc);
                         break;
                     }
                     default:
@@ -561,6 +576,7 @@ namespace Unluau
                         // If we don't handle the instruction and it has an auxiliary value, we need to skip it
                         if (properties.HasAux)
                             pc++;
+
                         break;
                     }
                 }
@@ -608,17 +624,22 @@ namespace Unluau
             if (operation == BinaryExpression.BinaryOperation.CompareGt || operation == BinaryExpression.BinaryOperation.CompareGe)
                 return new BinaryExpression(registers.GetExpression((int)aux.Value), operation, registers.GetExpression(instruction.A));
 
-            Expression right = registers.GetExpression((int)aux.Value);
+            Expression? right = null;
 
             if (operation == BinaryExpression.BinaryOperation.CompareEq && code != OpCode.JUMPIFEQ)
             {
-                if (code == OpCode.JUMPXEQKN || code == OpCode.JUMPXEQKS)
-                    right = ConstantToExpression(constants[(int)aux.Value & 0xffffff]);
-                else
-                    right = ConstantToExpression(constants[(int)aux.Value]);
+                right = code switch
+                {
+                    // Both instructions contain a constant index as the aux instruction.
+                    OpCode.JUMPXEQKN or OpCode.JUMPXEQKS => ConstantToExpression(constants[(int)aux.Value & 0xffffff]),
+                    OpCode.JUMPXEQKNIL => new NilLiteral(),
+                    _ => ConstantToExpression(constants[(int)aux.Value]),
+                };
             }
+            else
+                right = registers.GetExpression((int)aux.Value);
 
-            return new BinaryExpression(registers.GetExpression(instruction.A), operation, right);
+            return new BinaryExpression(registers.GetExpression(instruction.A), operation, right!);
         }
 
         private Expression InvertCondition(Expression expression)

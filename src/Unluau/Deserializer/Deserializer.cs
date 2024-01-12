@@ -129,7 +129,7 @@ namespace Unluau
 
             function.Instructions = ReadInstructions();
             function.Constants = ReadConstants(strings);
-            function.Functions = GetFunctions(functions);
+            function.Functions = ReadFunctions();
             function.GlobalFunctions = functions;
 
             function.LineDefined = reader.ReadInt32Compressed();
@@ -233,7 +233,7 @@ namespace Unluau
             throw new DecompilerException(Stage.Deserializer, $"No constant returned for type ({constantType})");
         }
 
-        private IList<int> GetFunctions(IList<Function> functions)
+        private IList<int> ReadFunctions()
         {
             int size = reader.ReadInt32Compressed();
 
