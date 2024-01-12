@@ -40,7 +40,7 @@ namespace Unluau
 
             builder.Append($"{Parameters}{(IsVararg ? "+" : string.Empty)} param(s), {MaxStackSize} slot(s), {MaxUpvalues} upvalue(s), {Constants.Count} constant(s), {Functions.Count} function(s)\n");
 
-            builder.Append($"function {(DebugName == null ? "main" : DebugName)}(");
+            builder.Append($"function {(string.IsNullOrEmpty(DebugName) ? "main" : DebugName)}(");
 
             for (int i = 0; i < Parameters; i++)
             {
