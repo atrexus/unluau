@@ -358,8 +358,8 @@ namespace Unluau
                     {
                         TableLiteral tableLiteral = (TableLiteral)registers.GetExpressionValue(instruction.A);
 
-                        for (int slot = instruction.B; slot <= instruction.C; slot++)
-                            tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetRefExpressionValue(slot)));
+                        for (int slot = 0; slot < instruction.C - 1; slot++)
+                            tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetRefExpressionValue(slot + instruction.B)));
 
                         // Skip next instruction because we didn't use AUX
                         pc++;
@@ -601,6 +601,55 @@ namespace Unluau
                         block.AddStatement(new ForLoopNumeric(assignment, limit, step, body), pc);
                         break;
                     }
+                    case OpCode.FORGPREP:
+                    case OpCode.FORGPREP_INEXT:
+                    case OpCode.FORGPREP_NEXT:
+                    {
+                        List<Decleration> variables = new();
+                        ExpressionList values = new(3);
+
+                        // Fill expressions. We are assuming the following register format: generator, state, index
+                        for (int register = instruction.A; register < 3; ++register)
+                        {
+                            var expression = registers.GetExpression(register);
+
+                            if (expression is not null && expression.GetValue()! is NilLiteral)
+                                values.Append(null);
+                            else
+                                values.Append(expression);
+                        }
+                          
+                        var loopInstruction = function.Instructions[pc + instruction.D + 1];
+
+                        // Make sure we have a FORGLOOP instruction following.
+                        if (loopInstruction.Code != OpCode.FORGLOOP)
+                            throw new DecompilerException(Stage.Lifter, "Expected FORGLOOP following for loop body");
+
+                        var varCount = instruction.Code == OpCode.FORGPREP_INEXT ? 2 : function.Instructions[pc + instruction.D + 2].Value;
+
+                        // Load all of the variables with placeholder values at at the third register. The first two are 
+                        // reserved for the VM.
+                        for (int count = 1; count <= varCount; count++)
+                        {
+                            int register = count + 2 + instruction.A;
+
+                            registers.LoadTempRegister(register, new NilLiteral(), block, Decleration.DeclerationType.Local);
+                            variables.Add(registers.GetDecleration(register));
+                        }
+
+                        // Lift the loop body into a block
+                        Block body = LiftBlock(function, registers, pc + 1, (pc += instruction.D) + 1);
+
+                        block.AddStatement(new ForLoopGeneric(variables, values, body), pc);
+
+                        // Note: Add this so skip the FORGLOOP instruction so that we don't have any warnings come out.
+                        pc += 2;
+                        break;
+                    }
+
+                    // Instructions that require no code. We have them here so that there are no compiler warnings.
+                    case OpCode.PREPVARARGS: break;
+
                     default:
                     {
                         Log.Warning($"Encountered unhandled code {properties.Code}, skipping");

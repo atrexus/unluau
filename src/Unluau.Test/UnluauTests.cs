@@ -187,5 +187,11 @@ namespace Unluau.Test
         {
             GetAndAssert("Binary/NumericForLoop.luau", "Expect/NumericForLoop.lua");
         }
+
+        [TestMethod]
+        public void Test_GenericForLoopPairs()
+        {
+            GetAndAssert("Binary/GenericForLoopPairs.luau", "Expect/GenericForLoopPairs.lua");
+        }
     }
 }

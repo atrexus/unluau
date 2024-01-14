@@ -23,10 +23,13 @@ namespace Unluau
         {
             for (int i = 0; i < Expressions.Count; ++i)
             {
-                Expressions[i].Write(output);
+                if (Expressions[i] == null)
+                    continue;
 
-                if (i != Expressions.Count - 1)
+                if (i != 0)
                     output.Write(", ");
+
+                Expressions[i].Write(output);
             }
         }
     }
