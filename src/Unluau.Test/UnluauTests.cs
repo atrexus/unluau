@@ -181,5 +181,11 @@ namespace Unluau.Test
         {
             GetAndAssert("Binary/RepeatUntil01.luau", "Expect/RepeatUntil01.lua");
         }
+
+        [TestMethod]
+        public void Test_NumericForLoop()
+        {
+            GetAndAssert("Binary/NumericForLoop.luau", "Expect/NumericForLoop.lua");
+        }
     }
 }

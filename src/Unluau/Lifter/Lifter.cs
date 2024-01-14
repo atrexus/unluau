@@ -15,7 +15,6 @@ namespace Unluau
     {
         private Chunk chunk;
         private DecompilerOptions options;
-        private static int upvalueId = 0;
 
         private enum CaptureType : byte
         {
@@ -25,7 +24,7 @@ namespace Unluau
         }
 
         public Lifter(Chunk chunk, DecompilerOptions options)
-        { 
+        {
             this.chunk = chunk;
             this.options = options;
         }
@@ -61,7 +60,7 @@ namespace Unluau
                     case OpCode.LOADKX:
                     case OpCode.LOADK:
                     {
-                        Constant target = properties.Code == OpCode.LOADK 
+                        Constant target = properties.Code == OpCode.LOADK
                             ? function.Constants[instruction.D] : function.GetConstant(++pc);
 
                         registers.LoadRegister(instruction.A, ConstantToExpression(target), block, pc);
@@ -98,17 +97,17 @@ namespace Unluau
                                 expression = new NameIndex(expression, target.Value[2].Value);
 
                             registers.LoadRegister(instruction.A, expression, block, pc);
-                        } 
+                        }
                         else
                             registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block, pc);
-                        
+
                         // Skip next instruction (we used the constant instead of AUX)
                         pc++;
                         break;
                     }
                     case OpCode.NAMECALL:
                     case OpCode.GETTABLEKS:
-                    {   
+                    {
                         Constant target = function.GetConstant(++pc);
                         string targetValue = (target as StringConstant)!.Value;
 
@@ -128,7 +127,7 @@ namespace Unluau
                                 // If we perfer string interpolation set the expression as an interpolated string
                                 string format = (((LocalExpression)nameIndex!.Expression).Expression as StringLiteral)!.Value;
                                 expression = new InterpolatedStringLiteral(format, new List<Expression>());
-                            } 
+                            }
                             else
                             {
                                 // Otherwise add an expression group around the string literal
@@ -182,7 +181,7 @@ namespace Unluau
                                 arguments.Add(expression);
 
                                 registers.FreeRegister(register, block);
-                            }        
+                            }
                         }
 
                         // Free the function register if we used it
@@ -238,7 +237,7 @@ namespace Unluau
                     case OpCode.DIV:
                     case OpCode.MOD:
                     case OpCode.POW:
-                    case OpCode.AND: 
+                    case OpCode.AND:
                     case OpCode.OR:
                     // Uses constant for right hand expression
                     case OpCode.ADDK:
@@ -251,7 +250,7 @@ namespace Unluau
                     case OpCode.ORK:
                     {
                         //Console.WriteLine($"{properties.Code >= OpCode.ADDK}   {properties.Code}");
-                        Expression right =  (properties.Code >= OpCode.ADDK) ? ConstantToExpression(function.Constants[instruction.C]) 
+                        Expression right = (properties.Code >= OpCode.ADDK) ? ConstantToExpression(function.Constants[instruction.C])
                             : registers.GetExpression(instruction.C);
                         Expression left = registers.GetExpression(instruction.B);
 
@@ -261,7 +260,7 @@ namespace Unluau
                         // Get the prescedence of the left and right hand expressions and the current operation
                         int leftPresedence = BinaryExpression.GetBinaryOperationPrescedence(left), rightPrescedence = BinaryExpression.GetBinaryOperationPrescedence(right);
                         int currentPrescedence = BinaryExpression.GetBinaryOperationPrescedence(operation);
-                        
+
                         // If the left hand expression has a lower prescedence than the current operation, we need to wrap it in an expression group
                         if (leftPresedence < currentPrescedence && leftPresedence > 0)
                             left = new ExpressionGroup(left);
@@ -317,7 +316,7 @@ namespace Unluau
                     case OpCode.SETTABLE:
                     {
                         Expression expression = registers.GetRefExpressionValue(instruction.C), value = registers.GetExpression(instruction.A);
-                        Expression table = registers.GetExpression(instruction.B, false), tableValue = ((LocalExpression)table).Expression;           
+                        Expression table = registers.GetExpression(instruction.B, false), tableValue = ((LocalExpression)table).Expression;
 
                         if (options.InlineTableDefintions && tableValue is TableLiteral)
                         {
@@ -372,15 +371,15 @@ namespace Unluau
 
                         TableLiteral tableLiteral = new TableLiteral(target.Value.Count, false);
 
-                        if (options.InlineTableDefintions)    
+                        if (options.InlineTableDefintions)
                             tableLiteral.MaxEntries = target.Value.Count;
-                        
+
 
                         registers.LoadRegister(instruction.A, tableLiteral, block, pc);
                         break;
                     }
                     case OpCode.GETVARARGS:
-                    { 
+                    {
                         int count = instruction.B - 1;
 
                         if (count > 0)
@@ -496,7 +495,7 @@ namespace Unluau
                                 if (expression!.Decleration.Register == register)
                                 {
                                     // We know that the current jump instruction represents an `and` or `or` statement.
-                                    Expression left = unaryCondition is null ? ifElse.Condition : unaryCondition!.Expression; 
+                                    Expression left = unaryCondition is null ? ifElse.Condition : unaryCondition!.Expression;
                                     Expression right = expression!.Expression;
 
                                     var operation = unaryCondition is null ? BinaryExpression.BinaryOperation.And : BinaryExpression.BinaryOperation.Or;
@@ -514,7 +513,7 @@ namespace Unluau
                     case OpCode.DUPCLOSURE:
                     {
                         int functionId = properties.Code == OpCode.DUPCLOSURE ? ((ClosureConstant)function.Constants[instruction.D]).Value : instruction.D;
-                        
+
                         Function newFunction = properties.Code == OpCode.DUPCLOSURE ? function.GlobalFunctions[functionId] : function.GetFunction(functionId);
                         Registers newRegisters = CreateRegisters(newFunction);
 
@@ -552,7 +551,7 @@ namespace Unluau
                             }
 
                             expression!.Decleration.Referenced++;
-                            
+
                             // Add the upvalue to our new function
                             newFunction.Upvalues.Add(expression);
                         }
@@ -571,13 +570,35 @@ namespace Unluau
                     {
                         IList<Expression> expressions = new List<Expression>();
 
-                        int numArgs = instruction.B > 0 ? instruction.B - 1: registers.Top - instruction.A + 1;
+                        int numArgs = instruction.B > 0 ? instruction.B - 1 : registers.Top - instruction.A + 1;
 
                         for (int slot = 0; slot < numArgs; ++slot)
                             expressions.Add(registers.GetExpression(instruction.A + slot));
 
                         if (pc + 1 < function.Instructions.Count || expressions.Count > 0)
                             block.AddStatement(new Return(expressions), pc);
+                        break;
+                    }
+                    case OpCode.FORNPREP:
+                    {
+                        var limit = registers.GetExpression(instruction.A);
+                        var step = registers.GetExpression(instruction.A + 1);
+
+                        LocalExpression index = (LocalExpression)registers.GetExpression(instruction.A + 2);
+
+                        foreach (var statement in block.Statements)
+                        {
+                            if (statement is LocalAssignment localAssignment && localAssignment.Expression is LocalExpression localExpression && localExpression.Decleration.Id == index.Decleration.Id)
+                            {
+                                block.Statements.Remove(statement);
+                                break;
+                            }
+                        }
+
+                        Assignment assignment = new(new Global(index.Decleration.Name), index.GetValue()!);
+                        Block body = LiftBlock(function, registers, pc + 1, pc += instruction.D);
+
+                        block.AddStatement(new ForLoopNumeric(assignment, limit, step, body), pc);
                         break;
                     }
                     default:
@@ -604,7 +625,7 @@ namespace Unluau
 
             if (value is NameIndex nameIndex)
                 return nameIndex.IsSelf ? 1 : 0;
-            
+
             return 0;
         }
 
@@ -658,7 +679,7 @@ namespace Unluau
                 if (unary.Operation == UnaryExpression.UnaryOperation.Not)
                     return unary.Expression;
             }
-            else 
+            else
                 return new UnaryExpression(expression, UnaryExpression.UnaryOperation.Not);
 
             return expression;
@@ -707,7 +728,7 @@ namespace Unluau
                 return new StringLiteral(((StringConstant)constant).Value);
 
             if (constant is NumberConstant)
-                 return new NumberLiteral(((NumberConstant)constant).Value);
+                return new NumberLiteral(((NumberConstant)constant).Value);
 
             if (constant is BoolConstant)
                 return new BooleanLiteral(((BoolConstant)constant).Value);
