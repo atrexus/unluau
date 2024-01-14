@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace Unluau
 {
@@ -153,11 +154,21 @@ namespace Unluau
                         registers.LoadRegister(instruction.A, expressionIndex, block, pc);
                         break;
                     }
+                    case OpCode.FASTCALL:
                     case OpCode.CALL:
                     {
+                        Builtin? builtin = null;
+
+                        if (properties.Code == OpCode.FASTCALL)
+                        {
+                            builtin = Builtin.FromId(instruction.A);
+
+                            instruction = function.Instructions[pc += instruction.C + 1];
+                        }
+
                         IList<Expression> arguments = new List<Expression>();
 
-                        Expression callFunction = registers.GetExpression(instruction.A);
+                        Expression callFunction = builtin is null ? registers.GetExpression(instruction.A) : builtin!.Expression;
 
                         int numArgs = instruction.B > 0 ? instruction.B : (registers.Top - instruction.A) + 1;
 
@@ -171,21 +182,19 @@ namespace Unluau
                                 arguments.Add(expression);
 
                                 registers.FreeRegister(register, block);
-                            }
-                            
+                            }        
                         }
 
-                        // Free the function register
-                        registers.FreeRegister(instruction.A, block);
+                        // Free the function register if we used it
+                        if (builtin is null)
+                            registers.FreeRegister(instruction.A, block);
 
                         Expression call = new FunctionCall(callFunction, arguments);
 
                         // Note: we do this for string interpolation to work
-                        var callFunctionValue = ((LocalExpression)callFunction).Expression;
-                        if (callFunctionValue is InterpolatedStringLiteral)
+                        var callFunctionValue = callFunction.GetValue();
+                        if (callFunctionValue is InterpolatedStringLiteral literal)
                         {
-                            InterpolatedStringLiteral literal = (InterpolatedStringLiteral)callFunctionValue;
-
                             literal.Arguments = arguments;
                             call = literal;
                         }
@@ -509,8 +518,6 @@ namespace Unluau
                         Function newFunction = properties.Code == OpCode.DUPCLOSURE ? function.GlobalFunctions[functionId] : function.GetFunction(functionId);
                         Registers newRegisters = CreateRegisters(newFunction);
 
-                        Console.WriteLine(newFunction.Id);
-
                         while (newFunction.Upvalues.Count < newFunction.MaxUpvalues)
                         {
                             Instruction capture = function.Instructions[++pc];
@@ -575,6 +582,8 @@ namespace Unluau
                     }
                     default:
                     {
+                        Log.Warning($"Encountered unhandled code {properties.Code}, skipping");
+
                         // If we don't handle the instruction and it has an auxiliary value, we need to skip it
                         if (properties.HasAux)
                             pc++;
@@ -591,13 +600,11 @@ namespace Unluau
 
         private int IsSelf(Expression expression)
         {
-            Expression value = ((LocalExpression)expression).Expression;
+            Expression? value = expression.GetValue();
 
-            if (value is NameIndex)
-            {
-                NameIndex nameIndex = (NameIndex)value;
+            if (value is NameIndex nameIndex)
                 return nameIndex.IsSelf ? 1 : 0;
-            }
+            
             return 0;
         }
 
