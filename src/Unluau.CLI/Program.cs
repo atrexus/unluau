@@ -15,7 +15,7 @@ namespace Unluau.CLI
 {
     class Program
     {
-        private static string Version = "0.0.9-alpha";
+        private static string Version = "1.0.9-alpha";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.
