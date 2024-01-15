@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -335,6 +336,14 @@ namespace Unluau
                         block.AddStatement(new Assignment(expression, value), pc);
                         break;
                     }
+                    case OpCode.SETTABLEN:
+                    {
+                        ExpressionIndex index = new ExpressionIndex(registers.GetExpression(instruction.B), new NumberLiteral(instruction.C + 1));
+                        Expression value = registers.GetExpression(instruction.A);
+
+                        block.AddStatement(new Assignment(index, value), pc);
+                        break;
+                    }
                     case OpCode.NEWTABLE:
                     {
                         // Todo: rewrite this stuff so it all works with 64 bit integers
@@ -458,7 +467,9 @@ namespace Unluau
                             {
                                 IfElse ifElse = (IfElse)statement;
 
-                                ifElse.ElseBody = LiftBlock(function, registers, pc + 1, (pc += nextInstruction.D) + 1);
+                                newRegisters = new Registers(registers);
+                                ifElse.ElseBody = LiftBlock(function, newRegisters, pc + 1, (pc += nextInstruction.D) + 1);
+
                                 Block elseBodyBlock = ifElse.ElseBody as Block; // We know it has to be a block
 
                                 // Little optimization to include elseifs
