@@ -38,7 +38,7 @@ namespace Unluau
             => (int)_value >> 16;
 
         public int E
-            => (int)(_value >> 8);
+            => (int)_value >> 8;
 
         public OpCode Code
         {

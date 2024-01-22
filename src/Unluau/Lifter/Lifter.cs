@@ -4,9 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace Unluau
 {
@@ -14,7 +16,6 @@ namespace Unluau
     {
         private Chunk chunk;
         private DecompilerOptions options;
-        private static int upvalueId = 0;
 
         private enum CaptureType : byte
         {
@@ -24,7 +25,7 @@ namespace Unluau
         }
 
         public Lifter(Chunk chunk, DecompilerOptions options)
-        { 
+        {
             this.chunk = chunk;
             this.options = options;
         }
@@ -60,7 +61,7 @@ namespace Unluau
                     case OpCode.LOADKX:
                     case OpCode.LOADK:
                     {
-                        Constant target = properties.Code == OpCode.LOADK 
+                        Constant target = properties.Code == OpCode.LOADK
                             ? function.Constants[instruction.D] : function.GetConstant(++pc);
 
                         registers.LoadRegister(instruction.A, ConstantToExpression(target), block, pc);
@@ -97,17 +98,17 @@ namespace Unluau
                                 expression = new NameIndex(expression, target.Value[2].Value);
 
                             registers.LoadRegister(instruction.A, expression, block, pc);
-                        } 
+                        }
                         else
                             registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block, pc);
-                        
+
                         // Skip next instruction (we used the constant instead of AUX)
                         pc++;
                         break;
                     }
                     case OpCode.NAMECALL:
                     case OpCode.GETTABLEKS:
-                    {   
+                    {
                         Constant target = function.GetConstant(++pc);
                         string targetValue = (target as StringConstant)!.Value;
 
@@ -127,7 +128,7 @@ namespace Unluau
                                 // If we perfer string interpolation set the expression as an interpolated string
                                 string format = (((LocalExpression)nameIndex!.Expression).Expression as StringLiteral)!.Value;
                                 expression = new InterpolatedStringLiteral(format, new List<Expression>());
-                            } 
+                            }
                             else
                             {
                                 // Otherwise add an expression group around the string literal
@@ -153,11 +154,21 @@ namespace Unluau
                         registers.LoadRegister(instruction.A, expressionIndex, block, pc);
                         break;
                     }
+                    case OpCode.FASTCALL:
                     case OpCode.CALL:
                     {
+                        Builtin? builtin = null;
+
+                        if (properties.Code == OpCode.FASTCALL)
+                        {
+                            builtin = Builtin.FromId(instruction.A);
+
+                            instruction = function.Instructions[pc += instruction.C + 1];
+                        }
+
                         IList<Expression> arguments = new List<Expression>();
 
-                        Expression callFunction = registers.GetExpression(instruction.A);
+                        Expression callFunction = builtin is null ? registers.GetExpression(instruction.A) : builtin!.Expression;
 
                         int numArgs = instruction.B > 0 ? instruction.B : (registers.Top - instruction.A) + 1;
 
@@ -172,20 +183,18 @@ namespace Unluau
 
                                 registers.FreeRegister(register, block);
                             }
-                            
                         }
 
-                        // Free the function register
-                        registers.FreeRegister(instruction.A, block);
+                        // Free the function register if we used it
+                        if (builtin is null)
+                            registers.FreeRegister(instruction.A, block);
 
                         Expression call = new FunctionCall(callFunction, arguments);
 
                         // Note: we do this for string interpolation to work
-                        var callFunctionValue = ((LocalExpression)callFunction).Expression;
-                        if (callFunctionValue is InterpolatedStringLiteral)
+                        var callFunctionValue = callFunction.GetValue();
+                        if (callFunctionValue is InterpolatedStringLiteral literal)
                         {
-                            InterpolatedStringLiteral literal = (InterpolatedStringLiteral)callFunctionValue;
-
                             literal.Arguments = arguments;
                             call = literal;
                         }
@@ -229,7 +238,7 @@ namespace Unluau
                     case OpCode.DIV:
                     case OpCode.MOD:
                     case OpCode.POW:
-                    case OpCode.AND: 
+                    case OpCode.AND:
                     case OpCode.OR:
                     // Uses constant for right hand expression
                     case OpCode.ADDK:
@@ -242,7 +251,7 @@ namespace Unluau
                     case OpCode.ORK:
                     {
                         //Console.WriteLine($"{properties.Code >= OpCode.ADDK}   {properties.Code}");
-                        Expression right =  (properties.Code >= OpCode.ADDK) ? ConstantToExpression(function.Constants[instruction.C]) 
+                        Expression right = (properties.Code >= OpCode.ADDK) ? ConstantToExpression(function.Constants[instruction.C])
                             : registers.GetExpression(instruction.C);
                         Expression left = registers.GetExpression(instruction.B);
 
@@ -252,7 +261,7 @@ namespace Unluau
                         // Get the prescedence of the left and right hand expressions and the current operation
                         int leftPresedence = BinaryExpression.GetBinaryOperationPrescedence(left), rightPrescedence = BinaryExpression.GetBinaryOperationPrescedence(right);
                         int currentPrescedence = BinaryExpression.GetBinaryOperationPrescedence(operation);
-                        
+
                         // If the left hand expression has a lower prescedence than the current operation, we need to wrap it in an expression group
                         if (leftPresedence < currentPrescedence && leftPresedence > 0)
                             left = new ExpressionGroup(left);
@@ -308,7 +317,7 @@ namespace Unluau
                     case OpCode.SETTABLE:
                     {
                         Expression expression = registers.GetRefExpressionValue(instruction.C), value = registers.GetExpression(instruction.A);
-                        Expression table = registers.GetExpression(instruction.B, false), tableValue = ((LocalExpression)table).Expression;           
+                        Expression table = registers.GetExpression(instruction.B, false), tableValue = ((LocalExpression)table).Expression;
 
                         if (options.InlineTableDefintions && tableValue is TableLiteral)
                         {
@@ -325,6 +334,14 @@ namespace Unluau
                             expression = new ExpressionIndex(table, expression);
 
                         block.AddStatement(new Assignment(expression, value), pc);
+                        break;
+                    }
+                    case OpCode.SETTABLEN:
+                    {
+                        ExpressionIndex index = new ExpressionIndex(registers.GetExpression(instruction.B), new NumberLiteral(instruction.C + 1));
+                        Expression value = registers.GetExpression(instruction.A);
+
+                        block.AddStatement(new Assignment(index, value), pc);
                         break;
                     }
                     case OpCode.NEWTABLE:
@@ -350,8 +367,8 @@ namespace Unluau
                     {
                         TableLiteral tableLiteral = (TableLiteral)registers.GetExpressionValue(instruction.A);
 
-                        for (int slot = instruction.B; slot <= instruction.C; slot++)
-                            tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetRefExpressionValue(slot)));
+                        for (int slot = 0; slot < instruction.C - 1; slot++)
+                            tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetRefExpressionValue(slot + instruction.B)));
 
                         // Skip next instruction because we didn't use AUX
                         pc++;
@@ -363,15 +380,15 @@ namespace Unluau
 
                         TableLiteral tableLiteral = new TableLiteral(target.Value.Count, false);
 
-                        if (options.InlineTableDefintions)    
+                        if (options.InlineTableDefintions)
                             tableLiteral.MaxEntries = target.Value.Count;
-                        
+
 
                         registers.LoadRegister(instruction.A, tableLiteral, block, pc);
                         break;
                     }
                     case OpCode.GETVARARGS:
-                    { 
+                    {
                         int count = instruction.B - 1;
 
                         if (count > 0)
@@ -450,7 +467,9 @@ namespace Unluau
                             {
                                 IfElse ifElse = (IfElse)statement;
 
-                                ifElse.ElseBody = LiftBlock(function, registers, pc + 1, (pc += nextInstruction.D) + 1);
+                                newRegisters = new Registers(registers);
+                                ifElse.ElseBody = LiftBlock(function, newRegisters, pc + 1, (pc += nextInstruction.D) + 1);
+
                                 Block elseBodyBlock = ifElse.ElseBody as Block; // We know it has to be a block
 
                                 // Little optimization to include elseifs
@@ -487,7 +506,7 @@ namespace Unluau
                                 if (expression!.Decleration.Register == register)
                                 {
                                     // We know that the current jump instruction represents an `and` or `or` statement.
-                                    Expression left = unaryCondition is null ? ifElse.Condition : unaryCondition!.Expression; 
+                                    Expression left = unaryCondition is null ? ifElse.Condition : unaryCondition!.Expression;
                                     Expression right = expression!.Expression;
 
                                     var operation = unaryCondition is null ? BinaryExpression.BinaryOperation.And : BinaryExpression.BinaryOperation.Or;
@@ -505,11 +524,9 @@ namespace Unluau
                     case OpCode.DUPCLOSURE:
                     {
                         int functionId = properties.Code == OpCode.DUPCLOSURE ? ((ClosureConstant)function.Constants[instruction.D]).Value : instruction.D;
-                        
+
                         Function newFunction = properties.Code == OpCode.DUPCLOSURE ? function.GlobalFunctions[functionId] : function.GetFunction(functionId);
                         Registers newRegisters = CreateRegisters(newFunction);
-
-                        Console.WriteLine(newFunction.Id);
 
                         while (newFunction.Upvalues.Count < newFunction.MaxUpvalues)
                         {
@@ -545,7 +562,7 @@ namespace Unluau
                             }
 
                             expression!.Decleration.Referenced++;
-                            
+
                             // Add the upvalue to our new function
                             newFunction.Upvalues.Add(expression);
                         }
@@ -564,7 +581,7 @@ namespace Unluau
                     {
                         IList<Expression> expressions = new List<Expression>();
 
-                        int numArgs = instruction.B > 0 ? instruction.B - 1: registers.Top - instruction.A + 1;
+                        int numArgs = instruction.B > 0 ? instruction.B - 1 : registers.Top - instruction.A + 1;
 
                         for (int slot = 0; slot < numArgs; ++slot)
                             expressions.Add(registers.GetExpression(instruction.A + slot));
@@ -573,8 +590,81 @@ namespace Unluau
                             block.AddStatement(new Return(expressions), pc);
                         break;
                     }
+                    case OpCode.FORNPREP:
+                    {
+                        var limit = registers.GetExpression(instruction.A);
+                        var step = registers.GetExpression(instruction.A + 1);
+
+                        LocalExpression index = (LocalExpression)registers.GetExpression(instruction.A + 2);
+
+                        foreach (var statement in block.Statements)
+                        {
+                            if (statement is LocalAssignment localAssignment && localAssignment.Expression is LocalExpression localExpression && localExpression.Decleration.Id == index.Decleration.Id)
+                            {
+                                block.Statements.Remove(statement);
+                                break;
+                            }
+                        }
+
+                        Assignment assignment = new(new Global(index.Decleration.Name), index.GetValue()!);
+                        Block body = LiftBlock(function, registers, pc + 1, pc += instruction.D);
+
+                        block.AddStatement(new ForLoopNumeric(assignment, limit, step, body), pc);
+                        break;
+                    }
+                    case OpCode.FORGPREP:
+                    case OpCode.FORGPREP_INEXT:
+                    case OpCode.FORGPREP_NEXT:
+                    {
+                        List<Decleration> variables = new();
+                        ExpressionList values = new(3);
+
+                        // Fill expressions. We are assuming the following register format: generator, state, index
+                        for (int register = instruction.A; register < 3; ++register)
+                        {
+                            var expression = registers.GetExpression(register);
+
+                            if (expression is not null && expression.GetValue()! is NilLiteral)
+                                values.Append(null);
+                            else
+                                values.Append(expression);
+                        }
+                          
+                        var loopInstruction = function.Instructions[pc + instruction.D + 1];
+
+                        // Make sure we have a FORGLOOP instruction following.
+                        if (loopInstruction.Code != OpCode.FORGLOOP)
+                            throw new DecompilerException(Stage.Lifter, "Expected FORGLOOP following for loop body");
+
+                        var varCount = instruction.Code == OpCode.FORGPREP_INEXT ? 2 : function.Instructions[pc + instruction.D + 2].Value;
+
+                        // Load all of the variables with placeholder values at at the third register. The first two are 
+                        // reserved for the VM.
+                        for (int count = 1; count <= varCount; count++)
+                        {
+                            int register = count + 2 + instruction.A;
+
+                            registers.LoadTempRegister(register, new NilLiteral(), block, Decleration.DeclerationType.Local);
+                            variables.Add(registers.GetDecleration(register));
+                        }
+
+                        // Lift the loop body into a block
+                        Block body = LiftBlock(function, registers, pc + 1, (pc += instruction.D) + 1);
+
+                        block.AddStatement(new ForLoopGeneric(variables, values, body), pc);
+
+                        // Note: Add this so skip the FORGLOOP instruction so that we don't have any warnings come out.
+                        pc += 2;
+                        break;
+                    }
+
+                    // Instructions that require no code. We have them here so that there are no compiler warnings.
+                    case OpCode.PREPVARARGS: break;
+
                     default:
                     {
+                        Log.Warning($"Encountered unhandled code {properties.Code}, skipping");
+
                         // If we don't handle the instruction and it has an auxiliary value, we need to skip it
                         if (properties.HasAux)
                             pc++;
@@ -591,13 +681,11 @@ namespace Unluau
 
         private int IsSelf(Expression expression)
         {
-            Expression value = ((LocalExpression)expression).Expression;
+            Expression? value = expression.GetValue();
 
-            if (value is NameIndex)
-            {
-                NameIndex nameIndex = (NameIndex)value;
+            if (value is NameIndex nameIndex)
                 return nameIndex.IsSelf ? 1 : 0;
-            }
+
             return 0;
         }
 
@@ -651,7 +739,7 @@ namespace Unluau
                 if (unary.Operation == UnaryExpression.UnaryOperation.Not)
                     return unary.Expression;
             }
-            else 
+            else
                 return new UnaryExpression(expression, UnaryExpression.UnaryOperation.Not);
 
             return expression;
@@ -700,7 +788,7 @@ namespace Unluau
                 return new StringLiteral(((StringConstant)constant).Value);
 
             if (constant is NumberConstant)
-                 return new NumberLiteral(((NumberConstant)constant).Value);
+                return new NumberLiteral(((NumberConstant)constant).Value);
 
             if (constant is BoolConstant)
                 return new BooleanLiteral(((BoolConstant)constant).Value);

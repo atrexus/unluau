@@ -25,5 +25,11 @@ namespace Unluau
         {
             Stage = stage;
         }
+
+        public static void Assert(bool condition, Stage stage)
+        {
+            if (!condition)
+                throw new DecompilerException(stage, "Assetation failed");
+        }
     }
 }
