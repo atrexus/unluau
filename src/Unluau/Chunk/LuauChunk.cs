@@ -1,5 +1,6 @@
 ﻿using Unluau.Utils;
 using Unluau.Chunk.Luau;
+using Unluau.IL;
 
 namespace Unluau.Chunk
 {
@@ -93,6 +94,15 @@ namespace Unluau.Chunk
                 functions[i] = new Function(reader, Version);
 
             return functions;
+        }
+
+        /// <summary>
+        /// Translates the current chunk to the universal IL.
+        /// </summary>
+        /// <returns>A new IL program.</returns>
+        public Program Translate()
+        {
+            throw new NotImplementedException();
         }
     }
 }

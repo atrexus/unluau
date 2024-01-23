@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unluau.IL;
 
 namespace Unluau.Chunk
 {
@@ -17,5 +18,11 @@ namespace Unluau.Chunk
         /// <param name="stream">The input stream.</param>
         /// <returns>A new chunk.</returns>
         public static abstract IChunk Create(Stream stream);
+
+        /// <summary>
+        /// Translates the current chunk to the IL.
+        /// </summary>
+        /// <returns></returns>
+        public Program Translate();
     }
 }
