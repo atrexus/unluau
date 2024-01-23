@@ -1,1 +1,0 @@
-print("line1\r\nline2\r\nline3\r\nline4\r\nline1\r\nline2\r\nline3\r\nline4\r\nline1\r\nline2\r\nline3\r\nline4\r\nline1\r\nline2\r\nline3\r\nline4\r\nline1\r\nline2\r\nline3\r\nline4\r\nline1\r\nline2\r\nline3\r\nline4\r\nline1\r\nline2\r\nline3\r\nline4\r\nline1\r\nline2\r\nline3\r\nline4\r\nline1\r\nline2\r\nline3\r\nline4\r\n")

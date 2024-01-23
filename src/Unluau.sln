@@ -1,18 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.6.33829.357
+VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{685DC56D-DEF0-4F09-B2C4-24177D4239EE}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau", "Unluau\Unluau.csproj", "{C15FA6F1-47BE-4000-AD57-A94750634167}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.Test", "Unluau.Test\Unluau.Test.csproj", "{4ADF3B5E-F67E-4331-B20E-51E24A13534C}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau", "Unluau\Unluau.csproj", "{82385E30-D0D4-4122-BC2E-83E9E9EF6106}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.CLI", "Unluau.CLI\Unluau.CLI.csproj", "{58145ECB-D686-4C80-8E30-8526F48BE409}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.CLI", "Unluau.CLI\Unluau.CLI.csproj", "{C442BD3C-DD52-4DC1-A7B2-2BD7FBBBAF01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,23 +13,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4ADF3B5E-F67E-4331-B20E-51E24A13534C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{82385E30-D0D4-4122-BC2E-83E9E9EF6106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{82385E30-D0D4-4122-BC2E-83E9E9EF6106}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{82385E30-D0D4-4122-BC2E-83E9E9EF6106}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{82385E30-D0D4-4122-BC2E-83E9E9EF6106}.Release|Any CPU.Build.0 = Release|Any CPU
-		{58145ECB-D686-4C80-8E30-8526F48BE409}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58145ECB-D686-4C80-8E30-8526F48BE409}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{58145ECB-D686-4C80-8E30-8526F48BE409}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58145ECB-D686-4C80-8E30-8526F48BE409}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C15FA6F1-47BE-4000-AD57-A94750634167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C15FA6F1-47BE-4000-AD57-A94750634167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C15FA6F1-47BE-4000-AD57-A94750634167}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C15FA6F1-47BE-4000-AD57-A94750634167}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C442BD3C-DD52-4DC1-A7B2-2BD7FBBBAF01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C442BD3C-DD52-4DC1-A7B2-2BD7FBBBAF01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C442BD3C-DD52-4DC1-A7B2-2BD7FBBBAF01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C442BD3C-DD52-4DC1-A7B2-2BD7FBBBAF01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {A13E364F-5518-4C30-966B-7B42A3566195}
+		SolutionGuid = {D75AD508-2844-4ACC-B946-BC54B0845F10}
 	EndGlobalSection
 EndGlobal
