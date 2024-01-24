@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Unluau.IL
+namespace Unluau.IL.Instructions
 {
-    public class Program
+    public class Instruction : Node
     {
     }
 }

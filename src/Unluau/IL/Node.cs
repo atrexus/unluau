@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Unluau.IL
+{
+    /// <summary>
+    /// Contains information about location. 
+    /// </summary>
+    public struct Context
+    {
+        /// <summary>
+        /// The start and end instruction the node was translated from.
+        /// </summary>
+        public (int, int) PcScope { get; private set; }
+
+        /// <summary>
+        /// The line number from the original script.
+        /// </summary>
+        public int? Line { get; private set; }
+    }
+
+    /// <summary>
+    /// The base node for all IL components.
+    /// </summary>
+    /// <param name="context">Additional context on the node.</param>
+    public class Node(Context context)
+    {
+        /// <summary>
+        /// Provides additional context on the current node.
+        /// </summary>
+        public Context Context { get; private set; } = context;
+
+        /// <summary>
+        /// Recursive visitor.
+        /// </summary>
+        /// <param name="visitor">The visitor.</param>
+        public virtual void Visit(Visitor visitor)
+        {
+            return;
+        }
+    }
+}

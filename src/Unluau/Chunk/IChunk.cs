@@ -22,7 +22,7 @@ namespace Unluau.Chunk
         /// <summary>
         /// Translates the current chunk to the IL.
         /// </summary>
-        /// <returns></returns>
-        public Program Translate();
+        /// <returns>A block that wraps the IL instructions.</returns>
+        public BasicBlock Translate();
     }
 }
