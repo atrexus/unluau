@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unluau.IL;
+﻿using Unluau.IL;
 
 namespace Unluau.Chunk
 {
@@ -20,9 +15,9 @@ namespace Unluau.Chunk
         public static abstract IChunk Create(Stream stream);
 
         /// <summary>
-        /// Translates the current chunk to the IL.
+        /// Lifts the current chunk to an IL program.
         /// </summary>
-        /// <returns>A block that wraps the IL instructions.</returns>
-        public BasicBlock Translate();
+        /// <returns>An IL program.</returns>
+        public Program Lift();
     }
 }

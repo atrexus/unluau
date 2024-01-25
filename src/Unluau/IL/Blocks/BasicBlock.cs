@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unluau.IL.Instructions;
+﻿using Unluau.IL.Instructions;
 
-namespace Unluau.IL
+namespace Unluau.IL.Blocks
 {
     /// <summary>
     /// Represents a basic block in the program.
     /// </summary>
+    /// <param name="context">Provides context about the block.</param>
     /// <param name="instructions">A list of instructions.</param>
-    public class BasicBlock(Instruction[] instructions) : Node
+    public class BasicBlock(Context context, Instruction[] instructions) : Node(context)
     {
         /// <summary>
         /// The instructions within the block.

@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using Unluau.IL;
 using Unluau.Utils;
 
 namespace Unluau.Chunk.Luau
@@ -231,6 +232,15 @@ namespace Unluau.Chunk.Luau
                 closureTable[i] = reader.ReadSize();
 
             return closureTable;
+        }
+
+        /// <summary>
+        /// Lifts the current function to a new IL closure.
+        /// </summary>
+        /// <returns>An IL closure.</returns>
+        public Closure Lift()
+        {
+
         }
     }
 }

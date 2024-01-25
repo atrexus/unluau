@@ -100,9 +100,11 @@ namespace Unluau.Chunk
         /// Translates the current chunk to the universal IL.
         /// </summary>
         /// <returns>A new IL program.</returns>
-        public Program Translate()
+        public Program Lift()
         {
-            throw new NotImplementedException();
+            var function = Functions[MainFunctionIndex];
+
+            var closure = function.Lift();
         }
     }
 }

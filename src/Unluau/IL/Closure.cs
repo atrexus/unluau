@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unluau.IL.Blocks;
+using Unluau.IL.Values;
 
 namespace Unluau.IL
 {
@@ -10,7 +12,17 @@ namespace Unluau.IL
     /// Provides information on parameters and contents of a closure.
     /// </summary>
     public struct ClosureContext
-    { 
+    {
+        /// <summary>
+        /// A list of variables that act as parameters to the closure.
+        /// </summary>
+        public Variable[] Parameters { get; set; }
+
+        /// <summary>
+        /// Whether or not the function is variadic (includes `...`).
+        /// </summary>
+        public bool IsVariadic { get; set; }
+
         /// <summary>
         /// Basic line and instruction information.
         /// </summary>
@@ -22,6 +34,16 @@ namespace Unluau.IL
     /// </summary>
     public class Closure(ClosureContext context, BasicBlock[] blocks) : Node(context.Context)
     {
+        /// <summary>
+        /// A list of variables that act as parameters to the closure.
+        /// </summary>
+        public Variable[] Parameters { get; set; } = context.Parameters;
+
+        /// <summary>
+        /// Whether or not the function is variadic (includes `...`).
+        /// </summary>
+        public bool IsVariadic { get; set; } = context.IsVariadic;
+
         /// <summary>
         /// The children blocks of the closure. Each contain
         /// </summary>

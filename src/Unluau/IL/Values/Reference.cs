@@ -1,0 +1,30 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Unluau.IL.Values
+{
+    /// <summary>
+    /// A reference to a register slot in the current function.
+    /// </summary>
+    /// <param name="context">Information about the refrence.</param>
+    /// <param name="slot">A register slot.</param>
+    public class Reference(Context context, int slot) : BasicValue(context)
+    {
+        /// <summary>
+        /// A register slot in memory.
+        /// </summary>
+        public int Slot { get; set; } = slot;
+
+        /// <summary>
+        /// Implements the visitor.
+        /// </summary>
+        /// <param name="visitor">The visitor.</param>
+        public override void Visit(Visitor visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
+}

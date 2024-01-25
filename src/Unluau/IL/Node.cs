@@ -17,9 +17,9 @@ namespace Unluau.IL
         public (int, int) PcScope { get; private set; }
 
         /// <summary>
-        /// The line number from the original script.
+        /// The line numbers from the original script.
         /// </summary>
-        public int? Line { get; private set; }
+        public (int, int)? Lines { get; private set; }
     }
 
     /// <summary>
