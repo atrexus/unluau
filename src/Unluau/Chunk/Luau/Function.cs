@@ -286,6 +286,8 @@ namespace Unluau.Chunk.Luau
                             OpCode.LOADB => new BasicValue<bool>(context, instruction.B == 1),
                             OpCode.LOADN => new BasicValue<int>(context, instruction.D),
                             OpCode.LOADNIL => new BasicValue<object>(context, null),
+
+                            // We know this won't ever happen, but the C# compiler will cry if I don't add this.
                             _ => throw new NotSupportedException()
                         };
 
@@ -299,9 +301,13 @@ namespace Unluau.Chunk.Luau
                     case OpCode.FASTCALL2K:
                     case OpCode.CALL:
                     {
-                        var ra = instruction.A;
-                        var paramCount = instruction.B - 1;
-                        var resCount = instruction.C - 1;
+                        // Unlike the simple CALL instruction, all FASTCALL instructions contain an identifier to a builtin function
+                        // as the first argument.
+                        BasicValue function = instruction.Code == OpCode.CALL 
+                            ? new Reference(context, instruction.A) 
+                            : new BasicValue<string>(context, Builtin.IdToName(instruction.A));
+
+
                     }
                 }
             }
