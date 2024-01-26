@@ -48,5 +48,13 @@ namespace Unluau.Chunk.Luau
         /// <param name="pc">The instruction's index in the function (program counter).</param>
         /// <returns>The line.</returns>
         public int GetLine(int pc) => _absLineInfo[pc >> _lineGapLog2] + _lineInfo[pc];
+
+        /// <summary>
+        /// Gets the line numbers for a range of instructions.
+        /// </summary>
+        /// <param name="startPc">Start instruction index.</param>
+        /// <param name="endPc">End instruction index.</param>
+        /// <returns>The rane of lines.</returns>
+        public (int, int) GetLines(int startPc, int endPc) => (GetLine(startPc), GetLine(endPc));
     }
 }

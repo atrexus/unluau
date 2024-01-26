@@ -1,5 +1,9 @@
 ﻿using Microsoft.VisualBasic;
+using System.Reflection.Metadata.Ecma335;
 using Unluau.IL;
+using Unluau.IL.Blocks;
+using Unluau.IL.Instructions;
+using Unluau.IL.Values;
 using Unluau.Utils;
 
 namespace Unluau.Chunk.Luau
@@ -9,6 +13,8 @@ namespace Unluau.Chunk.Luau
     /// </summary>
     public class Function
     {
+        private string[] _symbolTable;
+
         /// <summary>
         /// The total number of register slots the function requires.
         /// </summary>
@@ -79,8 +85,10 @@ namespace Unluau.Chunk.Luau
         /// </summary>
         /// <param name="reader">The reader to use.</param>
         /// <param name="version">The version of the bytecode.</param>
-        public Function(BinaryReader reader, Version version)
+        public Function(BinaryReader reader, Version version, string[] symbolTable)
         {
+            _symbolTable = symbolTable;
+
             SlotCount = reader.ReadByte();
             ParameterCount = reader.ReadByte();
             UpvalueCount = reader.ReadByte();
@@ -242,5 +250,92 @@ namespace Unluau.Chunk.Luau
         {
 
         }
+
+        public BasicBlock LiftBasicBlock(ref int pc)
+        {
+            var startPc = pc;
+            var instructions = new List<IL.Instructions.Instruction>();
+
+            // We could set up an infinate loop, but I hate them. By setting up a loop like this, we can 
+            // easily break once we have processed all instructions.
+            for (; pc < Instructions.Length; ++pc)
+            {
+                var instruction = Instructions[pc];
+                var context = GetContext(pc, pc);
+
+                switch (instruction.Code)
+                {
+                    case OpCode.LOADNIL:
+                    case OpCode.LOADN:
+                    case OpCode.LOADB:
+                    case OpCode.LOADKX:
+                    case OpCode.LOADK:
+                    case OpCode.GETGLOBAL:
+                    case OpCode.GETIMPORT:
+                    {
+                        var ra = instruction.A;
+
+                        var value = instruction.Code switch 
+                        { 
+                            OpCode.LOADK or OpCode.GETIMPORT => ConstantToBasicValue(context, Constants[instruction.D]),
+                            
+                            // Both LOADKX and GETGLOBAL have constants in the auxiliary instruction. We can group
+                            // them for simplicity.
+                            OpCode.LOADKX or 
+                            OpCode.GETGLOBAL => ConstantToBasicValue(context, Constants[Instructions[++pc].Value]),
+                            OpCode.LOADB => new BasicValue<bool>(context, instruction.B == 1),
+                            OpCode.LOADN => new BasicValue<int>(context, instruction.D),
+                            OpCode.LOADNIL => new BasicValue<object>(context, null),
+                            _ => throw new NotSupportedException()
+                        };
+
+                        // Note: loading a value onto the stack can be for both for constant values and environment variables.
+                        // It doesn't really matter what kind we have because when we generate our AST they are treated the same.
+                        instructions.Add(new LoadValue(context, ra, value));
+                        break;
+                    }
+                    case OpCode.FASTCALL:
+                    case OpCode.FASTCALL2:
+                    case OpCode.FASTCALL2K:
+                    case OpCode.CALL:
+                    {
+                        var ra = instruction.A;
+                        var paramCount = instruction.B - 1;
+                        var resCount = instruction.C - 1;
+                    }
+                }
+            }
+
+            return new(GetContext(startPc, pc), [.. instructions]);
+        }
+
+        private BasicValue ConstantToBasicValue(Context context, Constant constant)
+        {
+            if (constant is StringConstant stringConstant)
+                return new BasicValue<string>(context, _symbolTable[stringConstant.Value]); 
+
+            else if (constant is NumberConstant numberConstant)
+                return new BasicValue<double>(context, numberConstant.Value);
+
+            else if (constant is BoolConstant boolConstant)
+                return new BasicValue<bool>(context, boolConstant.Value);
+
+            else if (constant is NilConstant)
+                return new BasicValue<object>(context, null);
+
+            else if (constant is ImportConstant importConstant)
+            {
+                var names = new string[importConstant.Value.Length];
+
+                for (int i = 0; i < names.Length; ++i)
+                    names[i] = _symbolTable[importConstant.Value[i].Value];
+                    
+                return new Global(context, names);
+            }
+
+            throw new NotImplementedException();
+        }
+
+        private Context GetContext(int startPc, int endPc) => new((startPc, endPc), LineInformation?.GetLines(startPc, endPc));
     }
 }

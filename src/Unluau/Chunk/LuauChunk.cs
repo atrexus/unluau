@@ -91,7 +91,7 @@ namespace Unluau.Chunk
             var functions = new Function[functionCount];
 
             for (int i = 0; i < functionCount; ++i)
-                functions[i] = new Function(reader, Version);
+                functions[i] = new Function(reader, Version, Symbols);
 
             return functions;
         }

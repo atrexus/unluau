@@ -11,7 +11,7 @@ namespace Unluau.IL.Values
     /// </summary>
     /// <param name="context">Information about the value.</param>
     /// <param name="value">The name of the global.</param>
-    public class Global(Context context, string value) : BasicValue<string>(context, value)
+    public class Global(Context context, string[] value) : BasicValue<string[]>(context, value)
     {
         /// <summary>
         /// Implements the recursive visitor.
