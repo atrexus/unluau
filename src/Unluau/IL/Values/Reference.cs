@@ -19,6 +19,12 @@ namespace Unluau.IL.Values
         public int Slot { get; set; } = slot;
 
         /// <summary>
+        /// Converts the curren <see cref="Reference"/> to a string representation.
+        /// </summary>
+        /// <returns>String representation.</returns>
+        public override string? ToString() => $"Ref({Slot})";
+
+        /// <summary>
         /// Implements the visitor.
         /// </summary>
         /// <param name="visitor">The visitor.</param>

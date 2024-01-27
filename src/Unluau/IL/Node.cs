@@ -20,6 +20,9 @@ namespace Unluau.IL
         /// The line numbers from the original script.
         /// </summary>
         public (int, int)? Lines { get; set; } = lines;
+
+        public override string ToString()
+            => $"pc {PcScope.Item1} to {PcScope.Item2}{(Lines is null ? string.Empty : $", line {Lines.Value.Item1}")}";
     }
 
     /// <summary>

@@ -10,12 +10,12 @@ namespace Unluau.IL
     /// <summary>
     /// The main IL program that contains all of the closures.
     /// </summary>
-    public class Program(Context context, BasicBlock[] body, Closure[] closures) : Node(context)
+    public class Program(Context context, Closure main, Closure[] closures) : Node(context)
     {
         /// <summary>
-        /// The body for the program (main closure).
+        /// The main closure.
         /// </summary>
-        public BasicBlock[] Body { get; set; } = body;
+        public Closure Main { get; set; } = main;
 
         /// <summary>
         /// The other functions in the program.
@@ -30,8 +30,7 @@ namespace Unluau.IL
         {
             if (visitor.Visit(this))
             {
-                foreach (var b in Body)
-                    b.Visit(visitor);
+                Main.Visit(visitor);
 
                 foreach (var c in Closures) 
                     c.Visit(visitor);

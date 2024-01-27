@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unluau.IL.Blocks;
+﻿using Unluau.IL.Blocks;
 using Unluau.IL.Values;
 
 namespace Unluau.IL
@@ -27,6 +22,11 @@ namespace Unluau.IL
         /// Basic line and instruction information.
         /// </summary>
         public Context Context { get; set; }
+
+        /// <summary>
+        /// The symbol name assigned to this closure.
+        /// </summary>
+        public string? Symbol { get; set; }  
     }
 
     /// <summary>
@@ -48,6 +48,16 @@ namespace Unluau.IL
         /// The children blocks of the closure. Each contain
         /// </summary>
         public BasicBlock[] Blocks { get; set; } = blocks;
+
+        /// <summary>
+        /// The name of the current closure.
+        /// </summary>
+        public string? Name { get; set; }
+
+        /// <summary>
+        /// Whether or not this is the main closure (entrypoint).
+        /// </summary>
+        public bool IsMain { get; set; } = false;
 
         /// <summary>
         /// Visits the children of the closure.

@@ -21,5 +21,14 @@ namespace Unluau.IL.Values
         {
             visitor.Visit(this);
         }
+
+        /// <summary>
+        /// Converts the current <see cref="Global"/> to a string.
+        /// </summary>
+        /// <returns>String representation.</returns>
+        public override string ToString()
+        {
+            return $"Global({string.Join(", ", value)})";
+        }
     }
 }

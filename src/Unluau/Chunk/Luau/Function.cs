@@ -14,7 +14,7 @@ namespace Unluau.Chunk.Luau
     /// </summary>
     public class Function
     {
-        private string[] _symbolTable;
+        private readonly string[] _symbolTable;
 
         /// <summary>
         /// The total number of register slots the function requires.
@@ -249,7 +249,14 @@ namespace Unluau.Chunk.Luau
         /// <returns>An IL closure.</returns>
         public Closure Lift()
         {
+            var context = GetClosureContext();
 
+            List<BasicBlock> body = [];
+
+            for (int pc = 0; pc < Instructions.Length; ++pc)
+                body.Add(LiftBasicBlock(ref pc));
+           
+            return new(context, [.. body]);
         }
 
         public BasicBlock LiftBasicBlock(ref int pc)
@@ -337,7 +344,7 @@ namespace Unluau.Chunk.Luau
 
                         int? results = instruction.B == 1 ? null : instruction.B - 1;
 
-                        instructions.Add(new Call(context, function, arguments.ToArray(), results));
+                        instructions.Add(new Call(context, function, [.. arguments], results));
                         break;
                     }
                 }
@@ -349,7 +356,7 @@ namespace Unluau.Chunk.Luau
         private BasicValue ConstantToBasicValue(Context context, Constant constant)
         {
             if (constant is StringConstant stringConstant)
-                return new BasicValue<string>(context, _symbolTable[stringConstant.Value]);
+                return new BasicValue<string>(context, _symbolTable[stringConstant.Value - 1]);
 
             else if (constant is NumberConstant numberConstant)
                 return new BasicValue<double>(context, numberConstant.Value);
@@ -365,7 +372,7 @@ namespace Unluau.Chunk.Luau
                 var names = new string[importConstant.Value.Length];
 
                 for (int i = 0; i < names.Length; ++i)
-                    names[i] = _symbolTable[importConstant.Value[i].Value];
+                    names[i] = _symbolTable[importConstant.Value[i].Value - 1];
 
                 return new Global(context, names);
             }
@@ -373,14 +380,25 @@ namespace Unluau.Chunk.Luau
             throw new NotImplementedException();
         }
 
-        private BasicValue[] MakeReferenceList(Context context, int from, int to)
+        private ClosureContext GetClosureContext()
         {
-            var ret = new List<BasicValue>();
+            (int, int) pcScope = (0, Instructions.Length - 1);
+            (int, int) lines = (LineDefined, LineInformation?.GetLine(pcScope.Item2) ?? LineDefined);
 
-            for (int i = from; i <= to; ++i)
-                ret.Add(new Reference(context, i));
+            List<Variable> parameters = [];
 
-            return [.. ret];
+            for (int slot = 0; slot < ParameterCount; ++slot)
+                parameters.Add(new Variable(new(pcScope, lines), slot));
+
+            string? name = DebugSymbolIndex is null ? null : _symbolTable[(int)DebugSymbolIndex];
+
+            return new()
+            {
+                Context = new(pcScope, lines),
+                IsVariadic = IsVariadic,
+                Parameters = [.. parameters],
+                Symbol = name
+            };
         }
 
         private Context GetContext(int startPc, int endPc) => new((startPc, endPc), LineInformation?.GetLines(startPc, endPc));

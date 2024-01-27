@@ -25,6 +25,12 @@ namespace Unluau.IL.Values
         public int Slot { get; set; } = slot;
 
         /// <summary>
+        /// Converts the current <see cref="Variable"/> to a string.
+        /// </summary>
+        /// <returns>String representation.</returns>
+        public override string? ToString() => $"Variable({Slot}, {Symbol})";
+
+        /// <summary>
         /// Implements the recursive visitor pattern.
         /// </summary>
         /// <param name="visitor">The visitor.</param>

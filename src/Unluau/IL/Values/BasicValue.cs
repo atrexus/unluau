@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unluau.Utils;
 
 namespace Unluau.IL.Values
 {
@@ -12,6 +13,11 @@ namespace Unluau.IL.Values
     /// <param name="context">Additional information about the value.</param>
     public abstract class BasicValue(Context context) : Node(context)
     {
+        /// <summary>
+        /// Converts the current <see cref="BasicValue"/> to a string.
+        /// </summary>
+        /// <returns>String representation.</returns>
+        public override abstract string? ToString();
     }
 
     /// <summary>
@@ -26,6 +32,12 @@ namespace Unluau.IL.Values
         /// The value. If its empty, then its equivalent to a null value.
         /// </summary>
         public T? Value { get; private set; } = value;
+
+        /// <summary>
+        /// Converts the current <see cref="BasicValue{T}"/> to a string.
+        /// </summary>
+        /// <returns>String representation.</returns>
+        public override string? ToString() => $"Val<{typeof(T).Name}>({TypeExtentions.ToString(Value)})";
 
         /// <summary>
         /// Implements the recursive visitor pattern.

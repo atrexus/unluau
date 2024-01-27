@@ -102,9 +102,22 @@ namespace Unluau.Chunk
         /// <returns>A new IL program.</returns>
         public Program Lift()
         {
-            var function = Functions[MainFunctionIndex];
+            var main = Functions[MainFunctionIndex].Lift();
+            main.IsMain = true; 
 
-            var closure = function.Lift();
+            List<Closure> liftedClosures = [];
+
+            for (int id = 0; id < Functions.Length; ++id)
+            {
+                // Most of the time the main function index is located at 0, but sometimes (for some reason...)
+                // the main function is not the first function compiled. 
+                if (id == MainFunctionIndex)
+                    continue;
+
+                liftedClosures.Add(Functions[id].Lift());
+            }
+
+            return new Program(main.Context, main, [.. liftedClosures]);
         }
     }
 }
