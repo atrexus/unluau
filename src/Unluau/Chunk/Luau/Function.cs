@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using Microsoft.Win32;
 using System.Reflection.Metadata.Ecma335;
 using Unluau.IL;
 using Unluau.IL.Blocks;
@@ -262,6 +263,7 @@ namespace Unluau.Chunk.Luau
             {
                 var instruction = Instructions[pc];
                 var context = GetContext(pc, pc);
+                var top = 0;
 
                 switch (instruction.Code)
                 {
@@ -273,15 +275,16 @@ namespace Unluau.Chunk.Luau
                     case OpCode.GETGLOBAL:
                     case OpCode.GETIMPORT:
                     {
-                        var ra = instruction.A;
+                        // Not we update top, since this is the last register loaded.
+                        var ra = top = instruction.A;
 
-                        var value = instruction.Code switch 
-                        { 
+                        var value = instruction.Code switch
+                        {
                             OpCode.LOADK or OpCode.GETIMPORT => ConstantToBasicValue(context, Constants[instruction.D]),
-                            
+
                             // Both LOADKX and GETGLOBAL have constants in the auxiliary instruction. We can group
                             // them for simplicity.
-                            OpCode.LOADKX or 
+                            OpCode.LOADKX or
                             OpCode.GETGLOBAL => ConstantToBasicValue(context, Constants[Instructions[++pc].Value]),
                             OpCode.LOADB => new BasicValue<bool>(context, instruction.B == 1),
                             OpCode.LOADN => new BasicValue<int>(context, instruction.D),
@@ -297,17 +300,45 @@ namespace Unluau.Chunk.Luau
                         break;
                     }
                     case OpCode.FASTCALL:
+                    case OpCode.FASTCALL1:
                     case OpCode.FASTCALL2:
                     case OpCode.FASTCALL2K:
                     case OpCode.CALL:
                     {
                         // Unlike the simple CALL instruction, all FASTCALL instructions contain an identifier to a builtin function
                         // as the first argument.
-                        BasicValue function = instruction.Code == OpCode.CALL 
-                            ? new Reference(context, instruction.A) 
+                        BasicValue function = instruction.Code == OpCode.CALL
+                            ? new Reference(context, instruction.A)
                             : new BasicValue<string>(context, Builtin.IdToName(instruction.A));
 
+                        List<BasicValue> arguments = [];
 
+                        if (instruction.Code == OpCode.FASTCALL2K)
+                        {
+                            // The FASTCALL2K instruction is unique. Unlike the other FASTCALL instructions, you can't just jump to the call
+                            // without processing the following instructions. The auxiliary instruction contains the constant index.
+                            arguments.Add(new Reference(context, instruction.B));
+                            arguments.Add(ConstantToBasicValue(context, Constants[Instructions[++pc].Value]));
+                        }
+
+                        // The C operand of the FASTCALL instruction is the jump index for the CALL instruction.
+                        if (instruction.Code != OpCode.CALL)
+                            instruction = Instructions[pc += instruction.C + 1];
+
+                        if (instruction.Code != OpCode.FASTCALL2K)
+                        {
+                            // When CALL's B operand is 0, the instruction is LUA_MULTRET. This means that its arguments start 
+                            // at R(A) and go up to the top of the stack.
+                            var argCount = instruction.B > 0 ? instruction.B : (top - instruction.A) + 1;
+
+                            for (int i = 1; i < argCount; ++i)
+                                arguments.Add(new Reference(context, instruction.A + i));
+                        }
+
+                        int? results = instruction.B == 1 ? null : instruction.B - 1;
+
+                        instructions.Add(new Call(context, function, arguments.ToArray(), results));
+                        break;
                     }
                 }
             }
@@ -318,7 +349,7 @@ namespace Unluau.Chunk.Luau
         private BasicValue ConstantToBasicValue(Context context, Constant constant)
         {
             if (constant is StringConstant stringConstant)
-                return new BasicValue<string>(context, _symbolTable[stringConstant.Value]); 
+                return new BasicValue<string>(context, _symbolTable[stringConstant.Value]);
 
             else if (constant is NumberConstant numberConstant)
                 return new BasicValue<double>(context, numberConstant.Value);
@@ -335,11 +366,21 @@ namespace Unluau.Chunk.Luau
 
                 for (int i = 0; i < names.Length; ++i)
                     names[i] = _symbolTable[importConstant.Value[i].Value];
-                    
+
                 return new Global(context, names);
             }
 
             throw new NotImplementedException();
+        }
+
+        private BasicValue[] MakeReferenceList(Context context, int from, int to)
+        {
+            var ret = new List<BasicValue>();
+
+            for (int i = from; i <= to; ++i)
+                ret.Add(new Reference(context, i));
+
+            return [.. ret];
         }
 
         private Context GetContext(int startPc, int endPc) => new((startPc, endPc), LineInformation?.GetLines(startPc, endPc));
