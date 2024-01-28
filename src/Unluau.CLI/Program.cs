@@ -7,7 +7,7 @@ namespace Unluau.CLI
     {
         static void Main(string[] args)
         {
-            using (var stream = File.OpenRead("./test/Print.luau"))
+            using (var stream = File.OpenRead("./test/Namecall.luau"))
             {
                 var chunk = LuauChunk.Create(stream);
                 var program = chunk.Lift();

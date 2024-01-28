@@ -22,7 +22,7 @@ namespace Unluau.IL
         public (int, int)? Lines { get; set; } = lines;
 
         public override string ToString()
-            => $"pc {PcScope.Item1} to {PcScope.Item2}{(Lines is null ? string.Empty : $", line {Lines.Value.Item1}")}";
+            => $"<{PcScope.Item1}:{PcScope.Item2}{(Lines is null ? string.Empty : $",{Lines.Value.Item1}")}>";
     }
 
     /// <summary>

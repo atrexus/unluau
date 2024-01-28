@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Unluau.IL.Blocks;
 using Unluau.IL.Instructions;
 using Unluau.IL.Values;
@@ -43,15 +44,22 @@ namespace Unluau.IL.Visitors
 
         public override bool Visit(LoadValue node)
         {
-            Writer.Write(string.Format("{0, -10} {1, -8} {2, -45} -- {3}", $"LoadValue", $"R({node.Slot})", node.Value.ToString(), node.Context.ToString()));
+            Writer.Write(Format(node.Context, $"LoadValue", $"R({node.Slot})", node.Value.ToString()));
 
             return false;
         }
 
         public override bool Visit(Call node)
         {
-            Writer.Write(string.Format("{0, -10} {1, -8} {2, -30} {3, -14} -- {4}", $"Call", node.Callee.ToString(), TypeExtentions.ToString(node.Arguments), $"Ret({node.Results})", node.Context.ToString()));
+            Writer.Write(Format(node.Context, $"Call", node.Callee.ToString(), TypeExtentions.ToString(node.Arguments), $"Ret({node.Results})"));
             
+            return false;
+        }
+
+        public override bool Visit(GetIndexSelf node)
+        {
+            Writer.Write(Format(node.Context, $"GetIndexSelf", $"R({node.Slot})", node.Indexable.ToString(), node.Index.ToString()));
+
             return false;
         }
 
@@ -66,5 +74,18 @@ namespace Unluau.IL.Visitors
 
             return false;
         }
+
+        private static string Format(Context context, string op, string? a, string? b, string? c)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.Append($"{context}  ");
+            stringBuilder.Append(string.Format("{0, -15} {1, -8} {2, -30} {3, -14}", op, a, b, c));
+
+            return stringBuilder.ToString();
+        }
+
+        private static string Format(Context context, string op, string? a, string? b)
+            => Format(context, op, a, b, string.Empty);
     }
 }

@@ -282,7 +282,7 @@ namespace Unluau.Chunk.Luau
                     case OpCode.GETGLOBAL:
                     case OpCode.GETIMPORT:
                     {
-                        // Not we update top, since this is the last register loaded.
+                        // Now we update top, since this is the last register loaded.
                         var ra = top = instruction.A;
 
                         var value = instruction.Code switch
@@ -345,6 +345,39 @@ namespace Unluau.Chunk.Luau
                         int? results = instruction.B == 1 ? null : instruction.B - 1;
 
                         instructions.Add(new Call(context, function, [.. arguments], results));
+                        break;
+                    }
+                    case OpCode.GETTABLE:
+                    case OpCode.GETTABLEN:
+                    case OpCode.GETTABLEKS:
+                    case OpCode.NAMECALL:
+                    {
+                        var ra = top = instruction.A;
+
+                        // This is our indexable value. In Luau its always a table.
+                        var table = new Reference(context, instruction.B);
+
+                        var value = instruction.Code switch
+                        {
+                            OpCode.GETTABLE => new Reference(context, instruction.C),
+
+                            // The GETTABLEN instruction contains a value (byte) from 1 to 256. Because the C operand can only hold
+                            // a value as large as 255, we need to add 1 to it.
+                            OpCode.GETTABLEN => new BasicValue<int>(context, instruction.C + 1),
+
+                            // Both GETTABLEKS and NAMECALL contain a constant in the auxiliary instruction. We group them here for 
+                            // simplicity.
+                            OpCode.GETTABLEKS or OpCode.NAMECALL => ConstantToBasicValue(context, Constants[Instructions[++pc].Value]),
+
+                            // We know this won't ever happen, but the C# compiler will cry if I don't add this.
+                            _ => throw new NotSupportedException()
+                        };
+
+                        // The NAMECALL instruction is special. It tells the VM that we have a call proceeding and that the call should pass 
+                        // a pointer to the instance of this table. We mark this by using a seperate instruction.
+                        instructions.Add(instruction.Code == OpCode.NAMECALL 
+                            ? new GetIndexSelf(context, ra, table, value) 
+                            : new GetIndex(context, ra, table, value));
                         break;
                     }
                 }

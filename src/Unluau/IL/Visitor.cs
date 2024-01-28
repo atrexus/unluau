@@ -20,5 +20,7 @@ namespace Unluau.IL
         public virtual bool Visit(Instruction node) => Visit(node as Node);
         public virtual bool Visit(LoadValue node) => Visit(node as Instruction);
         public virtual bool Visit(Call node) => Visit(node as Instruction);
+        public virtual bool Visit(GetIndex node) => Visit(node as Instruction);
+        public virtual bool Visit(GetIndexSelf node) => Visit(node as GetIndex);
     }
 }
