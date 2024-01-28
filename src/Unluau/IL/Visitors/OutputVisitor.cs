@@ -16,8 +16,6 @@ namespace Unluau.IL.Visitors
 
         public override bool Visit(Closure node)
         {
-            //Writer.WriteLine($"{node.Parameters.Length}{(node.IsVariadic ? '+' : string.Empty)} param(s)");
-
             Writer.Write($"Closure {(node.IsMain ? "main" : node.Name)}(");
 
             for (int i = 0; i < node.Parameters.Length; i++)
@@ -38,21 +36,21 @@ namespace Unluau.IL.Visitors
                 Writer.Write("...");
             }
 
-            Writer.WriteLine($"){string.Format("{0, 57}", $"-- {node.Context}")}");
+            Writer.WriteLine($"){string.Format(" {0}", $"-- {node.Context}")}");
 
             return true;
         }
 
         public override bool Visit(LoadValue node)
         {
-            Writer.Write(string.Format("{0, -10} {1, -8}  {2, -30} -- {3}", $"LoadValue", $"R({node.Slot})", node.Value.ToString(), node.Context.ToString()));
+            Writer.Write(string.Format("{0, -10} {1, -8} {2, -45} -- {3}", $"LoadValue", $"R({node.Slot})", node.Value.ToString(), node.Context.ToString()));
 
             return false;
         }
 
         public override bool Visit(Call node)
         {
-            Writer.Write(string.Format("{0, -10} {1, -8}  {2, -30} -- {3}", $"Call", node.Callee.ToString(), TypeExtentions.ToString(node.Arguments), node.Context.ToString()));
+            Writer.Write(string.Format("{0, -10} {1, -8} {2, -30} {3, -14} -- {4}", $"Call", node.Callee.ToString(), TypeExtentions.ToString(node.Arguments), $"Ret({node.Results})", node.Context.ToString()));
             
             return false;
         }
