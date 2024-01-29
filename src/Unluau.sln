@@ -5,7 +5,7 @@ VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau", "Unluau\Unluau.csproj", "{C15FA6F1-47BE-4000-AD57-A94750634167}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.CLI", "Unluau.CLI\Unluau.CLI.csproj", "{C442BD3C-DD52-4DC1-A7B2-2BD7FBBBAF01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.CLI", "Unluau.CLI\Unluau.CLI.csproj", "{C442BD3C-DD52-4DC1-A7B2-2BD7FBBBAF01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
