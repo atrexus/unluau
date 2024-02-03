@@ -14,12 +14,12 @@ namespace Unluau.IL.Instructions
         /// <summary>
         /// The value to perform that call operation on.
         /// </summary>
-        public BasicValue Callee { get; private set; } = callee;
+        public BasicValue Callee { get; set; } = callee;
 
         /// <summary>
         /// The arguments of the call operation.
         /// </summary>
-        public BasicValue[] Arguments { get; private set; } = arguments;
+        public BasicValue[] Arguments { get; set; } = arguments;
 
         /// <summary>
         /// The number of return values of the call.

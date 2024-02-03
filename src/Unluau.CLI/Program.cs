@@ -12,10 +12,13 @@ namespace Unluau.CLI
                 var chunk = LuauChunk.Create(stream);
                 var program = chunk.Lift();
 
-                using (var output = Console.OpenStandardOutput())
-                {
-                    program.Visit(new OutputVisitor(output));
-                }
+                using var output = Console.OpenStandardOutput();
+                program.Visit(new OutputVisitor(output));
+
+                output!.WriteByte((byte)'\n');
+
+                program.Visit(new ValueVisitor());
+                program.Visit(new OutputVisitor(output));
                 //Console.WriteLine(.);
             }
         }

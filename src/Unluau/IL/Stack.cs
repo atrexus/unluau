@@ -10,7 +10,7 @@ namespace Unluau.IL
     /// <summary>
     /// Contains information on a frame of register slots.
     /// </summary>
-    public class SlotFrame
+    public class Stack
     {
         private readonly Dictionary<int, Slot> _slots;
 
@@ -20,9 +20,9 @@ namespace Unluau.IL
         public Slot Top => _slots[_slots.Keys.ToHashSet().Max()];
 
         /// <summary>
-        /// Creates a new <see cref="SlotFrame"/>.
+        /// Creates a new <see cref="Stack"/>.
         /// </summary>
-        public SlotFrame()
+        public Stack()
         {
             _slots = [];
         }
@@ -57,7 +57,10 @@ namespace Unluau.IL
         public Slot Get(byte id)
         {
             if (_slots.TryGetValue(id, out Slot? value))
+            {
+                value.References++;
                 return value;
+            }
 
             throw new InvalidOperationException($"Slot ({id}) is empty or wasn't initialized");
         }
@@ -67,6 +70,16 @@ namespace Unluau.IL
         /// </summary>
         /// <param name="id">The slot number.</param>
         public void Free(byte id) => _slots.Remove(id);
+
+        /// <summary>
+        /// Frees the current stack frame (baseSlot..Top).
+        /// </summary>
+        /// <param name="baseSlot">The base register slot.</param>
+        public void FreeFrame(byte baseSlot)
+        {
+            for (byte slot = baseSlot; slot < Top.Id; slot++)
+                _slots.Remove(slot);
+        }
 
         /// <summary>
         /// Gets a slot with the specifc slot number.

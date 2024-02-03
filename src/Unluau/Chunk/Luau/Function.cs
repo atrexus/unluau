@@ -263,7 +263,7 @@ namespace Unluau.Chunk.Luau
         {
             var startPc = pc;
             var instructions = new List<IL.Instructions.Instruction>();
-            var slots = new SlotFrame();
+            var slots = new Stack();
 
             // We could set up an infinate loop, but I hate them. By setting up a loop like this, we can 
             // easily break once we have processed all instructions.
@@ -340,6 +340,9 @@ namespace Unluau.Chunk.Luau
                             for (int i = 1; i < argCount; ++i)
                                 arguments.Add(new Reference(context, slots.Get(instruction.A + i)));
                         }
+
+                        // Pop the stack frame (slots are freed and are now 'dead')
+                        slots.FreeFrame(instruction.A);
 
                         int? results = instruction.B == 1 ? null : instruction.B - 1;
 
