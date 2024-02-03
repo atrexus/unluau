@@ -11,12 +11,12 @@ namespace Unluau.IL.Values
     /// </summary>
     /// <param name="context">Information about the refrence.</param>
     /// <param name="slot">A register slot.</param>
-    public class Reference(Context context, int slot) : BasicValue(context)
+    public class Reference(Context context, Slot slot) : BasicValue(context)
     {
         /// <summary>
         /// A register slot in memory.
         /// </summary>
-        public int Slot { get; set; } = slot;
+        public Slot Slot { get; set; } = slot;
 
         /// <summary>
         /// Converts the curren <see cref="Reference"/> to a string representation.

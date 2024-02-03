@@ -77,7 +77,7 @@ namespace Unluau.IL.Visitors
 
         private static string Format(Context context, string op, string? a, string? b, string? c)
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
 
             stringBuilder.Append($"{context}  ");
             stringBuilder.Append(string.Format("{0, -15} {1, -8} {2, -30} {3, -14}", op, a, b, c));

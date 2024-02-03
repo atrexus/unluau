@@ -8,12 +8,12 @@ namespace Unluau.IL.Instructions
     /// <param name="context">Information about the instruction.</param>
     /// <param name="slot">The register slot to use.</param>
     /// <param name="value">The value to load.</param>
-    public class LoadValue(Context context, int slot, BasicValue value) : Instruction(context)
+    public class LoadValue(Context context, Slot slot, BasicValue value) : Instruction(context)
     {
         /// <summary>
         /// The register slot to use.
         /// </summary>
-        public int Slot { get; private set; } = slot;
+        public Slot Slot { get; private set; } = slot;
 
         /// <summary>
         /// The value to load into the provided register.

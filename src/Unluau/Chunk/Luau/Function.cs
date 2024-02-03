@@ -255,7 +255,7 @@ namespace Unluau.Chunk.Luau
 
             for (int pc = 0; pc < Instructions.Length; ++pc)
                 body.Add(LiftBasicBlock(ref pc));
-           
+
             return new(context, [.. body]);
         }
 
@@ -263,6 +263,7 @@ namespace Unluau.Chunk.Luau
         {
             var startPc = pc;
             var instructions = new List<IL.Instructions.Instruction>();
+            var slots = new SlotFrame();
 
             // We could set up an infinate loop, but I hate them. By setting up a loop like this, we can 
             // easily break once we have processed all instructions.
@@ -270,7 +271,6 @@ namespace Unluau.Chunk.Luau
             {
                 var instruction = Instructions[pc];
                 var context = GetContext(pc, pc);
-                var top = 0;
 
                 switch (instruction.Code)
                 {
@@ -282,9 +282,6 @@ namespace Unluau.Chunk.Luau
                     case OpCode.GETGLOBAL:
                     case OpCode.GETIMPORT:
                     {
-                        // Now we update top, since this is the last register loaded.
-                        var ra = top = instruction.A;
-
                         var value = instruction.Code switch
                         {
                             OpCode.LOADK or OpCode.GETIMPORT => ConstantToBasicValue(context, Constants[instruction.D]),
@@ -301,6 +298,8 @@ namespace Unluau.Chunk.Luau
                             _ => throw new NotSupportedException()
                         };
 
+                        var ra = slots.Set(instruction.A, value);
+
                         // Note: loading a value onto the stack can be for both for constant values and environment variables.
                         // It doesn't really matter what kind we have because when we generate our AST they are treated the same.
                         instructions.Add(new LoadValue(context, ra, value));
@@ -315,7 +314,7 @@ namespace Unluau.Chunk.Luau
                         // Unlike the simple CALL instruction, all FASTCALL instructions contain an identifier to a builtin function
                         // as the first argument.
                         BasicValue function = instruction.Code == OpCode.CALL
-                            ? new Reference(context, instruction.A)
+                            ? new Reference(context, slots.Get(instruction.A))
                             : new BasicValue<string>(context, Builtin.IdToName(instruction.A));
 
                         List<BasicValue> arguments = [];
@@ -324,7 +323,7 @@ namespace Unluau.Chunk.Luau
                         {
                             // The FASTCALL2K instruction is unique. Unlike the other FASTCALL instructions, you can't just jump to the call
                             // without processing the following instructions. The auxiliary instruction contains the constant index.
-                            arguments.Add(new Reference(context, instruction.B));
+                            arguments.Add(new Reference(context, slots.Get(instruction.B)));
                             arguments.Add(ConstantToBasicValue(context, Constants[Instructions[++pc].Value]));
                         }
 
@@ -336,10 +335,10 @@ namespace Unluau.Chunk.Luau
                         {
                             // When CALL's B operand is 0, the instruction is LUA_MULTRET. This means that its arguments start 
                             // at R(A) and go up to the top of the stack.
-                            var argCount = instruction.B > 0 ? instruction.B : (top - instruction.A) + 1;
+                            var argCount = instruction.B > 0 ? instruction.B : (slots.Top.Id - instruction.A) + 1;
 
                             for (int i = 1; i < argCount; ++i)
-                                arguments.Add(new Reference(context, instruction.A + i));
+                                arguments.Add(new Reference(context, slots.Get(instruction.A + i)));
                         }
 
                         int? results = instruction.B == 1 ? null : instruction.B - 1;
@@ -352,14 +351,12 @@ namespace Unluau.Chunk.Luau
                     case OpCode.GETTABLEKS:
                     case OpCode.NAMECALL:
                     {
-                        var ra = top = instruction.A;
-
                         // This is our indexable value. In Luau its always a table.
-                        var table = new Reference(context, instruction.B);
+                        var table = new Reference(context, slots.Get(instruction.B));
 
                         var value = instruction.Code switch
                         {
-                            OpCode.GETTABLE => new Reference(context, instruction.C),
+                            OpCode.GETTABLE => new Reference(context, slots.Get(instruction.C)),
 
                             // The GETTABLEN instruction contains a value (byte) from 1 to 256. Because the C operand can only hold
                             // a value as large as 255, we need to add 1 to it.
@@ -373,10 +370,12 @@ namespace Unluau.Chunk.Luau
                             _ => throw new NotSupportedException()
                         };
 
+                        var ra = slots.Set(instruction.A, value);
+
                         // The NAMECALL instruction is special. It tells the VM that we have a call proceeding and that the call should pass 
                         // a pointer to the instance of this table. We mark this by using a seperate instruction.
-                        instructions.Add(instruction.Code == OpCode.NAMECALL 
-                            ? new GetIndexSelf(context, ra, table, value) 
+                        instructions.Add(instruction.Code == OpCode.NAMECALL
+                            ? new GetIndexSelf(context, ra, table, value)
                             : new GetIndex(context, ra, table, value));
                         break;
                     }
