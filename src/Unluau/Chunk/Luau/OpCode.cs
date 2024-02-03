@@ -7,6 +7,23 @@ using System.Threading.Tasks;
 namespace Unluau.Chunk.Luau
 {
     /// <summary>
+    /// Represents the format of an instruction.
+    /// </summary>
+    public enum OpMode
+    {
+        // ABC encoding: three 8-bit values, containing registers or small numbers
+        iABC,
+        // AD encoding: one 8-bit value, one signed 16-bit value
+        iAD,
+        // E encoding: one signed 24-bit value
+        iE,
+        AUX,
+
+        // Represents an empy instruction (contans no args)
+        None
+    }
+
+    /// <summary>
     /// Represents an operation code for an instruction.
     /// </summary>
     public enum OpCode : byte
@@ -365,5 +382,99 @@ namespace Unluau.Chunk.Luau
 
         // Enum entry for number of opcodes, not a valid opcode by itself!
         COUNT
+    }
+
+    public class OpProperties(OpCode code, OpMode mode, bool hasAux = false)
+    {
+        public OpCode Code { get; private set; } = code;
+        public OpMode Mode { get; private set; } = mode;
+        public bool HasAux { get; private set; } = hasAux;
+
+        public static readonly Dictionary<OpCode, OpProperties> Map = new()
+        {
+            { OpCode.NOP, new OpProperties(OpCode.NOP, OpMode.None) },
+            { OpCode.BREAK, new OpProperties(OpCode.BREAK, OpMode.None) },
+            { OpCode.LOADNIL, new OpProperties(OpCode.LOADNIL, OpMode.iABC) },
+            { OpCode.LOADB, new OpProperties(OpCode.LOADB, OpMode.iABC) },
+            { OpCode.LOADN, new OpProperties(OpCode.LOADN, OpMode.iAD) },
+            { OpCode.LOADK, new OpProperties(OpCode.LOADK, OpMode.iAD) },
+            { OpCode.MOVE, new OpProperties(OpCode.MOVE, OpMode.iABC) },
+            { OpCode.GETGLOBAL, new OpProperties(OpCode.GETGLOBAL, OpMode.iABC, true) },
+            { OpCode.SETGLOBAL, new OpProperties(OpCode.SETGLOBAL, OpMode.iABC, true) },
+            { OpCode.GETUPVAL, new OpProperties(OpCode.GETUPVAL, OpMode.iABC) },
+            { OpCode.SETUPVAL, new OpProperties(OpCode.SETUPVAL, OpMode.iABC) },
+            { OpCode.CLOSEUPVALS, new OpProperties(OpCode.CLOSEUPVALS, OpMode.iABC) },
+            { OpCode.GETIMPORT, new OpProperties(OpCode.GETIMPORT, OpMode.iAD, true) },
+            { OpCode.GETTABLE, new OpProperties(OpCode.GETTABLE, OpMode.iABC) },
+            { OpCode.SETTABLE, new OpProperties(OpCode.SETTABLE, OpMode.iABC) },
+            { OpCode.GETTABLEKS, new OpProperties(OpCode.GETTABLEKS, OpMode.iABC, true) },
+            { OpCode.SETTABLEKS, new OpProperties(OpCode.SETTABLEKS, OpMode.iABC, true) },
+            { OpCode.GETTABLEN, new OpProperties(OpCode.GETTABLEN, OpMode.iABC) },
+            { OpCode.SETTABLEN, new OpProperties(OpCode.SETTABLEN, OpMode.iABC) },
+            { OpCode.NEWCLOSURE, new OpProperties(OpCode.NEWCLOSURE, OpMode.iAD) },
+            { OpCode.NAMECALL, new OpProperties(OpCode.NAMECALL, OpMode.iABC, true) },
+            { OpCode.CALL, new OpProperties(OpCode.CALL, OpMode.iABC) },
+            { OpCode.RETURN, new OpProperties(OpCode.RETURN, OpMode.iABC) },
+            { OpCode.JUMP, new OpProperties(OpCode.JUMP, OpMode.iAD) },
+            { OpCode.JUMPBACK, new OpProperties(OpCode.JUMPBACK, OpMode.iAD) },
+            { OpCode.JUMPIF, new OpProperties(OpCode.JUMPIF, OpMode.iAD) },
+            { OpCode.JUMPIFNOT, new OpProperties(OpCode.JUMPIFNOT, OpMode.iAD) },
+            { OpCode.JUMPIFEQ, new OpProperties(OpCode.JUMPIFEQ, OpMode.iAD, true) },
+            { OpCode.JUMPIFLE, new OpProperties(OpCode.JUMPIFLE, OpMode.iAD, true) },
+            { OpCode.JUMPIFLT, new OpProperties(OpCode.JUMPIFLT, OpMode.iAD, true) },
+            { OpCode.JUMPIFNOTEQ, new OpProperties(OpCode.JUMPIFNOTEQ, OpMode.iAD, true) },
+            { OpCode.JUMPIFNOTLE, new OpProperties(OpCode.JUMPIFNOTLE, OpMode.iAD, true) },
+            { OpCode.JUMPIFNOTLT, new OpProperties(OpCode.JUMPIFNOTLT, OpMode.iAD, true) },
+            { OpCode.ADD, new OpProperties(OpCode.ADD, OpMode.iABC) },
+            { OpCode.SUB, new OpProperties(OpCode.SUB, OpMode.iABC) },
+            { OpCode.MUL, new OpProperties(OpCode.MUL, OpMode.iABC) },
+            { OpCode.DIV, new OpProperties(OpCode.DIV, OpMode.iABC) },
+            { OpCode.MOD, new OpProperties(OpCode.MOD, OpMode.iABC) },
+            { OpCode.POW, new OpProperties(OpCode.POW, OpMode.iABC) },
+            { OpCode.ADDK, new OpProperties(OpCode.ADDK, OpMode.iABC) },
+            { OpCode.SUBK, new OpProperties(OpCode.SUBK, OpMode.iABC) },
+            { OpCode.MULK, new OpProperties(OpCode.MULK, OpMode.iABC) },
+            { OpCode.DIVK, new OpProperties(OpCode.DIVK, OpMode.iABC) },
+            { OpCode.MODK, new OpProperties(OpCode.MODK, OpMode.iABC) },
+            { OpCode.POWK, new OpProperties(OpCode.POWK, OpMode.iABC) },
+            { OpCode.AND, new OpProperties(OpCode.AND, OpMode.iABC) },
+            { OpCode.OR, new OpProperties(OpCode.OR, OpMode.iABC) },
+            { OpCode.ANDK, new OpProperties(OpCode.ANDK, OpMode.iABC) },
+            { OpCode.ORK, new OpProperties(OpCode.ORK, OpMode.iABC) },
+            { OpCode.CONCAT, new OpProperties(OpCode.CONCAT, OpMode.iABC) },
+            { OpCode.NOT, new OpProperties(OpCode.NOT, OpMode.iABC) },
+            { OpCode.MINUS, new OpProperties(OpCode.MINUS, OpMode.iABC) },
+            { OpCode.LENGTH, new OpProperties(OpCode.LENGTH, OpMode.iABC) },
+            { OpCode.NEWTABLE, new OpProperties(OpCode.NEWTABLE, OpMode.iABC, true) },
+            { OpCode.DUPTABLE, new OpProperties(OpCode.DUPTABLE, OpMode.iAD) },
+            { OpCode.SETLIST, new OpProperties(OpCode.SETLIST, OpMode.iABC, true) },
+            { OpCode.FORNPREP, new OpProperties(OpCode.FORNPREP, OpMode.iAD) },
+            { OpCode.FORNLOOP, new OpProperties(OpCode.FORNLOOP, OpMode.iAD) },
+            { OpCode.FORGLOOP, new OpProperties(OpCode.FORGLOOP, OpMode.iAD, true) },
+            { OpCode.FORGPREP_INEXT, new OpProperties(OpCode.FORGPREP_INEXT, OpMode.iAD) },
+            { OpCode.DEP_FORGLOOP_INEXT, new OpProperties(OpCode.DEP_FORGLOOP_INEXT, OpMode.iAD) },
+            { OpCode.FORGPREP_NEXT, new OpProperties(OpCode.FORGPREP_NEXT, OpMode.iAD) },
+            { OpCode.DEP_FORGLOOP_NEXT, new OpProperties(OpCode.DEP_FORGLOOP_NEXT, OpMode.iAD) },
+            { OpCode.GETVARARGS, new OpProperties(OpCode.GETVARARGS, OpMode.iABC) },
+            { OpCode.DUPCLOSURE, new OpProperties(OpCode.DUPCLOSURE, OpMode.iAD) },
+            { OpCode.PREPVARARGS, new OpProperties(OpCode.PREPVARARGS, OpMode.iABC) },
+            { OpCode.LOADKX, new OpProperties(OpCode.LOADKX, OpMode.iABC, true) },
+            { OpCode.JUMPX, new OpProperties(OpCode.JUMPX, OpMode.iE) },
+            { OpCode.FASTCALL, new OpProperties(OpCode.FASTCALL, OpMode.iABC) },
+            { OpCode.COVERAGE, new OpProperties(OpCode.COVERAGE, OpMode.iE) },
+            { OpCode.CAPTURE, new OpProperties(OpCode.CAPTURE, OpMode.iABC) },
+            { OpCode.DEP_JUMPIFEQK, new OpProperties(OpCode.DEP_JUMPIFEQK, OpMode.iAD, true) },
+            { OpCode.DEP_JUMPIFNOTEQK, new OpProperties(OpCode.DEP_JUMPIFNOTEQK, OpMode.iAD, true) },
+            { OpCode.FASTCALL1, new OpProperties(OpCode.FASTCALL1, OpMode.iABC) },
+            { OpCode.FASTCALL2, new OpProperties(OpCode.FASTCALL2, OpMode.iABC, true) },
+            { OpCode.FASTCALL2K, new OpProperties(OpCode.FASTCALL2K, OpMode.iABC, true) },
+            { OpCode.FORGPREP, new OpProperties(OpCode.FORGPREP, OpMode.iAD) },
+            { OpCode.JUMPXEQKNIL, new OpProperties(OpCode.JUMPXEQKNIL, OpMode.iAD, true) },
+            { OpCode.JUMPXEQKB, new OpProperties(OpCode.JUMPXEQKB, OpMode.iAD, true) },
+            { OpCode.JUMPXEQKN, new OpProperties(OpCode.JUMPXEQKN, OpMode.iAD, true) },
+            { OpCode.JUMPXEQKS, new OpProperties(OpCode.JUMPXEQKS, OpMode.iAD, true) },
+            { OpCode.IDIV, new OpProperties(OpCode.IDIV, OpMode.iABC, false) },
+            { OpCode.IDIVK, new OpProperties(OpCode.IDIVK, OpMode.iABC, false) },
+        };
     }
 }

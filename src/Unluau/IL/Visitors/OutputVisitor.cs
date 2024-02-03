@@ -51,14 +51,14 @@ namespace Unluau.IL.Visitors
 
         public override bool Visit(Call node)
         {
-            Writer.Write(Format(node.Context, $"Call", node.Callee.ToString(), TypeExtentions.ToString(node.Arguments), $"Ret({node.Results})"));
+            Writer.Write(Format(node.Context, $"Call", node.Callee.ToString(), TypeExtentions.ToString(node.Arguments), node.Results is not null ? $"Ret({node.Results})" : string.Empty));
             
             return false;
         }
 
         public override bool Visit(GetIndexSelf node)
         {
-            Writer.Write(Format(node.Context, $"GetIndexSelf", $"R({node.Slot})", node.Indexable.ToString(), node.Index.ToString()));
+            Writer.Write(Format(node.Context, $"GetIndexSelf", $"R({node.Slot})", node.Index.ToString()));
 
             return false;
         }
@@ -79,8 +79,7 @@ namespace Unluau.IL.Visitors
         {
             StringBuilder stringBuilder = new();
 
-            stringBuilder.Append($"{context}  ");
-            stringBuilder.Append(string.Format("{0, -15} {1, -8} {2, -30} {3, -14}", op, a, b, c));
+            stringBuilder.Append(string.Format("{0, -10} {1, -15} {2, -8} {3, -30} {4, -14}", context, op, a, b, c));
 
             return stringBuilder.ToString();
         }

@@ -63,6 +63,16 @@ namespace Unluau.IL
         /// Visits the children of the closure.
         /// </summary>
         /// <param name="visitor">The visitor.</param>
+        public void VisitChildren(Visitor visitor)
+        {
+            foreach (var block in Blocks)
+                block.Visit(visitor);
+        }
+
+        /// <summary>
+        /// Implements the visitor.
+        /// </summary>
+        /// <param name="visitor">The visitor.</param>
         public override void Visit(Visitor visitor)
         {
             if (visitor.Visit(this))

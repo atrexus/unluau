@@ -12,7 +12,7 @@ namespace Unluau.IL.Blocks
         /// <summary>
         /// The instructions within the block.
         /// </summary>
-        public Instruction[] Instructions { get; set; } = instructions;
+        public List<Instruction> Instructions { get; set; } = new(instructions);
 
         /// <summary>
         /// Recursive visitor method.
@@ -22,8 +22,8 @@ namespace Unluau.IL.Blocks
         {
             if (visitor.Visit(this))
             {
-                foreach (Instruction instruction in Instructions)
-                    instruction.Visit(visitor);
+                for (int i = 0; i < instructions.Length; i++)
+                    instructions[i].Visit(visitor);
             }
         }
     }

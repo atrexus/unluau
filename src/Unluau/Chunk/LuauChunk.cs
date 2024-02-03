@@ -1,6 +1,7 @@
 ﻿using Unluau.Utils;
 using Unluau.Chunk.Luau;
 using Unluau.IL;
+using System.Text;
 
 namespace Unluau.Chunk
 {
@@ -118,6 +119,18 @@ namespace Unluau.Chunk
             }
 
             return new Program(main.Context, main, [.. liftedClosures]);
+        }
+
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new();
+
+            foreach (var func in Functions)
+                stringBuilder.AppendLine(func.ToString() + "\n");
+
+            stringBuilder.AppendLine("main -> " + MainFunctionIndex);
+
+            return stringBuilder.ToString();    
         }
     }
 }

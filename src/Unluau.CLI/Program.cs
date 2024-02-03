@@ -1,4 +1,5 @@
-﻿using Unluau.Chunk;
+﻿using System.Globalization;
+using Unluau.Chunk;
 using Unluau.IL.Visitors;
 
 namespace Unluau.CLI
@@ -7,10 +8,15 @@ namespace Unluau.CLI
     {
         static void Main(string[] args)
         {
-            using (var stream = File.OpenRead("./test/Print.luau"))
+            using (var stream = File.OpenRead("./test/RegisterTest.luau"))
             {
                 var chunk = LuauChunk.Create(stream);
+
+                Console.WriteLine(chunk.ToString());
+
                 var program = chunk.Lift();
+
+                
 
                 using var output = Console.OpenStandardOutput();
                 program.Visit(new OutputVisitor(output));

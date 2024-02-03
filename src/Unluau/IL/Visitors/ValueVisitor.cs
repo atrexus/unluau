@@ -12,6 +12,16 @@ namespace Unluau.IL.Visitors
     {
         private BasicBlock? _lastBlock;
 
+        public override bool Visit(Closure node)
+        {
+            // First we need to resolve all of our references.
+            node.VisitChildren(this);
+
+            // Now we need to remove all of the dead instructions.
+            node.VisitChildren(this);
+
+            return false;
+        }
         public override bool Visit(BasicBlock node)
         {
             _lastBlock = node;
@@ -24,7 +34,22 @@ namespace Unluau.IL.Visitors
             node.Callee = ResolveValue(node.Callee);
             node.Arguments = ResolveValueList(node.Arguments);
 
-            return true;    
+            return true;
+        }
+
+        public override bool Visit(GetIndexSelf node)
+        {
+            if (!TryDelete(node, node.Slot))
+                node.Index = ResolveIndex(node.Index);
+
+            return true;
+        }
+
+        public override bool Visit(LoadValue node)
+        {
+            TryDelete(node, node.Slot);
+
+            return true;
         }
 
         /// <summary>
@@ -32,11 +57,11 @@ namespace Unluau.IL.Visitors
         /// </summary>
         /// <param name="values">The values.</param>
         /// <returns>The resolved values.</returns>
-        private BasicValue[] ResolveValueList(BasicValue[] values)
+        private static BasicValue[] ResolveValueList(BasicValue[] values)
         {
             var resolved = new BasicValue[values.Length];
 
-            for (int i  = 0; i < values.Length; ++i)
+            for (int i = 0; i < values.Length; ++i)
                 resolved[i] = ResolveValue(values[i]);
 
             return resolved;
@@ -47,10 +72,12 @@ namespace Unluau.IL.Visitors
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The resolved value.</returns>
-        private BasicValue ResolveValue(BasicValue value)
+        private static BasicValue ResolveValue(BasicValue value)
         {
             if (value is Reference reference)
                 return ResolveReference(reference);
+            if (value is Values.Index index)
+                return ResolveIndex(index);
 
             return value;
         }
@@ -60,28 +87,50 @@ namespace Unluau.IL.Visitors
         /// </summary>
         /// <param name="reference">The reference.</param>
         /// <returns>The resolved value.</returns>
-        private BasicValue ResolveReference(Reference reference)
+        private static BasicValue ResolveReference(Reference reference)
         {
             // If we only have one reference to a slot, then we can just replace this reference
             // with its BasicValue. 
             if (reference.Slot.References == 1)
             {
-                if (_lastBlock is not null)
-                {
-                    var instructions = new List<Instruction>(_lastBlock.Instructions);
-                    
-                    var match = instructions.Find(match => match.Context == reference.Slot.Value.Context);
+                // We set the number of references to a negative value so that the load instruction 
+                // for this slot can be removed.
+                reference.Slot.References = -1;
 
-                    if (match != null) 
-                        instructions.Remove(match);
-
-                    _lastBlock.Instructions = instructions.ToArray();
-                }
-               
                 return reference.Slot.Value;
             }
-                
+
             return reference;
+        }
+
+        /// <summary>
+        /// Resolves an index operation.
+        /// </summary>
+        /// <param name="reference">The reference.</param>
+        /// <returns>The resolved index.</returns>
+        private static Values.Index ResolveIndex(Values.Index index)
+        {
+            index.Indexable = ResolveValue(index.Indexable);
+            index.Key = ResolveValue(index.Key);
+
+            return index;
+        }
+
+        /// <summary>
+        /// Tries to delete an instruction from the instructions list if its "dead".
+        /// </summary>
+        /// <param name="node">The instruction</param>
+        /// <param name="slot">Its slot.</param>
+        /// <returns>True if deleted.</returns>
+        private bool TryDelete(Instruction node, Slot slot)
+        {
+            if (slot.References == -1 && _lastBlock != null)
+            {
+                _lastBlock.Instructions.Remove(node);
+                return true;
+            }
+
+            return false;
         }
     }
 }

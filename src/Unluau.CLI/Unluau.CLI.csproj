@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="test\Namecall.luau">
+    <None Update="test\Namecall2.luau">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="test\Print.luau">

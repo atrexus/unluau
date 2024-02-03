@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unluau.IL.Instructions;
 using Unluau.IL.Values;
 
 namespace Unluau.IL
@@ -34,16 +35,16 @@ namespace Unluau.IL
         /// <param name="basicValue">The value to set.</param>
         public Slot Set(byte id, BasicValue basicValue)
         {
-            if (_slots.TryGetValue(id, out Slot? value))
-            {
-                value.Value = basicValue;
-                value.References++;
-            }
-            else
-            {
-                value = new Slot() { Id = id, Value = basicValue };
-                _slots.Add(id, value);
-            }
+            if (_slots.ContainsKey(id))
+                Free(id);
+
+            var value = new Slot() 
+            { 
+                Id = id, 
+                Value = basicValue 
+            };
+
+            _slots.Add(id, value);
 
             return value;
         }
@@ -87,6 +88,13 @@ namespace Unluau.IL
         /// <param name="v">The slot number.</param>
         /// <returns>The slot.</returns>
         internal Slot Get(int v) => Get((byte)v);
+
+        /// <summary>
+        /// Sets the slot to the specified value.
+        /// </summary>
+        /// <param name="v">The slot number.</param>
+        /// <param name="basicValue">The value to set.</param>
+        internal void Set(int v, BasicValue basicValue) => Set((byte)v, basicValue);
     }
 
     /// <summary>

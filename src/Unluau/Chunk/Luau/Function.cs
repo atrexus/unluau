@@ -1,11 +1,15 @@
 ﻿using Microsoft.VisualBasic;
 using Microsoft.Win32;
+using System.IO;
 using System.Reflection.Metadata.Ecma335;
+using System.Text;
 using Unluau.IL;
 using Unluau.IL.Blocks;
 using Unluau.IL.Instructions;
 using Unluau.IL.Values;
 using Unluau.Utils;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Index = Unluau.IL.Values.Index;
 
 namespace Unluau.Chunk.Luau
 {
@@ -243,6 +247,70 @@ namespace Unluau.Chunk.Luau
             return closureTable;
         }
 
+        public override string ToString()
+        {
+            StringBuilder builder = new();
+
+            // Write function header.
+            builder.AppendLine($"{ParameterCount}{(IsVariadic ? "+" : string.Empty)} param(s), {SlotCount} slot(s), {UpvalueCount} upvalue(s), {Constants.Length} constant(s), {ClosureTable.Length} function(s)");
+
+            // Write function name
+            builder.Append($"function {(DebugSymbolIndex is null ? "main" : _symbolTable[(int)DebugSymbolIndex])}(");
+            
+            // Write function parameters
+            for (int i = 0; i < ParameterCount; ++i)
+            {
+                if (i > 0)
+                    builder.Append(", ");
+                builder.Append($"v{i + 1}");
+            }
+
+            // Write vararg "..." if provided
+            if (IsVariadic)
+                builder.Append($"{(ParameterCount > 0 ? ", " : string.Empty)}...");
+
+            // Write line information if avalible
+            builder.AppendLine($"){(LineInformation is null ? string.Empty : $" -- line {LineInformation.GetLine(0)} through {LineInformation.GetLine(Instructions.Length - 1)}")}");
+
+            var fmt = new string('0', (int)Math.Floor(Math.Log10(Instructions.Length - 1) + 1) + 1);
+
+            for (int i = 0; i < Instructions.Length; ++i)
+            {
+                var instruction = Instructions[i];
+                var properties = OpProperties.Map[instruction.Code];
+
+                builder.Append(i.ToString(fmt));
+
+                switch (properties.Mode)
+                {
+                    case OpMode.iABC:
+                        builder.Append(string.Format("   {0, -10}\t {1, 5} {2} {3}", properties.Code.ToString(),
+                            instruction.A, instruction.B, instruction.C));
+                        break;
+                    case OpMode.iAD:
+                        builder.Append(string.Format("   {0, -10}\t {1, 5} {2}", properties.Code.ToString(),
+                            instruction.A, instruction.D));
+                        break;
+                    case OpMode.iE:
+                        builder.Append(string.Format("   {0, -10}\t {1, 5}", properties.Code.ToString(),
+                            instruction.E));
+                        break;
+                }
+
+                builder.AppendLine();
+
+                if (properties.HasAux)
+                {
+                    builder.Append((i + 1).ToString(fmt));
+                    builder.Append(string.Format("   {0, -10}\t {1, 5}\n", "   AUX", Instructions[++i].Value));
+                }
+            }
+
+            builder.Append($"end");
+
+            return builder.ToString();
+        }
+
         /// <summary>
         /// Lifts the current function to a new IL closure.
         /// </summary>
@@ -344,7 +412,7 @@ namespace Unluau.Chunk.Luau
                         // Pop the stack frame (slots are freed and are now 'dead')
                         slots.FreeFrame(instruction.A);
 
-                        int? results = instruction.B == 1 ? null : instruction.B - 1;
+                        int? results = instruction.C == 1 ? null : instruction.C - 1;
 
                         instructions.Add(new Call(context, function, [.. arguments], results));
                         break;
@@ -373,13 +441,23 @@ namespace Unluau.Chunk.Luau
                             _ => throw new NotSupportedException()
                         };
 
-                        var ra = slots.Set(instruction.A, value);
+                        var index = new Index(context, table, value);
+
+                        var ra = slots.Set(instruction.A, index);
+
+                        var getIndex = new GetIndex(context, ra, index);
 
                         // The NAMECALL instruction is special. It tells the VM that we have a call proceeding and that the call should pass 
                         // a pointer to the instance of this table. We mark this by using a seperate instruction.
-                        instructions.Add(instruction.Code == OpCode.NAMECALL
-                            ? new GetIndexSelf(context, ra, table, value)
-                            : new GetIndex(context, ra, table, value));
+                        if (instruction.Code == OpCode.NAMECALL)
+                        {
+                            // Set the next register to the instance to the table that is being invoked.
+                            slots.Set(instruction.A + 1, table.Slot.Value);
+
+                            getIndex = new GetIndexSelf(getIndex);
+                        }
+
+                        instructions.Add(getIndex);
                         break;
                     }
                 }

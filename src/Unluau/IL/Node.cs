@@ -24,7 +24,7 @@ namespace Unluau.IL
         public static bool operator ==(Context left, Context right) => Equals(left, right);
         public static bool operator !=(Context left, Context right) => !Equals(left, right);
 
-        public override string ToString()
+        public override readonly string ToString()
             => $"<{PcScope.Item1}:{PcScope.Item2}{(Lines is null ? string.Empty : $",{Lines.Value.Item1}")}>";
 
         public override readonly bool Equals(object? obj)
@@ -34,6 +34,8 @@ namespace Unluau.IL
 
             return false;
         }
+
+        public override readonly int GetHashCode() => base.GetHashCode();
     }
 
     /// <summary>

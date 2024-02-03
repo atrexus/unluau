@@ -16,6 +16,7 @@ namespace Unluau.IL
         public virtual bool Visit(Global node) => Visit(node as BasicValue);
         public virtual bool Visit(Variable node) => Visit(node as BasicValue);
         public virtual bool Visit(Reference node) => Visit(node as BasicValue);
+        public virtual bool Visit(Values.Index node) => Visit(node as BasicValue);
 
         public virtual bool Visit(Instruction node) => Visit(node as Node);
         public virtual bool Visit(LoadValue node) => Visit(node as Instruction);
