@@ -8,7 +8,6 @@ using Unluau.IL.Blocks;
 using Unluau.IL.Instructions;
 using Unluau.IL.Values;
 using Unluau.Utils;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using Index = Unluau.IL.Values.Index;
 
 namespace Unluau.Chunk.Luau
@@ -331,7 +330,7 @@ namespace Unluau.Chunk.Luau
         {
             var startPc = pc;
             var instructions = new List<IL.Instructions.Instruction>();
-            var slots = new Stack();
+            var stack = new Stack();
 
             // We could set up an infinate loop, but I hate them. By setting up a loop like this, we can 
             // easily break once we have processed all instructions.
@@ -366,7 +365,7 @@ namespace Unluau.Chunk.Luau
                             _ => throw new NotSupportedException()
                         };
 
-                        var ra = slots.Set(instruction.A, value);
+                        var ra = stack.Set(instruction.A, value);
 
                         // Note: loading a value onto the stack can be for both for constant values and environment variables.
                         // It doesn't really matter what kind we have because when we generate our AST they are treated the same.
@@ -382,7 +381,7 @@ namespace Unluau.Chunk.Luau
                         // Unlike the simple CALL instruction, all FASTCALL instructions contain an identifier to a builtin function
                         // as the first argument.
                         BasicValue function = instruction.Code == OpCode.CALL
-                            ? new Reference(context, slots.Get(instruction.A))
+                            ? new Reference(context, stack.Get(instruction.A))
                             : new BasicValue<string>(context, Builtin.IdToName(instruction.A));
 
                         List<BasicValue> arguments = [];
@@ -391,7 +390,7 @@ namespace Unluau.Chunk.Luau
                         {
                             // The FASTCALL2K instruction is unique. Unlike the other FASTCALL instructions, you can't just jump to the call
                             // without processing the following instructions. The auxiliary instruction contains the constant index.
-                            arguments.Add(new Reference(context, slots.Get(instruction.B)));
+                            arguments.Add(new Reference(context, stack.Get(instruction.B)));
                             arguments.Add(ConstantToBasicValue(context, Constants[Instructions[++pc].Value]));
                         }
 
@@ -403,18 +402,25 @@ namespace Unluau.Chunk.Luau
                         {
                             // When CALL's B operand is 0, the instruction is LUA_MULTRET. This means that its arguments start 
                             // at R(A) and go up to the top of the stack.
-                            var argCount = instruction.B > 0 ? instruction.B : (slots.Top.Id - instruction.A) + 1;
+                            var argCount = instruction.B > 0 ? instruction.B : (stack.Top.Id - instruction.A) + 1;
 
                             for (int i = 1; i < argCount; ++i)
-                                arguments.Add(new Reference(context, slots.Get(instruction.A + i)));
+                                arguments.Add(new Reference(context, stack.Get(instruction.A + i)));
                         }
 
-                        // Pop the stack frame (slots are freed and are now 'dead')
-                        slots.FreeFrame(instruction.A);
+                        // Pop the stack frame (stack are freed and are now 'dead')
+                        stack.FreeFrame(instruction.A);
 
-                        int? results = instruction.C == 1 ? null : instruction.C - 1;
+                        // Create our new call result, that we will load onto the stack.
+                        var callResult = new CallResult(context, function, [.. arguments]);
 
-                        instructions.Add(new Call(context, function, [.. arguments], results));
+                        var results = new List<Slot>();
+
+                        // Load all of the results onto the stack. 
+                        for (int slot = 0; slot < instruction.C - 1; ++slot)
+                            results.Add(stack.Set(slot + instruction.A, callResult));
+
+                        instructions.Add(new Call(context, callResult, [.. results]));
                         break;
                     }
                     case OpCode.GETTABLE:
@@ -423,11 +429,11 @@ namespace Unluau.Chunk.Luau
                     case OpCode.NAMECALL:
                     {
                         // This is our indexable value. In Luau its always a table.
-                        var table = new Reference(context, slots.Get(instruction.B));
+                        var table = new Reference(context, stack.Get(instruction.B));
 
                         var value = instruction.Code switch
                         {
-                            OpCode.GETTABLE => new Reference(context, slots.Get(instruction.C)),
+                            OpCode.GETTABLE => new Reference(context, stack.Get(instruction.C)),
 
                             // The GETTABLEN instruction contains a value (byte) from 1 to 256. Because the C operand can only hold
                             // a value as large as 255, we need to add 1 to it.
@@ -443,7 +449,7 @@ namespace Unluau.Chunk.Luau
 
                         var index = new Index(context, table, value);
 
-                        var ra = slots.Set(instruction.A, index);
+                        var ra = stack.Set(instruction.A, index);
 
                         var getIndex = new GetIndex(context, ra, index);
 
@@ -452,12 +458,20 @@ namespace Unluau.Chunk.Luau
                         if (instruction.Code == OpCode.NAMECALL)
                         {
                             // Set the next register to the instance to the table that is being invoked.
-                            slots.Set(instruction.A + 1, table.Slot.Value);
+                            stack.Set(instruction.A + 1, table.Slot.Value);
 
                             getIndex = new GetIndexSelf(getIndex);
                         }
 
                         instructions.Add(getIndex);
+                        break;
+                    }
+                    case OpCode.MOVE:
+                    {
+                        var rb = stack.Get(instruction.B);
+                        var ra = stack.Set(instruction.A, rb.Value);
+
+                        instructions.Add(new Move(context, ra, rb));
                         break;
                     }
                 }

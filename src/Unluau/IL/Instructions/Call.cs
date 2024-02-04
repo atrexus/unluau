@@ -6,25 +6,19 @@ namespace Unluau.IL.Instructions
     /// Performs a call operation on a basic value.
     /// </summary>
     /// <param name="context">Information about the instruction.</param>
-    /// <param name="callee">The value to call.</param>
-    /// <param name="arguments">The list of arguments.</param>
-    /// <param name="results">Number of values loaded on stack.</param>
-    public class Call(Context context, BasicValue callee, BasicValue[] arguments, int? results) : Instruction(context)
+    /// <param name="call">The object call.</param>
+    /// <param name="slots">The slots the call will fill.</param>
+    public class Call(Context context, CallResult call, Slot[] slots) : Instruction(context)
     {
         /// <summary>
         /// The value to perform that call operation on.
         /// </summary>
-        public BasicValue Callee { get; set; } = callee;
+        public CallResult CallResult { get; set; } = call;
 
         /// <summary>
-        /// The arguments of the call operation.
+        /// The register slots this call is supposed to fill.
         /// </summary>
-        public BasicValue[] Arguments { get; set; } = arguments;
-
-        /// <summary>
-        /// The number of return values of the call.
-        /// </summary>
-        public int? Results { get; private set; } = results;
+        public Slot[] Slots { get; private set; } = slots;
 
         /// <summary>
         /// The recursive visitor.
@@ -34,10 +28,7 @@ namespace Unluau.IL.Instructions
         {
             if (visitor.Visit(this))
             {
-                Callee.Visit(visitor);
-
-                foreach (var arg in Arguments) 
-                    arg.Visit(visitor);
+                call.Visit(visitor);
             }
         }
     }

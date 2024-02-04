@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unluau.Utils;
 
 namespace Unluau.IL.Values
 {
@@ -28,7 +29,7 @@ namespace Unluau.IL.Values
         /// <returns>String representation.</returns>
         public override string ToString()
         {
-            return $"Global({string.Join(", ", value)})";
+            return $"Global({TypeExtentions.ToString(Value)})";
         }
     }
 }

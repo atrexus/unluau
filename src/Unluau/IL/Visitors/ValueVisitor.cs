@@ -31,8 +31,15 @@ namespace Unluau.IL.Visitors
 
         public override bool Visit(Call node)
         {
-            node.Callee = ResolveValue(node.Callee);
-            node.Arguments = ResolveValueList(node.Arguments);
+            node.CallResult = ResolveCallResult(node.CallResult);
+
+            // We don't want to propogate the results from a function call. They need to be
+            // contained in a local variable.
+            if (node.Slots.Length > 1)
+            {
+                foreach (var slot in node.Slots)
+                    slot.References++;
+            }
 
             return true;
         }
@@ -48,6 +55,19 @@ namespace Unluau.IL.Visitors
         public override bool Visit(LoadValue node)
         {
             TryDelete(node, node.Slot);
+
+            return true;
+        }
+
+        public override bool Visit(Move node)
+        {
+            if (node.Source.References > 1 && _lastBlock != null)
+            {
+                node.Target.Id = node.Source.Id;
+                node.Target.References = node.Source.References;
+
+                _lastBlock.Instructions.Remove(node);
+            }
 
             return true;
         }
@@ -114,6 +134,19 @@ namespace Unluau.IL.Visitors
             index.Key = ResolveValue(index.Key);
 
             return index;
+        }
+
+        /// <summary>
+        /// Resolves a call operation.
+        /// </summary>
+        /// <param name="call">The call.</param>
+        /// <returns>The resolved call.</returns>
+        private static CallResult ResolveCallResult(CallResult call)
+        {
+            call.Callee = ResolveValue(call.Callee);
+            call.Arguments = ResolveValueList(call.Arguments);
+
+            return call;
         }
 
         /// <summary>

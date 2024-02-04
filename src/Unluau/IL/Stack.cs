@@ -94,7 +94,7 @@ namespace Unluau.IL
         /// </summary>
         /// <param name="v">The slot number.</param>
         /// <param name="basicValue">The value to set.</param>
-        internal void Set(int v, BasicValue basicValue) => Set((byte)v, basicValue);
+        internal Slot Set(int v, BasicValue basicValue) => Set((byte)v, basicValue);
     }
 
     /// <summary>
@@ -121,6 +121,6 @@ namespace Unluau.IL
         /// Returns a string representation of the slot number.
         /// </summary>
         /// <returns>Slot number as string.</returns>
-        public override string ToString() => $"{Id}";
+        public override string ToString() => $"R({Id})";
     }
 }

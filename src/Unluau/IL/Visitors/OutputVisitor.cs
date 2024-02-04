@@ -44,21 +44,28 @@ namespace Unluau.IL.Visitors
 
         public override bool Visit(LoadValue node)
         {
-            Writer.Write(Format(node.Context, $"LoadValue", $"R({node.Slot})", node.Value.ToString()));
+            Writer.Write(Format(node.Context, $"LoadValue", node.Slot.ToString(), node.Value.ToString()));
 
             return false;
         }
 
         public override bool Visit(Call node)
         {
-            Writer.Write(Format(node.Context, $"Call", node.Callee.ToString(), TypeExtentions.ToString(node.Arguments), node.Results is not null ? $"Ret({node.Results})" : string.Empty));
+            Writer.Write(Format(node.Context, $"Call", node.CallResult.ToString(), $"Ret({TypeExtentions.ToString(node.Slots)})"));
             
             return false;
         }
 
         public override bool Visit(GetIndexSelf node)
         {
-            Writer.Write(Format(node.Context, $"GetIndexSelf", $"R({node.Slot})", node.Index.ToString()));
+            Writer.Write(Format(node.Context, $"GetIndexSelf", node.Slot.ToString(), node.Index.ToString()));
+
+            return false;
+        }
+
+        public override bool Visit(Move node)
+        {
+            Writer.Write(Format(node.Context, $"Move", node.Target.ToString(), node.Source.ToString()));
 
             return false;
         }
