@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Unluau.IL.Blocks;
 using Unluau.IL.Instructions;
-using Unluau.IL.Values;
 using Unluau.Utils;
 
 namespace Unluau.IL.Visitors
@@ -59,6 +58,13 @@ namespace Unluau.IL.Visitors
         public override bool Visit(GetIndexSelf node)
         {
             Writer.Write(Format(node.Context, $"GetIndexSelf", node.Slot.ToString(), node.Index.ToString()));
+
+            return false;
+        }
+
+        public override bool Visit(GetIndex node)
+        {
+            Writer.Write(Format(node.Context, $"GetIndex", node.Slot.ToString(), node.Index.ToString()));
 
             return false;
         }
