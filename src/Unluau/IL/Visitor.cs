@@ -1,7 +1,7 @@
 ﻿using Unluau.IL.Blocks;
 using Unluau.IL.Instructions;
 using Unluau.IL.Values;
-
+using Unluau.IL.Values.Conditions;
 using Index = Unluau.IL.Values.Index;
 
 namespace Unluau.IL
@@ -20,6 +20,9 @@ namespace Unluau.IL
         public virtual bool Visit(Reference node) => Visit(node as BasicValue);
         public virtual bool Visit(Index node) => Visit(node as BasicValue);
         public virtual bool Visit(CallResult node) => Visit(node as BasicValue);
+
+        public virtual bool Visit(BasicCondition node) => Visit(node as BasicValue);
+        public virtual bool Visit(Equals node) => Visit(node as BasicCondition);
 
         public virtual bool Visit(Instruction node) => Visit(node as Node);
         public virtual bool Visit(LoadValue node) => Visit(node as Instruction);

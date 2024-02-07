@@ -7,6 +7,7 @@ using Unluau.IL;
 using Unluau.IL.Blocks;
 using Unluau.IL.Instructions;
 using Unluau.IL.Values;
+using Unluau.IL.Values.Conditions;
 using Unluau.Utils;
 using Index = Unluau.IL.Values.Index;
 
@@ -60,12 +61,12 @@ namespace Unluau.Chunk.Luau
         public int LineDefined { get; private set; }
 
         /// <summary>
-        /// The index in the symbol table that constains the name of the current function.
+        /// The index in the symbol table that contains the name of the current function.
         /// </summary>
         public int? DebugSymbolIndex { get; private set; }
 
         /// <summary>
-        /// Constains flags..? 
+        /// Contains flags..? 
         /// </summary>
         public byte? Flags { get; private set; }
 
@@ -230,10 +231,10 @@ namespace Unluau.Chunk.Luau
         }
 
         /// <summary>
-        /// Reads a list of closure indeces using a binary reader.
+        /// Reads a list of closure indices using a binary reader.
         /// </summary>
         /// <param name="reader">The reader to use.</param>
-        /// <returns>List of closure indeces.</returns>
+        /// <returns>List of closure indices.</returns>
         private static int[] ReadClosureTable(BinaryReader reader)
         {
             var closureCount = reader.ReadSize();
@@ -255,7 +256,7 @@ namespace Unluau.Chunk.Luau
 
             // Write function name
             builder.Append($"function {(DebugSymbolIndex is null ? "main" : _symbolTable[(int)DebugSymbolIndex])}(");
-            
+
             // Write function parameters
             for (int i = 0; i < ParameterCount; ++i)
             {
@@ -268,7 +269,7 @@ namespace Unluau.Chunk.Luau
             if (IsVariadic)
                 builder.Append($"{(ParameterCount > 0 ? ", " : string.Empty)}...");
 
-            // Write line information if avalible
+            // Write line information if available
             builder.AppendLine($"){(LineInformation is null ? string.Empty : $" -- line {LineInformation.GetLine(0)} through {LineInformation.GetLine(Instructions.Length - 1)}")}");
 
             var fmt = new string('0', (int)Math.Floor(Math.Log10(Instructions.Length - 1) + 1) + 1);
@@ -319,20 +320,20 @@ namespace Unluau.Chunk.Luau
             var context = GetClosureContext();
 
             List<BasicBlock> body = [];
+            var stack = new Stack();
 
             for (int pc = 0; pc < Instructions.Length; ++pc)
-                body.Add(LiftBasicBlock(ref pc));
+                body.Add(LiftBasicBlock(ref pc, stack));
 
             return new(context, [.. body]);
         }
 
-        public BasicBlock LiftBasicBlock(ref int pc)
+        public BasicBlock LiftBasicBlock(ref int pc, Stack stack)
         {
             var startPc = pc;
-            var instructions = new List<IL.Instructions.Instruction>();
-            var stack = new Stack();
+            var block = BuildBlock(ref pc, stack);
 
-            // We could set up an infinate loop, but I hate them. By setting up a loop like this, we can 
+            // We could set up an infinite loop, but I hate them. By setting up a loop like this, we can 
             // easily break once we have processed all instructions.
             for (; pc < Instructions.Length; ++pc)
             {
@@ -369,7 +370,7 @@ namespace Unluau.Chunk.Luau
 
                         // Note: loading a value onto the stack can be for both for constant values and environment variables.
                         // It doesn't really matter what kind we have because when we generate our AST they are treated the same.
-                        instructions.Add(new LoadValue(context, ra, value));
+                        block.Instructions.Add(new LoadValue(context, ra, value));
                         break;
                     }
                     case OpCode.FASTCALL:
@@ -378,7 +379,7 @@ namespace Unluau.Chunk.Luau
                     case OpCode.FASTCALL2K:
                     case OpCode.CALL:
                     {
-                        // Unlike the simple CALL instruction, all FASTCALL instructions contain an identifier to a builtin function
+                        // Unlike the simple CALL instruction, all FASTCALL instructions contain an identifier to a built in function
                         // as the first argument.
                         BasicValue function = instruction.Code == OpCode.CALL
                             ? new Reference(context, stack.Get(instruction.A))
@@ -420,7 +421,7 @@ namespace Unluau.Chunk.Luau
                         for (int slot = 0; slot < instruction.C - 1; ++slot)
                             results.Add(stack.Set(slot + instruction.A, callResult));
 
-                        instructions.Add(new Call(context, callResult, [.. results]));
+                        block.Instructions.Add(new Call(context, callResult, [.. results]));
                         break;
                     }
                     case OpCode.GETTABLE:
@@ -454,7 +455,7 @@ namespace Unluau.Chunk.Luau
                         var getIndex = new GetIndex(context, ra, index);
 
                         // The NAMECALL instruction is special. It tells the VM that we have a call proceeding and that the call should pass 
-                        // a pointer to the instance of this table. We mark this by using a seperate instruction.
+                        // a pointer to the instance of this table. We mark this by using a separate instruction.
                         if (instruction.Code == OpCode.NAMECALL)
                         {
                             // Set the next register to the instance to the table that is being invoked.
@@ -463,7 +464,7 @@ namespace Unluau.Chunk.Luau
                             getIndex = new GetIndexSelf(getIndex);
                         }
 
-                        instructions.Add(getIndex);
+                        block.Instructions.Add(getIndex);
                         break;
                     }
                     case OpCode.MOVE:
@@ -471,13 +472,26 @@ namespace Unluau.Chunk.Luau
                         var rb = stack.Get(instruction.B);
                         var ra = stack.Set(instruction.A, rb.Value);
 
-                        instructions.Add(new Move(context, ra, rb));
+                        block.Instructions.Add(new Move(context, ra, rb));
                         break;
+                    }
+                    case OpCode.JUMPIFEQ:
+                    case OpCode.JUMPIFLE:
+                    case OpCode.JUMPIFLT:
+                    case OpCode.JUMPIFNOTEQ:
+                    case OpCode.JUMPIFNOTLE:
+                    case OpCode.JUMPIFNOTLT:
+                    {
+                        // We don't handle jumps here. 
+                        goto EndOfBlock;
                     }
                 }
             }
 
-            return new(GetContext(startPc, pc), [.. instructions]);
+            EndOfBlock:
+            block.Context = GetContext(startPc, pc);
+
+            return block;
         }
 
         private BasicValue ConstantToBasicValue(Context context, Constant constant)
@@ -529,5 +543,33 @@ namespace Unluau.Chunk.Luau
         }
 
         private Context GetContext(int startPc, int endPc) => new((startPc, endPc), LineInformation?.GetLines(startPc, endPc));
+
+        private BasicBlock BuildBlock(ref int pc, Stack stack)
+        {
+            var instruction = Instructions[pc];
+            var context = GetContext(pc, pc);
+
+            switch (instruction.Code)
+            {
+                case OpCode.JUMPIFNOTEQ:
+                {
+                    var left = stack.Get(instruction.A);
+                    var right = stack.Get(Instructions[++pc].Value);
+
+                    // Build the condition based on the current operation code. We may need to refactor for other kinds of jumps but this works
+                    // for now, I guess...
+                    var condition = instruction.Code switch
+                    {
+                        OpCode.JUMPIFNOTEQ => new Equals(context, left, right),
+
+                        _ => throw new NotImplementedException()
+                    };
+
+                    return new IfBlock(context, condition);
+                }
+            }
+
+            return new(context);
+        }
     }
 }

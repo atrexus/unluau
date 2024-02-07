@@ -40,7 +40,7 @@ namespace Unluau.Chunk
         public Function[] Functions { get; private set; }
 
         /// <summary>
-        /// The index to the main function (the enty-point of the program).
+        /// The index to the main function (the entry-point of the program).
         /// </summary>
         public int MainFunctionIndex { get; private set; }
 

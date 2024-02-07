@@ -47,7 +47,7 @@ namespace Unluau.IL
         /// <summary>
         /// Provides additional context on the current node.
         /// </summary>
-        public Context Context { get; private set; } = context;
+        public Context Context { get; set; } = context;
 
         /// <summary>
         /// Recursive visitor.

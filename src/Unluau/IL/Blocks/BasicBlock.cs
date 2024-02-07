@@ -1,4 +1,5 @@
 ﻿using Unluau.IL.Instructions;
+using Unluau.IL.Values;
 
 namespace Unluau.IL.Blocks
 {
@@ -7,12 +8,21 @@ namespace Unluau.IL.Blocks
     /// </summary>
     /// <param name="context">Provides context about the block.</param>
     /// <param name="instructions">A list of instructions.</param>
-    public class BasicBlock(Context context, Instruction[] instructions) : Node(context)
+    public class BasicBlock(Context context, List<Instruction> instructions) : Node(context)
     {
         /// <summary>
         /// The instructions within the block.
         /// </summary>
-        public List<Instruction> Instructions { get; set; } = new(instructions);
+        public List<Instruction> Instructions { get; set; } = instructions;
+
+        /// <summary>
+        /// Creates a new <see cref="BasicBlock"/>.
+        /// </summary>
+        /// <param name="context">Context about the block.</param>
+        public BasicBlock(Context context) : this(context, [])
+        {
+
+        }
 
         /// <summary>
         /// Recursive visitor method.
@@ -22,8 +32,8 @@ namespace Unluau.IL.Blocks
         {
             if (visitor.Visit(this))
             {
-                for (int i = 0; i < instructions.Length; i++)
-                    instructions[i].Visit(visitor);
+                foreach (var instruction in Instructions)
+                    instruction.Visit(visitor);
             }
         }
     }

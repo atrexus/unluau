@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unluau.IL.Instructions;
-using Unluau.IL.Values;
+﻿using Unluau.IL.Values;
 
 namespace Unluau.IL
 {
     /// <summary>
     /// Contains information on a frame of register slots.
     /// </summary>
-    public class Stack
+    /// <remarks>
+    /// Creates a new <see cref="Stack"/> and copies the provided slots.
+    /// </remarks>
+    /// <param name="slots">The slots to copy.</param>
+    public class Stack(Dictionary<int, Slot> slots)
     {
-        private readonly Dictionary<int, Slot> _slots;
+        private readonly Dictionary<int, Slot> _slots = slots;
 
         /// <summary>
         /// Gets the register slot on the top of the stack.
@@ -23,10 +21,15 @@ namespace Unluau.IL
         /// <summary>
         /// Creates a new <see cref="Stack"/>.
         /// </summary>
-        public Stack()
+        public Stack() : this([])
         {
-            _slots = [];
         }
+
+        /// <summary>
+        /// Clones the current <see cref="Stack"/>.
+        /// </summary>
+        /// <returns>The cloned stack.</returns>
+        public Stack Clone() => new(_slots);
 
         /// <summary>
         /// Sets the slot to the specified value.
@@ -83,7 +86,7 @@ namespace Unluau.IL
         }
 
         /// <summary>
-        /// Gets a slot with the specifc slot number.
+        /// Gets a slot with the specific slot number.
         /// </summary>
         /// <param name="v">The slot number.</param>
         /// <returns>The slot.</returns>

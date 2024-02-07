@@ -18,6 +18,6 @@ namespace Unluau.Chunk
         /// Lifts the current chunk to an IL program.
         /// </summary>
         /// <returns>An IL program.</returns>
-        public Program Lift();
+        public abstract Program Lift();
     }
 }
