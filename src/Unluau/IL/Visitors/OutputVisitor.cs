@@ -93,16 +93,9 @@ namespace Unluau.IL.Visitors
             return false;
         }
 
-        public override bool Visit(Equals node)
-        {
-            Writer.Write($"{node.Left} == {node.Right}");
-            return false;
-        }
-
         public override bool Visit(IfBlock node)
         {
-            Writer.Write(Format(node.Context, "IfBlock "));
-            node.Condition.Visit(this);
+            Writer.Write(Format(node.Context, $"IfBlock {node.Condition}"));
             Writer.WriteLine(" {");
 
             Indent++;
@@ -113,7 +106,7 @@ namespace Unluau.IL.Visitors
             return false;
         }
 
-        private string Format(Context context, string op, string? a, string? b, string? c)
+        private static string Format(Context context, string op, string? a, string? b, string? c)
         {
             StringBuilder stringBuilder = new();
 
@@ -122,10 +115,10 @@ namespace Unluau.IL.Visitors
             return stringBuilder.ToString();
         }
 
-        private string Format(Context context, string op, string? a, string? b)
+        private static string Format(Context context, string op, string? a, string? b)
             => Format(context, op, a, b, " ");
 
-        private string Format(Context context, string op)
+        private static string Format(Context context, string op)
         {
             StringBuilder stringBuilder = new();
 

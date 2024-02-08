@@ -486,21 +486,36 @@ namespace Unluau.Chunk.Luau
                     case OpCode.JUMPIFNOTEQ:
                     case OpCode.JUMPIFNOTLE:
                     case OpCode.JUMPIFNOTLT:
+                    case OpCode.JUMPIFNOT:
                     {
+                        // Save the original pc value so that we can conserve the jump offset.
+                        var ogPc = pc;
+
                         var left = new Reference(context, stack.Get(instruction.A)!);
-                        var right = new Reference(context, stack.Get(Instructions[++pc].Value)!);
+
+                        var right = instruction.Code switch
+                        {
+                            // These operations just test a value and have one operand. 
+                            OpCode.JUMPIF or OpCode.JUMPIFNOT => null,
+
+                            _ => new Reference(context, stack.Get(Instructions[++pc].Value)!)
+                        };
 
                         // Build the condition based on the current operation code.
-                        var condition = instruction.Code switch
+                        BasicCondition condition = instruction.Code switch
                         {
-                            OpCode.JUMPIFNOTEQ => new Equals(context, left, right),
+                            // Performs a jump if values are not equal to each other.
+                            OpCode.JUMPIFNOTEQ => new Equals(context, left, right!),
+
+                            // Jumps if the register is nil or false.
+                            OpCode.JUMPIFNOT => new Test(context, left),
 
                             // This should never happen, but just in case.
                             _ => throw new NotImplementedException()
                         };
 
                         // Now we lift the body of the block.
-                        var body = LiftBasicBlock(stack, ++pc, pc + instruction.D - 1);
+                        var body = LiftBasicBlock(stack, ++pc, pc + instruction.D - (pc - ogPc - 1));
 
                         block.Statements.Add(new IfBlock(body.Context, condition, body.Statements));
                         break;
