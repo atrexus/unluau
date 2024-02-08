@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unluau.IL.Values;
 
-namespace Unluau.IL.Instructions
+namespace Unluau.IL.Statements.Instructions
 {
     /// <summary>
     /// Gets a value from a table using an index.

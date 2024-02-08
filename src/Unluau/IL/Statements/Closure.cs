@@ -1,7 +1,8 @@
-﻿using Unluau.IL.Blocks;
+﻿using Unluau.IL.Statements.Blocks;
 using Unluau.IL.Values;
 
-namespace Unluau.IL
+namespace Unluau.IL.Statements
+
 {
     /// <summary>
     /// Provides information on parameters and contents of a closure.
@@ -26,13 +27,13 @@ namespace Unluau.IL
         /// <summary>
         /// The symbol name assigned to this closure.
         /// </summary>
-        public string? Symbol { get; set; }  
+        public string? Symbol { get; set; }
     }
 
     /// <summary>
     /// Represents a function (closure) within the code.
     /// </summary>
-    public class Closure(ClosureContext context, BasicBlock[] blocks) : Node(context.Context)
+    public class Closure(ClosureContext context, BasicBlock body) : Statement(context.Context)
     {
         /// <summary>
         /// A list of variables that act as parameters to the closure.
@@ -45,9 +46,9 @@ namespace Unluau.IL
         public bool IsVariadic { get; set; } = context.IsVariadic;
 
         /// <summary>
-        /// The children blocks of the closure. Each contain
+        /// The children statements of the closure. Each contain
         /// </summary>
-        public BasicBlock[] Blocks { get; set; } = blocks;
+        public BasicBlock Body { get; set; } = body;
 
         /// <summary>
         /// The name of the current closure.
@@ -55,7 +56,7 @@ namespace Unluau.IL
         public string? Name { get; set; }
 
         /// <summary>
-        /// Whether or not this is the main closure (entrypoint).
+        /// Whether or not this is the main closure (entry point).
         /// </summary>
         public bool IsMain { get; set; } = false;
 
@@ -65,8 +66,7 @@ namespace Unluau.IL
         /// <param name="visitor">The visitor.</param>
         public void VisitChildren(Visitor visitor)
         {
-            foreach (var block in Blocks)
-                block.Visit(visitor);
+            Body.Visit(visitor);
         }
 
         /// <summary>
@@ -77,8 +77,7 @@ namespace Unluau.IL
         {
             if (visitor.Visit(this))
             {
-                foreach (var block in Blocks)
-                    block.Visit(visitor);
+                Body.Visit(visitor);
             }
         }
     }

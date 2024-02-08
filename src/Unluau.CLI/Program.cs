@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Unluau.Chunk;
+﻿using Unluau.Chunk;
 using Unluau.IL.Visitors;
 
 namespace Unluau.CLI
@@ -18,7 +17,7 @@ namespace Unluau.CLI
             using var output = Console.OpenStandardOutput();
             program.Visit(new OutputVisitor(output));
 
-            output.WriteByte((byte)'\n');
+            Console.WriteLine('\n');
 
             program.Visit(new ValueVisitor());
             program.Visit(new OutputVisitor(output));

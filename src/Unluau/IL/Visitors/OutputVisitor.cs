@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Unluau.IL.Blocks;
-using Unluau.IL.Instructions;
+using Unluau.IL.Statements;
+using Unluau.IL.Statements.Blocks;
+using Unluau.IL.Statements.Instructions;
+using Unluau.IL.Values.Conditions;
 using Unluau.Utils;
 
 namespace Unluau.IL.Visitors
@@ -13,6 +15,8 @@ namespace Unluau.IL.Visitors
     public class OutputVisitor(Stream stream) : Visitor
     {
         public readonly StreamWriter Writer = new(stream) { AutoFlush = true };
+
+        private static int Indent = 0;
 
         public override bool Visit(Closure node)
         {
@@ -51,7 +55,7 @@ namespace Unluau.IL.Visitors
         public override bool Visit(Call node)
         {
             Writer.Write(Format(node.Context, $"Call", node.CallResult.ToString(), $"Ret({TypeExtentions.ToString(node.Slots)})"));
-            
+
             return false;
         }
 
@@ -78,26 +82,65 @@ namespace Unluau.IL.Visitors
 
         public override bool Visit(BasicBlock node)
         {
-            foreach (var instruction in node.Instructions)
-            {
-                Writer.Write("  ");
-                instruction.Visit(this);
-                Writer.Write('\n');
-            }
+            Writer.WriteLine(Format(node.Context, "BasicBlock {"));
+
+            Indent++;
+            WriteStatements(node.Statements);
+            Indent--;
+
+            Writer.Write(Format(node.Context, "}"));
 
             return false;
         }
 
-        private static string Format(Context context, string op, string? a, string? b, string? c)
+        public override bool Visit(Equals node)
+        {
+            Writer.Write($"{node.Left} == {node.Right}");
+            return false;
+        }
+
+        public override bool Visit(IfBlock node)
+        {
+            Writer.Write(Format(node.Context, "IfBlock "));
+            node.Condition.Visit(this);
+            Writer.WriteLine(" {");
+
+            Indent++;
+            WriteStatements(node.Statements);
+            Indent--;
+
+            Writer.Write(Format(node.Context, "}"));
+            return false;
+        }
+
+        private string Format(Context context, string op, string? a, string? b, string? c)
         {
             StringBuilder stringBuilder = new();
 
-            stringBuilder.Append(string.Format("{0, -10} {1, -15} {2, -8} {3, -30} {4, -14}", context, op, a, b, c));
+            stringBuilder.Append(string.Format(" {0, -15} {1, -15} {2, -8} {3, -30} {4, -14}", context, new string(' ', Indent * 2) + op, a, b, c));
 
             return stringBuilder.ToString();
         }
 
-        private static string Format(Context context, string op, string? a, string? b)
-            => Format(context, op, a, b, string.Empty);
+        private string Format(Context context, string op, string? a, string? b)
+            => Format(context, op, a, b, " ");
+
+        private string Format(Context context, string op)
+        {
+            StringBuilder stringBuilder = new();
+
+            stringBuilder.Append(string.Format(" {0, -15} {1}", context, new string(' ', Indent * 2) + op));
+
+            return stringBuilder.ToString();
+        }
+
+        private void WriteStatements(List<Statement> statements)
+        {
+            foreach (var statement in statements)
+            {
+                statement.Visit(this);
+                Writer.Write('\n');
+            }
+        }
     }
 }

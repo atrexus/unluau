@@ -53,12 +53,30 @@ namespace Unluau.IL
         }
 
         /// <summary>
+        /// Updates the slot with the specified value.
+        /// </summary>
+        /// <param name="id">The slot number.</param>
+        /// <param name="basicValue">The value to set.</param>
+        /// <returns>The new slot.</returns>
+        public Slot Update(byte id, BasicValue basicValue)
+        {
+            if (!_slots.ContainsKey(id))
+                Set(id, basicValue);
+
+            var slot = _slots[id];
+
+            slot.Value = basicValue;
+
+            return slot;
+        }
+
+        /// <summary>
         /// Gets a slot with the specific slot number.
         /// </summary>
         /// <param name="id">The slot number.</param>
         /// <returns>The slot.</returns>
         /// <exception cref="InvalidOperationException">If the slot doesn't have a value.</exception>
-        public Slot Get(byte id)
+        public Slot? Get(byte id)
         {
             if (_slots.TryGetValue(id, out Slot? value))
             {
@@ -66,7 +84,7 @@ namespace Unluau.IL
                 return value;
             }
 
-            throw new InvalidOperationException($"Slot ({id}) is empty or wasn't initialized");
+            return null;
         }
 
         /// <summary>
@@ -90,7 +108,7 @@ namespace Unluau.IL
         /// </summary>
         /// <param name="v">The slot number.</param>
         /// <returns>The slot.</returns>
-        internal Slot Get(int v) => Get((byte)v);
+        internal Slot? Get(int v) => Get((byte)v);
 
         /// <summary>
         /// Sets the slot to the specified value.

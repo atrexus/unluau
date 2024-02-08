@@ -1,7 +1,9 @@
 ﻿using System.Xml.Linq;
-using Unluau.IL.Blocks;
-using Unluau.IL.Instructions;
+using Unluau.IL.Statements;
+using Unluau.IL.Statements.Blocks;
+using Unluau.IL.Statements.Instructions;
 using Unluau.IL.Values;
+using Unluau.IL.Values.Conditions;
 
 namespace Unluau.IL.Visitors
 {
@@ -24,22 +26,38 @@ namespace Unluau.IL.Visitors
         }
         public override bool Visit(BasicBlock node)
         {
-            _lastBlock = node;
+            // Visit the block's children and update the scope.
+            VisitBlockChildren(node);
 
-            return true;
+            return false;
+        }
+
+        public override bool Visit(IfBlock node)
+        {
+            node.Condition.Visit(this);
+
+            return Visit(node as BasicBlock);
         }
 
         public override bool Visit(Call node)
         {
             node.CallResult = ResolveCallResult(node.CallResult);
 
-            // We don't want to propogate the results from a function call. They need to be
+            // We don't want to propagate the results from a function call. They need to be
             // contained in a local variable.
             if (node.Slots.Length > 1)
             {
                 foreach (var slot in node.Slots)
                     slot.References++;
             }
+
+            return true;
+        }
+
+        public override bool Visit(Equals node)
+        {
+            node.Right = ResolveValue(node.Right);
+            node.Left = ResolveValue(node.Left);
 
             return true;
         }
@@ -61,12 +79,14 @@ namespace Unluau.IL.Visitors
 
         public override bool Visit(Move node)
         {
-            if (node.Source.References > 1 && _lastBlock != null)
+            if (node.Source.References > 1)
             {
                 node.Target.Id = node.Source.Id;
-                node.Target.References = node.Source.References;
+                node.Target.References += node.Source.References;
 
-                _lastBlock.Instructions.Remove(node);
+                // The `_lastBlock` variable should not be null because to get to this instruction
+                // we need to have processed a block.
+                _lastBlock!.Statements.Remove(node);
             }
 
             return true;
@@ -159,11 +179,26 @@ namespace Unluau.IL.Visitors
         {
             if (slot.References == -1 && _lastBlock != null)
             {
-                _lastBlock.Instructions.Remove(node);
+                _lastBlock.Statements.Remove(node);
                 return true;
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Visits the children of a block and sets the last block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        private void VisitBlockChildren(BasicBlock block)
+        {
+            var previousBlock = _lastBlock;
+
+            _lastBlock = block;
+
+            block.VisitChildren(this);
+
+            _lastBlock = previousBlock;
         }
     }
 }

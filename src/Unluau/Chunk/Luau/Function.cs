@@ -1,11 +1,8 @@
-﻿using Microsoft.VisualBasic;
-using Microsoft.Win32;
-using System.IO;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
+﻿using System.Text;
 using Unluau.IL;
-using Unluau.IL.Blocks;
-using Unluau.IL.Instructions;
+using Unluau.IL.Statements.Instructions;
+using Unluau.IL.Statements;
+using Unluau.IL.Statements.Blocks;
 using Unluau.IL.Values;
 using Unluau.IL.Values.Conditions;
 using Unluau.Utils;
@@ -184,7 +181,8 @@ namespace Unluau.Chunk.Luau
                         break;
                     case ConstantType.Import:
                     {
-                        var nameCount = reader.ReadInt32() >> 30;
+                        var id = reader.ReadInt32();
+                        var nameCount = id >> 30;
 
                         var names = new StringConstant[nameCount];
 
@@ -192,7 +190,7 @@ namespace Unluau.Chunk.Luau
                         // I've decided to go with a loop here to conserve space.
                         for (int j = 0; j < nameCount; ++j)
                         {
-                            var constantIndex = ((20 - j * 10) >> 20) & 1023;
+                            var constantIndex = (id >> (20 - j * 10)) & 1023;
 
                             names[j] = (StringConstant)constants[constantIndex];
                         }
@@ -318,24 +316,21 @@ namespace Unluau.Chunk.Luau
         public Closure Lift()
         {
             var context = GetClosureContext();
-
-            List<BasicBlock> body = [];
             var stack = new Stack();
 
-            for (int pc = 0; pc < Instructions.Length; ++pc)
-                body.Add(LiftBasicBlock(ref pc, stack));
+            var body = LiftBasicBlock(stack, 0);
 
-            return new(context, [.. body]);
+            return new(context, body);
         }
 
-        public BasicBlock LiftBasicBlock(ref int pc, Stack stack)
+        public BasicBlock LiftBasicBlock(Stack stack, int startPc, int? endPc = null)
         {
-            var startPc = pc;
-            var block = BuildBlock(ref pc, stack);
+            var pc = startPc;
+            var block = new BasicBlock(Context.Empty);
 
             // We could set up an infinite loop, but I hate them. By setting up a loop like this, we can 
             // easily break once we have processed all instructions.
-            for (; pc < Instructions.Length; ++pc)
+            for (; pc < (endPc ?? Instructions.Length); ++pc)
             {
                 var instruction = Instructions[pc];
                 var context = GetContext(pc, pc);
@@ -366,11 +361,21 @@ namespace Unluau.Chunk.Luau
                             _ => throw new NotSupportedException()
                         };
 
-                        var ra = stack.Set(instruction.A, value);
+                        var ra = stack.Get(instruction.A);
+
+                        if (ra != null && ra.Value.Context.PcScope.Item1 < startPc)
+                            ra = stack.Update(ra.Id, value);
+                        else
+                        {
+                            if (ra != null)
+                                ra.References--;
+                            ra = stack.Set(instruction.A, value);
+                        }
+                            
 
                         // Note: loading a value onto the stack can be for both for constant values and environment variables.
                         // It doesn't really matter what kind we have because when we generate our AST they are treated the same.
-                        block.Instructions.Add(new LoadValue(context, ra, value));
+                        block.Statements.Add(new LoadValue(context, ra, value));
                         break;
                     }
                     case OpCode.FASTCALL:
@@ -382,7 +387,7 @@ namespace Unluau.Chunk.Luau
                         // Unlike the simple CALL instruction, all FASTCALL instructions contain an identifier to a built in function
                         // as the first argument.
                         BasicValue function = instruction.Code == OpCode.CALL
-                            ? new Reference(context, stack.Get(instruction.A))
+                            ? new Reference(context, stack.Get(instruction.A)!)
                             : new BasicValue<string>(context, Builtin.IdToName(instruction.A));
 
                         List<BasicValue> arguments = [];
@@ -391,7 +396,7 @@ namespace Unluau.Chunk.Luau
                         {
                             // The FASTCALL2K instruction is unique. Unlike the other FASTCALL instructions, you can't just jump to the call
                             // without processing the following instructions. The auxiliary instruction contains the constant index.
-                            arguments.Add(new Reference(context, stack.Get(instruction.B)));
+                            arguments.Add(new Reference(context, stack.Get(instruction.B)!));
                             arguments.Add(ConstantToBasicValue(context, Constants[Instructions[++pc].Value]));
                         }
 
@@ -406,7 +411,7 @@ namespace Unluau.Chunk.Luau
                             var argCount = instruction.B > 0 ? instruction.B : (stack.Top.Id - instruction.A) + 1;
 
                             for (int i = 1; i < argCount; ++i)
-                                arguments.Add(new Reference(context, stack.Get(instruction.A + i)));
+                                arguments.Add(new Reference(context, stack.Get(instruction.A + i)!));
                         }
 
                         // Pop the stack frame (stack are freed and are now 'dead')
@@ -421,7 +426,7 @@ namespace Unluau.Chunk.Luau
                         for (int slot = 0; slot < instruction.C - 1; ++slot)
                             results.Add(stack.Set(slot + instruction.A, callResult));
 
-                        block.Instructions.Add(new Call(context, callResult, [.. results]));
+                        block.Statements.Add(new Call(context, callResult, [.. results]));
                         break;
                     }
                     case OpCode.GETTABLE:
@@ -430,11 +435,11 @@ namespace Unluau.Chunk.Luau
                     case OpCode.NAMECALL:
                     {
                         // This is our indexable value. In Luau its always a table.
-                        var table = new Reference(context, stack.Get(instruction.B));
+                        var table = new Reference(context, stack.Get(instruction.B)!);
 
                         var value = instruction.Code switch
                         {
-                            OpCode.GETTABLE => new Reference(context, stack.Get(instruction.C)),
+                            OpCode.GETTABLE => new Reference(context, stack.Get(instruction.C)!),
 
                             // The GETTABLEN instruction contains a value (byte) from 1 to 256. Because the C operand can only hold
                             // a value as large as 255, we need to add 1 to it.
@@ -464,15 +469,15 @@ namespace Unluau.Chunk.Luau
                             getIndex = new GetIndexSelf(getIndex);
                         }
 
-                        block.Instructions.Add(getIndex);
+                        block.Statements.Add(getIndex);
                         break;
                     }
                     case OpCode.MOVE:
                     {
-                        var rb = stack.Get(instruction.B);
+                        var rb = stack.Get(instruction.B)!;
                         var ra = stack.Set(instruction.A, rb.Value);
 
-                        block.Instructions.Add(new Move(context, ra, rb));
+                        block.Statements.Add(new Move(context, ra, rb));
                         break;
                     }
                     case OpCode.JUMPIFEQ:
@@ -482,13 +487,27 @@ namespace Unluau.Chunk.Luau
                     case OpCode.JUMPIFNOTLE:
                     case OpCode.JUMPIFNOTLT:
                     {
-                        // We don't handle jumps here. 
-                        goto EndOfBlock;
+                        var left = new Reference(context, stack.Get(instruction.A)!);
+                        var right = new Reference(context, stack.Get(Instructions[++pc].Value)!);
+
+                        // Build the condition based on the current operation code.
+                        var condition = instruction.Code switch
+                        {
+                            OpCode.JUMPIFNOTEQ => new Equals(context, left, right),
+
+                            // This should never happen, but just in case.
+                            _ => throw new NotImplementedException()
+                        };
+
+                        // Now we lift the body of the block.
+                        var body = LiftBasicBlock(stack, ++pc, pc + instruction.D - 1);
+
+                        block.Statements.Add(new IfBlock(body.Context, condition, body.Statements));
+                        break;
                     }
                 }
             }
 
-            EndOfBlock:
             block.Context = GetContext(startPc, pc);
 
             return block;
@@ -543,33 +562,5 @@ namespace Unluau.Chunk.Luau
         }
 
         private Context GetContext(int startPc, int endPc) => new((startPc, endPc), LineInformation?.GetLines(startPc, endPc));
-
-        private BasicBlock BuildBlock(ref int pc, Stack stack)
-        {
-            var instruction = Instructions[pc];
-            var context = GetContext(pc, pc);
-
-            switch (instruction.Code)
-            {
-                case OpCode.JUMPIFNOTEQ:
-                {
-                    var left = stack.Get(instruction.A);
-                    var right = stack.Get(Instructions[++pc].Value);
-
-                    // Build the condition based on the current operation code. We may need to refactor for other kinds of jumps but this works
-                    // for now, I guess...
-                    var condition = instruction.Code switch
-                    {
-                        OpCode.JUMPIFNOTEQ => new Equals(context, left, right),
-
-                        _ => throw new NotImplementedException()
-                    };
-
-                    return new IfBlock(context, condition);
-                }
-            }
-
-            return new(context);
-        }
     }
 }

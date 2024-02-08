@@ -1,6 +1,6 @@
 ﻿using Unluau.IL.Values;
 
-namespace Unluau.IL.Instructions
+namespace Unluau.IL.Statements.Instructions
 {
     /// <summary>
     /// Loads a value into a register slot.
@@ -21,7 +21,7 @@ namespace Unluau.IL.Instructions
         public BasicValue Value { get; private set; } = value;
 
         /// <summary>
-        /// Implements the recusive visitor.
+        /// Implements the recursive visitor.
         /// </summary>
         /// <param name="visitor">The visitor.</param>
         public override void Visit(Visitor visitor)

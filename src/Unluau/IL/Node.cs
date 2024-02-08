@@ -12,6 +12,11 @@ namespace Unluau.IL
     public struct Context((int, int) pcScope, (int, int)? lines = null)
     {
         /// <summary>
+        /// The empty context for a node in the IL.
+        /// </summary>
+        public static Context Empty { get; } = new();
+
+        /// <summary>
         /// The start and end instruction the node was translated from.
         /// </summary>
         public (int, int) PcScope { get; set; } = pcScope;

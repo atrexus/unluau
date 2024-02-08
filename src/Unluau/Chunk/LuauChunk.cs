@@ -2,6 +2,7 @@
 using Unluau.Chunk.Luau;
 using Unluau.IL;
 using System.Text;
+using Unluau.IL.Statements;
 
 namespace Unluau.Chunk
 {

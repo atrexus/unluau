@@ -1,6 +1,6 @@
 ﻿using Unluau.IL.Values;
 
-namespace Unluau.IL.Instructions
+namespace Unluau.IL.Statements.Instructions
 {
     /// <summary>
     /// Performs a call operation on a basic value.
@@ -28,7 +28,7 @@ namespace Unluau.IL.Instructions
         {
             if (visitor.Visit(this))
             {
-                call.Visit(visitor);
+                CallResult.Visit(visitor);
             }
         }
     }

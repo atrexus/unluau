@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Unluau.IL.Instructions
+namespace Unluau.IL.Statements.Instructions
 {
     /// <summary>
     /// Copies a value from one register slot to another. 

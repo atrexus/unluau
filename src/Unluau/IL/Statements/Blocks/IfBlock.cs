@@ -1,15 +1,15 @@
-﻿using Unluau.IL.Instructions;
+﻿using Unluau.IL.Statements.Instructions;
 using Unluau.IL.Values.Conditions;
 
-namespace Unluau.IL.Blocks
+namespace Unluau.IL.Statements.Blocks
 {
     /// <summary>
     /// A block of code that gets executed if the condition succeeds.
     /// </summary>
     /// <param name="context">Information about the instruction.</param>
     /// <param name="condition">The condition.</param>
-    /// <param name="instructions">The code.</param>
-    public class IfBlock(Context context, BasicCondition condition, List<Instruction> instructions) : BasicBlock(context, instructions)
+    /// <param name="statements">The statements.</param>
+    public class IfBlock(Context context, BasicCondition condition, List<Statement> statements) : BasicBlock(context, statements)
     {
         /// <summary>
         /// The condition that the block relies on.
@@ -22,7 +22,7 @@ namespace Unluau.IL.Blocks
         /// <param name="context">Information about the instruction.</param>
         /// <param name="basicCondition">The condition.</param>
         public IfBlock(Context context, BasicCondition basicCondition) : this(context, basicCondition, [])
-        { 
+        {
         }
 
         /// <summary>
