@@ -69,6 +69,13 @@ namespace Unluau.IL.Visitors
             return true;
         }
 
+        public override bool Visit(NotTest node)
+        {
+            node.Value = ResolveValue(node.Value);
+
+            return true;
+        }
+
         public override bool Visit(GetIndexSelf node)
         {
             if (!TryDelete(node, node.Slot))

@@ -486,6 +486,7 @@ namespace Unluau.Chunk.Luau
                     case OpCode.JUMPIFNOTEQ:
                     case OpCode.JUMPIFNOTLE:
                     case OpCode.JUMPIFNOTLT:
+                    case OpCode.JUMPIF:
                     case OpCode.JUMPIFNOT:
                     {
                         // Save the original pc value so that we can conserve the jump offset.
@@ -509,6 +510,7 @@ namespace Unluau.Chunk.Luau
 
                             // Jumps if the register is nil or false.
                             OpCode.JUMPIFNOT => new Test(context, left),
+                            OpCode.JUMPIF => new NotTest(context, left),
 
                             // This should never happen, but just in case.
                             _ => throw new NotImplementedException()
