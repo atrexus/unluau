@@ -41,6 +41,7 @@ namespace Unluau.IL
 
         // Conditions
         public virtual bool Visit(Equals node) => Visit(node as BasicCondition);
+        public virtual bool Visit(NotEquals node) => Visit(node as BasicCondition);
         public virtual bool Visit(Test node) => Visit(node as BasicCondition);
         public virtual bool Visit(NotTest node) => Visit(node as BasicCondition);
     }

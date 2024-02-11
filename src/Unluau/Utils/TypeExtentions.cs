@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Unluau.Utils
 {
-    public static class TypeExtentions
+    public static class TypeExtensions
     {
         public static string ToString<T>(T? value)
         {

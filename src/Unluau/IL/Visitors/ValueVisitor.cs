@@ -62,6 +62,14 @@ namespace Unluau.IL.Visitors
             return true;
         }
 
+        public override bool Visit(NotEquals node)
+        {
+            node.Right = ResolveValue(node.Right);
+            node.Left = ResolveValue(node.Left);
+
+            return true;
+        }
+
         public override bool Visit(Test node)
         {
             node.Value = ResolveValue(node.Value);
@@ -210,7 +218,10 @@ namespace Unluau.IL.Visitors
 
             _lastBlock = block;
 
-            block.VisitChildren(this);
+            // We call .ToList() to copy the list so that there are no concurrency issues. In the end
+            // we do end up adding/removing items in the statements list.
+            foreach (var statement in block.Statements.ToList()) 
+                statement.Visit(this);  
 
             _lastBlock = previousBlock;
         }

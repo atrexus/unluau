@@ -30,7 +30,7 @@ namespace Unluau.IL.Statements.Blocks
         /// <param name="visitor">The visitor.</param>
         public void VisitChildren(Visitor visitor)
         {
-            foreach (var statement in Statements.ToList())
+            foreach (var statement in Statements)
                 statement.Visit(visitor);
         }
 

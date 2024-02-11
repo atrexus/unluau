@@ -508,6 +508,9 @@ namespace Unluau.Chunk.Luau
                             // Performs a jump if values are not equal to each other.
                             OpCode.JUMPIFNOTEQ => new Equals(context, left, right!),
 
+                            // Performs a jump if values are not equal to each other.
+                            OpCode.JUMPIFEQ => new NotEquals(context, left, right!),
+
                             // Jumps if the register is nil or false.
                             OpCode.JUMPIFNOT => new Test(context, left),
                             OpCode.JUMPIF => new NotTest(context, left),

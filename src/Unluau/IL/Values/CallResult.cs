@@ -29,7 +29,7 @@ namespace Unluau.IL.Values
         /// Returns a string representation of the current object.
         /// </summary>
         /// <returns></returns>
-        public override string? ToString() => $"CallRes{{{Callee}, {TypeExtentions.ToString(Arguments)}}}";
+        public override string? ToString() => $"CallRes{{{Callee}, {TypeExtensions.ToString(Arguments)}}}";
 
         /// <summary>
         /// Implements the visitor.

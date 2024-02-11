@@ -32,7 +32,7 @@ namespace Unluau.IL.Values
         /// Converts the current <see cref="BasicValue{T}"/> to a string.
         /// </summary>
         /// <returns>String representation.</returns>
-        public override string? ToString() => $"Val<{typeof(T).Name}>({TypeExtentions.ToString(Value)})";
+        public override string? ToString() => $"Val<{typeof(T).Name}>({TypeExtensions.ToString(Value)})";
 
         /// <summary>
         /// Implements the recursive visitor pattern.
