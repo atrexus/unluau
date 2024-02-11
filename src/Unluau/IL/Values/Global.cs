@@ -27,6 +27,6 @@ namespace Unluau.IL.Values
         /// Converts the current <see cref="Global"/> to a string.
         /// </summary>
         /// <returns>String representation.</returns>
-        public override string ToString() => $"Global({TypeExtentions.ToString(Value)})";
+        public override string ToString() => $"Global({TypeExtensions.ToString(Value)})";
     }
 }

@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unluau.IL.Statements.Instructions;
-
-namespace Unluau.IL.Values
+﻿namespace Unluau.IL.Values
 {
     /// <summary>
-    /// Represents an index between two seperate values in the IL.
+    /// Represents an index between two separate values in the IL.
     /// </summary>
     /// <param name="indexable">The value to get indexed.</param>
     /// <param name="index">The index key.</param>

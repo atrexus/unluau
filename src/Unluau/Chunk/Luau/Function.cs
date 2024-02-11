@@ -344,7 +344,10 @@ namespace Unluau.Chunk.Luau
                     case OpCode.LOADK:
                     case OpCode.GETGLOBAL:
                     case OpCode.GETIMPORT:
+                    case OpCode.NEWTABLE:
                     {
+                        int aux = Instructions[++pc].Value;
+
                         var value = instruction.Code switch
                         {
                             OpCode.LOADK or OpCode.GETIMPORT => ConstantToBasicValue(context, Constants[instruction.D]),
@@ -357,21 +360,22 @@ namespace Unluau.Chunk.Luau
                             OpCode.LOADN => new BasicValue<int>(context, instruction.D),
                             OpCode.LOADNIL => new BasicValue<object>(context, null),
 
+                            // The size of the table varies. If the auxiliary instruction contains a value that is not
+                            // zero, then we use it. Otherwise we switch to the B operand.
+                            OpCode.NEWTABLE => new Table(context, aux > 0 ? aux : (instruction.B > 0 ? (1 << (instruction.B - 1)) : 0)),
+                            OpCode.DUPTABLE => ConstantToBasicValue(context, Constants[instruction.D]),
+
                             // We know this won't ever happen, but the C# compiler will cry if I don't add this.
                             _ => throw new NotSupportedException()
                         };
 
-                        var ra = stack.Get(instruction.A);
-
-                        if (ra != null && ra.Value.Context.PcScope.Item1 < startPc)
+                        // Here we check to see if the slot we are loading our value into is initialized or not. If it has, then we
+                        // check to see if this value has been set within the current block. If not then we reset it, otherwise we 
+                        // just update it.
+                        if (stack.TryGet(instruction.A, out Slot? ra) && ra!.Value.Context.PcScope.Item1 < startPc)
                             ra = stack.Update(ra.Id, value);
                         else
-                        {
-                            if (ra != null)
-                                ra.References--;
                             ra = stack.Set(instruction.A, value);
-                        }
-                            
 
                         // Note: loading a value onto the stack can be for both for constant values and environment variables.
                         // It doesn't really matter what kind we have because when we generate our AST they are treated the same.
@@ -525,6 +529,12 @@ namespace Unluau.Chunk.Luau
                         block.Statements.Add(new IfBlock(body.Context, condition, body.Statements));
                         break;
                     }
+                    case OpCode.SETLIST:
+                    {
+                        var table = (Table)stack.Get(instruction.D)!.Value;
+
+
+                    }
                 }
             }
 
@@ -555,6 +565,21 @@ namespace Unluau.Chunk.Luau
                     names[i] = _symbolTable[importConstant.Value[i].Value - 1];
 
                 return new Global(context, names);
+            }
+
+            else if (constant is TableConstant tableConstant)
+            {
+                var entries = new TableEntry[tableConstant.Value.Length];
+
+                for (int i = 0; i < tableConstant.Value.Length; ++i)
+                    entries[i] = new()
+                    {
+                        Context = context,
+                        Key = null,
+                        Value = ConstantToBasicValue(context, tableConstant.Value[i])
+                    };
+
+                return new Table(context, entries); 
             }
 
             throw new NotImplementedException();

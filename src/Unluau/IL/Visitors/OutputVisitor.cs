@@ -48,7 +48,7 @@ namespace Unluau.IL.Visitors
 
         public override bool Visit(Call node)
         {
-            Writer.Write(Format(node.Context, $"Call", node.CallResult.ToString(), $"Ret({TypeExtentions.ToString(node.Slots)})"));
+            Writer.Write(Format(node.Context, $"Call", node.CallResult.ToString(), $"Ret({TypeExtensions.ToString(node.Slots)})"));
 
             return false;
         }

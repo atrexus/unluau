@@ -104,6 +104,14 @@ namespace Unluau.IL
         }
 
         /// <summary>
+        /// Tries to get a slot if it has been initialized.
+        /// </summary>
+        /// <param name="id">The slot number.</param>
+        /// <param name="value">The slot.</param>
+        /// <returns>True if successful.</returns>
+        public bool TryGet(byte id, out Slot? value) => _slots.TryGetValue(id, out value);
+
+        /// <summary>
         /// Gets a slot with the specific slot number.
         /// </summary>
         /// <param name="v">The slot number.</param>
