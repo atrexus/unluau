@@ -15,7 +15,7 @@ namespace Unluau.IL.Values
         /// <summary>
         /// Key to the entry.
         /// </summary>
-        public required BasicValue? Key { get; set; }
+        public BasicValue? Key { get; set; }
 
         /// <summary>
         /// Value for the entry.
@@ -26,7 +26,7 @@ namespace Unluau.IL.Values
         /// Returns a string representation of the entry.
         /// </summary>
         /// <returns>String representation.</returns>
-        public override string ToString() => $"Entry({Key}, {Value})";
+        public override string ToString() => Key is null ? $"Entry({Value})" : $"Entry({Key}, {Value})";
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ namespace Unluau.IL.Values
             foreach (var entry in Entries)
             {
                 entry.Value.Visit(visitor);
-                entry.Key.Visit(visitor);
+                entry.Key?.Visit(visitor);
             }
         }
     }

@@ -346,7 +346,7 @@ namespace Unluau.Chunk.Luau
                     case OpCode.GETIMPORT:
                     case OpCode.NEWTABLE:
                     {
-                        int aux = Instructions[++pc].Value;
+                        int aux = Instructions[pc + 1].Value;
 
                         var value = instruction.Code switch
                         {
@@ -362,7 +362,7 @@ namespace Unluau.Chunk.Luau
 
                             // The size of the table varies. If the auxiliary instruction contains a value that is not
                             // zero, then we use it. Otherwise we switch to the B operand.
-                            OpCode.NEWTABLE => new Table(context, aux > 0 ? aux : (instruction.B > 0 ? (1 << (instruction.B - 1)) : 0)),
+                            OpCode.NEWTABLE => new Table(context, aux > 0 ? Instructions[++pc].Value : (instruction.B > 0 ? (1 << (instruction.B - 1)) : 0)),
                             OpCode.DUPTABLE => ConstantToBasicValue(context, Constants[instruction.D]),
 
                             // We know this won't ever happen, but the C# compiler will cry if I don't add this.
@@ -531,9 +531,22 @@ namespace Unluau.Chunk.Luau
                     }
                     case OpCode.SETLIST:
                     {
-                        var table = (Table)stack.Get(instruction.D)!.Value;
+                        var table = (Table)stack.Get(instruction.A)!.Value;
 
+                        for (int i = 0; i < instruction.C - 1; ++i)
+                        {
+                            var entry = stack.Get(instruction.B + i)!;
 
+                            table.Entries.Add(new()
+                            {
+                                Context = entry.Value.Context,
+                                Value = new Reference(context, entry)
+                            });
+                        }
+
+                        // Skip the auxiliary instruction
+                        ++pc;
+                        break;
                     }
                 }
             }
@@ -575,11 +588,10 @@ namespace Unluau.Chunk.Luau
                     entries[i] = new()
                     {
                         Context = context,
-                        Key = null,
                         Value = ConstantToBasicValue(context, tableConstant.Value[i])
                     };
 
-                return new Table(context, entries); 
+                return new Table(context, entries);
             }
 
             throw new NotImplementedException();

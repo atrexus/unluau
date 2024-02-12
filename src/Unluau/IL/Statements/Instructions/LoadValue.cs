@@ -18,7 +18,7 @@ namespace Unluau.IL.Statements.Instructions
         /// <summary>
         /// The value to load into the provided register.
         /// </summary>
-        public BasicValue Value { get; private set; } = value;
+        public BasicValue Value { get; set; } = value;
 
         /// <summary>
         /// Implements the recursive visitor.

@@ -96,6 +96,8 @@ namespace Unluau.IL.Visitors
         {
             TryDelete(node, node.Slot);
 
+            node.Value = ResolveValue(node.Value);
+
             return true;
         }
 
@@ -138,8 +140,12 @@ namespace Unluau.IL.Visitors
         {
             if (value is Reference reference)
                 return ResolveReference(reference);
+            
             if (value is Values.Index index)
                 return ResolveIndex(index);
+            
+            if (value is Table table)
+                ResolveTable(table);
 
             return value;
         }
@@ -168,7 +174,7 @@ namespace Unluau.IL.Visitors
         /// <summary>
         /// Resolves an index operation.
         /// </summary>
-        /// <param name="reference">The reference.</param>
+        /// <param name="index">The reference.</param>
         /// <returns>The resolved index.</returns>
         private static Values.Index ResolveIndex(Values.Index index)
         {
@@ -176,6 +182,19 @@ namespace Unluau.IL.Visitors
             index.Key = ResolveValue(index.Key);
 
             return index;
+        }
+
+        /// <summary>
+        /// Resolves a table reference.
+        /// </summary>
+        /// <param name="table">The reference.</param>
+        /// <returns>The resolved table value.</returns>
+        private static Table ResolveTable(Table table)
+        {
+            foreach (var entry in table.Entries)
+                entry.Value = ResolveValue(entry.Value);
+
+            return table;
         }
 
         /// <summary>
@@ -220,8 +239,8 @@ namespace Unluau.IL.Visitors
 
             // We call .ToList() to copy the list so that there are no concurrency issues. In the end
             // we do end up adding/removing items in the statements list.
-            foreach (var statement in block.Statements.ToList()) 
-                statement.Visit(this);  
+            foreach (var statement in block.Statements.ToList())
+                statement.Visit(this);
 
             _lastBlock = previousBlock;
         }
