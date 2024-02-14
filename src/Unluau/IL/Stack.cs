@@ -66,6 +66,7 @@ namespace Unluau.IL
             var slot = _slots[id];
 
             slot.Value = basicValue;
+            slot.References++;
 
             return slot;
         }
