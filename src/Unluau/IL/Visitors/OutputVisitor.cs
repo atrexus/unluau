@@ -74,6 +74,13 @@ namespace Unluau.IL.Visitors
             return false;
         }
 
+        public override bool Visit(Return node)
+        {
+            Writer.Write(Format(node.Context, $"Return", TypeExtensions.ToString(node.Values), ""));
+
+            return false;
+        }
+
         public override bool Visit(BasicBlock node)
         {
             Writer.WriteLine(Format(node.Context, "BasicBlock {"));

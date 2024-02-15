@@ -7,6 +7,7 @@ using Unluau.IL.Values;
 using Unluau.IL.Values.Conditions;
 using Unluau.Utils;
 using Index = Unluau.IL.Values.Index;
+using Microsoft.Win32;
 
 namespace Unluau.Chunk.Luau
 {
@@ -524,7 +525,10 @@ namespace Unluau.Chunk.Luau
                         };
 
                         // Now we lift the body of the block.
-                        var body = LiftBasicBlock(stack, ++pc, pc + instruction.D - (pc - ogPc - 1));
+                        var body = LiftBasicBlock(stack, pc + 1, pc += instruction.D - (pc - ogPc - 1));
+
+                        // We decrement the program counter because the for loop will increment it on the next pass.
+                        --pc;
 
                         block.Statements.Add(new IfBlock(body.Context, condition, body.Statements));
                         break;
@@ -546,6 +550,23 @@ namespace Unluau.Chunk.Luau
 
                         // Skip the auxiliary instruction
                         ++pc;
+                        break;
+                    }
+                    case OpCode.RETURN:
+                    {
+                        // Again this instruction uses LUA_MULTRET, just like the call instruction. If the `B` operand is empty,
+                        // then we pop all the values off of the stack and use those as our values. Otherwise, `B-1` contains our
+                        // value count.
+                        var valueCount = instruction.B > 0 ? instruction.B - 1 : stack.Top.Id - instruction.A + 1;
+
+                        var values = new BasicValue[valueCount];
+
+                        for (int i = 0; i < valueCount; ++i)
+                            values[i] = stack.Get(instruction.A + i)!.Value;
+
+                        // Note: We always add a return statement, even if this is the block of the main closure. Whether or not to 
+                        // display the `return` of the main block is configurable in the AST builder.
+                        block.Statements.Add(new Return(context, values));
                         break;
                     }
                 }

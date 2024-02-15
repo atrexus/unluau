@@ -116,6 +116,13 @@ namespace Unluau.IL.Visitors
             return true;
         }
 
+        public override bool Visit(Return node)
+        {
+            node.Values = ResolveValueList(node.Values);
+
+            return true;
+        }
+
         /// <summary>
         /// Resolves a list of values in the IL.
         /// </summary>
