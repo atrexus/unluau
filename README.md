@@ -4,7 +4,7 @@ A decompiler for Roblox's Lua based programming language (Luau https://luau-lang
 
 Unluau is still in early alpha and is receiving updates frequently. You can download and run any of the alpha versions in the [releases](https://github.com/valencefun/UnluauNET/releases) tab.
 
-> **Disclamer:** Unluau is still in very early alpha so the decompiler is not flawless. There will most definitely be bugs that you will encounter when decompiling complex scripts. Forloops are currently not supported, but are coming in future versions.
+> **Disclamer:** Unluau is still in very early alpha so the decompiler is not flawless. There will most definitely be bugs that you will encounter when decompiling complex scripts. We are currently working on [v2.0.0-beta](https://github.com/atrexus/unluau/tree/v2.0.0-beta) and will no longer maintain the old alpha versions.
 
 ## Usage
 After downloading the latest version in the [releases](https://github.com/valencefun/UnluauNET/releases) tab, you can refer to the manuals below to familiarize yourself with the different binaries availible to you.
