@@ -182,7 +182,7 @@ namespace Unluau.Chunk.Luau
                         break;
                     case ConstantType.Import:
                     {
-                        var id = reader.ReadInt32();
+                        var id = reader.ReadUInt32(); // uint, because Negative values error out here
                         var nameCount = id >> 30;
 
                         var names = new StringConstant[nameCount];
