@@ -346,6 +346,7 @@ namespace Unluau.Chunk.Luau
                     case OpCode.GETGLOBAL:
                     case OpCode.GETIMPORT:
                     case OpCode.NEWTABLE:
+                    case OpCode.DUPTABLE:
                     {
                         int aux = Instructions[pc + 1].Value;
 
