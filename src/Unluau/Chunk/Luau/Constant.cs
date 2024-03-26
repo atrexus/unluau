@@ -89,38 +89,69 @@ namespace Unluau.Chunk.Luau
         public override string? ToString() => Value is null ? "nil" : Value.ToString();
     }
 
+    /// <summary>
+    /// Represents the `nil` constant in Luau code.
+    /// </summary>
     public class NilConstant() : Constant(ConstantType.Nil)
     {
         public override string ToString() => "nil";
     }
 
+    /// <summary>
+    /// Represents a boolean value in Luau code.
+    /// </summary>
+    /// <param name="value">The value of the constant.</param>
     public class BoolConstant(bool value) : Constant<bool>(ConstantType.Bool, value)
     {
         public override string ToString() => Value ? "true" : "false";
     }
 
+    /// <summary>
+    /// Represents a number value constant in Luau code.
+    /// </summary>
+    /// <param name="value">The value of the constant.</param>
     public class NumberConstant(double value) : Constant<double>(ConstantType.Number, value)
     {
     }
 
+    /// <summary>
+    /// Represents a string constant in Luau code.
+    /// </summary>
+    /// <param name="index">The index of the string in the symbol table.</param>
     public class StringConstant(int index) : Constant<int>(ConstantType.String, index)
     {
     }
 
+    /// <summary>
+    /// Represents an import constant in luau code.
+    /// </summary>
+    /// <param name="names">The list of string constants that make up the import.</param>
     public class ImportConstant(StringConstant[] names) : Constant<StringConstant[]>(ConstantType.Import, names)
     {
         public override string ToString() => $"[{string.Join(",", new List<StringConstant>(Value))}]";
     }
 
+    /// <summary>
+    /// Represents a table constant in luau code.
+    /// </summary>
+    /// <param name="keys">List of constants that make up the keys in the table.</param>
     public class TableConstant(Constant[] keys) : Constant<Constant[]>(ConstantType.Table, keys)
     {
         public override string ToString() => $"{{{string.Join(", ", new List<Constant>(Value))}}}";
     }
 
+    /// <summary>
+    /// Represents a closure in Luau code (functions).
+    /// </summary>
+    /// <param name="index">The index of the associated function prototype in the Luau bytecode.</param>
     public class ClosureConstant(int index) : Constant<int>(ConstantType.Closure, index)
     {
     }
 
+    /// <summary>
+    /// Represents a vector constant in Luau bytecode.
+    /// </summary>
+    /// <param name="values">List of floating point numbers.</param>
     public class VectorConstant(float[] values) : Constant<Vector<float>>(ConstantType.Vector, new(values))
     {
     }
