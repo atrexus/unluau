@@ -11,7 +11,10 @@ namespace Unluau.AST
     {
         public static Block Build(IL.Program program)
         {
-            program.Visit(new Builder());
+            var builder = new Builder();
+            program.Visit(builder);
+
+            return builder.Root;
         }
 
         public Block Root { get; set; }
