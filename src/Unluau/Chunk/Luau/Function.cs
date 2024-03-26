@@ -370,6 +370,10 @@ namespace Unluau.Chunk.Luau
                             _ => throw new NotSupportedException()
                         };
 
+                        // Skip the AUX.
+                        if (instruction.Code == OpCode.GETIMPORT)
+                            ++pc;
+
                         // Here we check to see if the slot we are loading our value into is initialized or not. If it has, then we
                         // check to see if this value has been set within the current block. If not then we reset it, otherwise we 
                         // just update it.
@@ -569,9 +573,18 @@ namespace Unluau.Chunk.Luau
                         block.Statements.Add(new Return(context, values));
                         break;
                     }
+                    default:
+                    {
+                        // Skip AUX
+                        if (instruction.Code == OpCode.SETTABLEKS)
+                            ++pc;
+
+                        Console.WriteLine("Skipped: " + instruction.Code);
+                        break;
+                    }
                 }
             }
-
+            
             block.Context = GetContext(startPc, pc);
 
             return block;
