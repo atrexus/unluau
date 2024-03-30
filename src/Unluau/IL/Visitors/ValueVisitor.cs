@@ -100,6 +100,7 @@ namespace Unluau.IL.Visitors
         public override bool Visit(SetIndex node)
         {
             node.Index = ResolveIndex(node.Index);
+            node.Value = ResolveValue(node.Value);
 
             return true;
         }
