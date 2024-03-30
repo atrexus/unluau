@@ -319,6 +319,10 @@ namespace Unluau.Chunk.Luau
             var context = GetClosureContext();
             var stack = new Stack();
 
+            // Now we load the parameters to this closure onto the stack.
+            foreach (var variable in context.Parameters)
+                stack.Set(variable.Slot, variable);
+
             var body = LiftBasicBlock(stack, 0);
 
             return new(context, body);
@@ -370,6 +374,10 @@ namespace Unluau.Chunk.Luau
                             // We know this won't ever happen, but the C# compiler will cry if I don't add this.
                             _ => throw new NotSupportedException()
                         };
+
+                        // Skip the AUX instruction for the following operation codes
+                        if (instruction.Code == OpCode.GETIMPORT)
+                            pc++;
 
                         // Here we check to see if the slot we are loading our value into is initialized or not. If it has, then we
                         // check to see if this value has been set within the current block. If not then we reset it, otherwise we 
@@ -478,6 +486,38 @@ namespace Unluau.Chunk.Luau
                         block.Statements.Add(getIndex);
                         break;
                     }
+                    case OpCode.SETTABLEKS:
+                    case OpCode.SETTABLE:
+                    case OpCode.SETTABLEN:
+                    {
+                        // This is our indexable value. In Luau its always a table.
+                        var table = new Reference(context, stack.Get(instruction.B)!);
+
+                        // Gets the value for the index.
+                        var indexValue = instruction.Code switch
+                        { 
+                            OpCode.SETTABLE => new Reference(context, stack.Get(instruction.C)!),
+
+                            // The SETTABLEN instruction contains a value (byte) from 1 to 256. Because the C operand can only hold
+                            // a value as large as 255, we need to add 1 to it.
+                            OpCode.SETTABLEN => new BasicValue<int>(context, instruction.C + 1),
+
+                            // The SETTABLEKS instruction contains a constant in the auxiliary instruction. We group them here for 
+                            // simplicity.
+                            OpCode.SETTABLEKS => ConstantToBasicValue(context, Constants[Instructions[++pc].Value]),
+
+                            // We know this won't ever happen, but the C# compiler will cry if I don't add this.
+                            _ => throw new NotSupportedException()
+                        };
+
+                        var index = new Index(context, table, indexValue);
+
+                        // Now we get the value of the set instruction (what we are setting the index to).
+                        var value = new Reference(context, stack.Get(instruction.A)!);
+
+                        block.Statements.Add(new SetIndex(context, index, value));
+                        break;
+                    }
                     case OpCode.MOVE:
                     {
                         var rb = stack.Get(instruction.B)!;
@@ -536,6 +576,8 @@ namespace Unluau.Chunk.Luau
                     }
                     case OpCode.SETLIST:
                     {
+                        // This instruction doesn't generate any IL instructions. Instead it initializes a table as an array,
+                        // and assigns all of its values to it.
                         var table = (Table)stack.Get(instruction.A)!.Value;
 
                         for (int i = 0; i < instruction.C - 1; ++i)
@@ -563,7 +605,7 @@ namespace Unluau.Chunk.Luau
                         var values = new BasicValue[valueCount];
 
                         for (int i = 0; i < valueCount; ++i)
-                            values[i] = stack.Get(instruction.A + i)!.Value;
+                            values[i] = new Reference(context, stack.Get(instruction.A + i)!);
 
                         // Note: We always add a return statement, even if this is the block of the main closure. Whether or not to 
                         // display the `return` of the main block is configurable in the AST builder.

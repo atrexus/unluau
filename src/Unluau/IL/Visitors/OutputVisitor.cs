@@ -81,6 +81,13 @@ namespace Unluau.IL.Visitors
             return false;
         }
 
+        public override bool Visit(SetIndex node)
+        {
+            Writer.Write(Format(node.Context, "SetIndex", node.Index.ToString(), node.Value.ToString()));
+
+            return false;
+        }
+
         public override bool Visit(BasicBlock node)
         {
             Writer.WriteLine(Format(node.Context, "BasicBlock {"));

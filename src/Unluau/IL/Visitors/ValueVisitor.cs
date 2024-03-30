@@ -84,10 +84,22 @@ namespace Unluau.IL.Visitors
             return true;
         }
 
-        public override bool Visit(GetIndexSelf node)
+        public override bool Visit(GetIndex node)
         {
             if (!TryDelete(node, node.Slot))
                 node.Index = ResolveIndex(node.Index);
+
+            return true;
+        }
+
+        public override bool Visit(GetIndexSelf node)
+        {
+            return Visit(node as GetIndex);
+        }
+
+        public override bool Visit(SetIndex node)
+        {
+            node.Index = ResolveIndex(node.Index);
 
             return true;
         }
