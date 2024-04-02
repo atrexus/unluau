@@ -221,7 +221,7 @@ namespace Unluau.Chunk.Luau
                     case ConstantType.Vector:
                         // This is a relatively new constant. It's most likely an optimization for the Roblox engine, since they use
                         // vectors so often.
-                        constants[i] = new VectorConstant([reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()]);
+                        constants[i] = new VectorConstant(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
                         break;
                 }
             }
@@ -254,7 +254,7 @@ namespace Unluau.Chunk.Luau
             builder.AppendLine($"{ParameterCount}{(IsVariadic ? "+" : string.Empty)} param(s), {SlotCount} slot(s), {UpvalueCount} upvalue(s), {Constants.Length} constant(s), {ClosureTable.Length} function(s)");
 
             // Write function name
-            builder.Append($"function {(DebugSymbolIndex is null ? "main" : _symbolTable[(int)DebugSymbolIndex])}(");
+            builder.Append($"function {(DebugSymbolIndex is null ? "main" : _symbolTable[(int)DebugSymbolIndex - 1])}(");
 
             // Write function parameters
             for (int i = 0; i < ParameterCount; ++i)
@@ -671,7 +671,7 @@ namespace Unluau.Chunk.Luau
             for (int slot = 0; slot < ParameterCount; ++slot)
                 parameters.Add(new Variable(new(pcScope, lines), slot));
 
-            string? name = DebugSymbolIndex is null ? null : _symbolTable[(int)DebugSymbolIndex];
+            string? name = DebugSymbolIndex is null ? null : _symbolTable[(int)DebugSymbolIndex - 1];
 
             return new()
             {

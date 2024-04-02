@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Unluau.IL.Values;
-
-namespace Unluau.Chunk.Luau
+﻿namespace Unluau.Chunk.Luau
 {
     // Note: Ported from Luau source code.
     public enum BuiltinFunction : byte

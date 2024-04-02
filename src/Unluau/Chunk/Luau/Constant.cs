@@ -151,8 +151,7 @@ namespace Unluau.Chunk.Luau
     /// <summary>
     /// Represents a vector constant in Luau bytecode.
     /// </summary>
-    /// <param name="values">List of floating point numbers.</param>
-    public class VectorConstant(float[] values) : Constant<Vector<float>>(ConstantType.Vector, new(values))
+    public class VectorConstant(float x, float y, float z, float w) : Constant<Vector4>(ConstantType.Vector, new(x, y, z, w))
     {
     }
 }

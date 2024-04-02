@@ -53,7 +53,7 @@ namespace Unluau.IL.Statements
         /// <summary>
         /// The name of the current closure.
         /// </summary>
-        public string? Name { get; set; }
+        public string? Name { get; set; } = context.Symbol;
 
         /// <summary>
         /// Whether or not this is the main closure (entry point).

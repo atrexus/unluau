@@ -15,7 +15,7 @@ namespace Unluau.Chunk.Luau
         public int SymbolIndex { get; set; }
 
         /// <summary>
-        /// The scope of the varible in the program.
+        /// The scope of the variable in the program.
         /// </summary>
         public (int, int) Scope { get; set; }
 
@@ -38,7 +38,7 @@ namespace Unluau.Chunk.Luau
         /// <summary>
         /// A list of symbol indices for local upvalues.
         /// </summary>
-        private int[] UpvalueSymbolIndeces { get; set; }
+        private int[] UpvalueSymbolIndices { get; set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="DebugInformation"/>.
@@ -62,10 +62,10 @@ namespace Unluau.Chunk.Luau
             
             var upvalueCount = reader.ReadSize();
 
-            UpvalueSymbolIndeces = new int[upvalueCount];
+            UpvalueSymbolIndices = new int[upvalueCount];
 
             for (int i = 0;i < upvalueCount; i++)
-                UpvalueSymbolIndeces[i] = reader.ReadSize();
+                UpvalueSymbolIndices[i] = reader.ReadSize();
         }
     }
 }

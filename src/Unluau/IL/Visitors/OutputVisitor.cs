@@ -14,7 +14,7 @@ namespace Unluau.IL.Visitors
 
         public override bool Visit(Closure node)
         {
-            Writer.Write($"Closure {(node.IsMain ? "main" : node.Name)}(");
+            Writer.Write($"\n\nClosure {(node.IsMain ? "main" : node.Name)}(");
 
             for (int i = 0; i < node.Parameters.Length; i++)
             {
