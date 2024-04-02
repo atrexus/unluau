@@ -118,7 +118,7 @@ namespace Unluau.Chunk.Luau
             ClosureTable = ReadClosureTable(reader);
 
             LineDefined = reader.ReadSize();
-            DebugSymbolIndex = reader.ReadIndex();
+            DebugSymbolIndex = reader.ReadIndex() - 1;
 
             if (reader.ReadBoolean())
                 LineInformation = new LineInformation(reader, Instructions.Length);
@@ -254,7 +254,7 @@ namespace Unluau.Chunk.Luau
             builder.AppendLine($"{ParameterCount}{(IsVariadic ? "+" : string.Empty)} param(s), {SlotCount} slot(s), {UpvalueCount} upvalue(s), {Constants.Length} constant(s), {ClosureTable.Length} function(s)");
 
             // Write function name
-            builder.Append($"function {(DebugSymbolIndex is null ? "main" : _symbolTable[(int)DebugSymbolIndex - 1])}(");
+            builder.Append($"function {(DebugSymbolIndex is null ? "main" : _symbolTable[(int)DebugSymbolIndex])}(");
 
             // Write function parameters
             for (int i = 0; i < ParameterCount; ++i)
@@ -671,7 +671,7 @@ namespace Unluau.Chunk.Luau
             for (int slot = 0; slot < ParameterCount; ++slot)
                 parameters.Add(new Variable(new(pcScope, lines), slot));
 
-            string? name = DebugSymbolIndex is null ? null : _symbolTable[(int)DebugSymbolIndex - 1];
+            string? name = DebugSymbolIndex is null ? null : _symbolTable[(int)DebugSymbolIndex];
 
             return new()
             {
