@@ -807,6 +807,13 @@ namespace Unluau
                 return new Global(names);
             }
 
+            if (constant is VectorConstant)
+            {
+                VectorConstant vector = (VectorConstant)constant;
+
+                return new VectorLiteral(vector.Value);
+            }
+
             throw new DecompilerException(Stage.Lifter, "unexpected constant passed to 'ConstantToExpression'");
         }
 

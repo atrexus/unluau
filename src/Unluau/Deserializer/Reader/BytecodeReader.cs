@@ -70,6 +70,14 @@ namespace Unluau
         }
 
         /// <summary>
+        /// Reads a float.
+        /// </summary>
+        public float ReadSingle() 
+        { 
+            return Reader.ReadSingle();
+        }
+
+        /// <summary>
         /// Reads a 3 byte unsigned integer.
         /// </summary>
         public uint ReadUInt32()

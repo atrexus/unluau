@@ -17,7 +17,7 @@ namespace Unluau
         private byte version, typesVersion;
         private OpCodeEncoding encoding;
 
-        private const byte MinVesion = 3, MaxVersion = 4;
+        private const byte MinVesion = 3, MaxVersion = 5;
         private const byte TypeVersion = 1;
 
         public Deserializer(Stream stream, OpCodeEncoding encoding)
@@ -227,6 +227,8 @@ namespace Unluau
                     return new TableConstant(keys);
                 case ConstantType.Closure:
                     return new ClosureConstant(reader.ReadInt32Compressed());
+                case ConstantType.Vector:
+                    return new VectorConstant(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
             }
 
             // Should never happen
