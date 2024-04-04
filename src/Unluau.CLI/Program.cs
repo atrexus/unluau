@@ -7,7 +7,7 @@ namespace Unluau.CLI
     {
         static void Main(string[] args)
         {
-            using var stream = File.OpenRead("./test/input.txt");
+            using var stream = File.OpenRead("./test/Unary.luau");
             var chunk = LuauChunk.Create(stream);
 
             Console.WriteLine(chunk.ToString());

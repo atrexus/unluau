@@ -526,6 +526,35 @@ namespace Unluau.Chunk.Luau
                         block.Statements.Add(new Move(context, ra, rb));
                         break;
                     }
+                    case OpCode.CONCAT:
+                    {
+                        var values = new Reference[instruction.C - instruction.B + 1];
+
+                        for ( var i = instruction.B; i < instruction.C + 1; ++i )
+                        {
+                            values[i - instruction.B] = new Reference(context, stack.Get(i)!);
+                        }
+
+                        stack.Set(instruction.A, new Concat(context, values));
+
+                        break;
+                    }
+                    case OpCode.LENGTH:
+                    case OpCode.MINUS:
+                    case OpCode.NOT:
+                    {
+                        var type = instruction.Code switch
+                        {
+                            OpCode.LENGTH => UnaryType.Length,
+                            OpCode.MINUS => UnaryType.Minus,
+                            OpCode.NOT => UnaryType.Not,
+                            _ => throw new NotSupportedException()
+                        };
+
+                        stack.Set(instruction.A, new Unary(context, type, new Reference(context, stack.Get(instruction.B)!)));
+
+                        break;
+                    }
                     case OpCode.JUMPIFEQ:
                     case OpCode.JUMPIFLE:
                     case OpCode.JUMPIFLT:
