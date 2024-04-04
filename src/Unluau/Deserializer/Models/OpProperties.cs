@@ -318,9 +318,12 @@ namespace Unluau
         // B: source register (for VAL/REF) or upvalue index (for UPVAL/UPREF)
         CAPTURE,
 
-        // removed in v3
-        DEP_JUMPIFEQK,
-        DEP_JUMPIFNOTEQK,
+        // SUBRK, DIVRK: compute arithmetic operation between the constant and a source register and put the result into target register
+        // A: target register
+        // B: source register
+        // C: constant table index (0..255); must refer to a number
+        SUBRK,
+        DIVRK,
 
         // FASTCALL1: perform a fast call of a built-in function using 1 register argument
         // A: builtin function id (see LuauBuiltinFunction)
@@ -470,8 +473,8 @@ namespace Unluau
             { OpCode.FASTCALL, new OpProperties(OpCode.FASTCALL, OpMode.iABC) },
             { OpCode.COVERAGE, new OpProperties(OpCode.COVERAGE, OpMode.iE) },
             { OpCode.CAPTURE, new OpProperties(OpCode.CAPTURE, OpMode.iABC) },
-            { OpCode.DEP_JUMPIFEQK, new OpProperties(OpCode.DEP_JUMPIFEQK, OpMode.iAD, true) },
-            { OpCode.DEP_JUMPIFNOTEQK, new OpProperties(OpCode.DEP_JUMPIFNOTEQK, OpMode.iAD, true) },
+            { OpCode.SUBRK, new OpProperties(OpCode.SUBRK, OpMode.iABC, false) },
+            { OpCode.DIVRK, new OpProperties(OpCode.DIVRK, OpMode.iABC, false) },
             { OpCode.FASTCALL1, new OpProperties(OpCode.FASTCALL1, OpMode.iABC) },
             { OpCode.FASTCALL2, new OpProperties(OpCode.FASTCALL2, OpMode.iABC, true) },
             { OpCode.FASTCALL2K, new OpProperties(OpCode.FASTCALL2K, OpMode.iABC, true) },

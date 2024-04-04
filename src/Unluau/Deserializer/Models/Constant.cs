@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace Unluau
@@ -16,7 +17,8 @@ namespace Unluau
 		String,
 		Import,
 		Table,
-		Closure
+		Closure,
+        Vector
 	}
 
 	public abstract class Constant
@@ -118,5 +120,12 @@ namespace Unluau
 		public ClosureConstant(int index)
 			: base(ConstantType.Closure, index)
 		{ }
-	}
+    }
+
+    public class VectorConstant : Constant<Vector4>
+    {
+        public VectorConstant(float x, float y, float z, float w)
+            : base(ConstantType.Vector, new(x, y, z, w))
+        { }
+    }
 }
