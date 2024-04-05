@@ -41,6 +41,7 @@ namespace Unluau.IL
         public virtual bool Visit(CallResult node) => Visit(node as BasicValue);
         public virtual bool Visit(BasicCondition node) => Visit(node as BasicValue);
         public virtual bool Visit(Concat concat) => Visit(concat as BasicValue);
+        public virtual bool Visit(Unary unary) => Visit(unary as BasicValue);
 
         // Conditions
         public virtual bool Visit(Equals node) => Visit(node as BasicCondition);

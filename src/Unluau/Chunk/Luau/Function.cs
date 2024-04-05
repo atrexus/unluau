@@ -352,6 +352,9 @@ namespace Unluau.Chunk.Luau
                     case OpCode.NEWTABLE:
                     case OpCode.DUPTABLE:
                     case OpCode.CONCAT:
+                    case OpCode.LENGTH:
+                    case OpCode.MINUS:
+                    case OpCode.NOT:
                     {
                         int aux = Instructions[pc + 1].Value;
 
@@ -374,6 +377,11 @@ namespace Unluau.Chunk.Luau
 
                             // This instruction concatenates the list of registers together in descending order. 
                             OpCode.CONCAT => new Concat(context, BuildConcatList(context, stack, instruction)),
+
+                            // Unary operations...
+                            OpCode.LENGTH or 
+                            OpCode.MINUS or 
+                            OpCode.NOT => BuildUnaryValue(context, stack, instruction),
 
                             // We know this won't ever happen, but the C# compiler will cry if I don't add this.
                             _ => throw new NotSupportedException()
@@ -530,22 +538,6 @@ namespace Unluau.Chunk.Luau
                         block.Statements.Add(new Move(context, ra, rb));
                         break;
                     }
-                    case OpCode.LENGTH:
-                    case OpCode.MINUS:
-                    case OpCode.NOT:
-                    {
-                        var type = instruction.Code switch
-                        {
-                            OpCode.LENGTH => UnaryType.Length,
-                            OpCode.MINUS => UnaryType.Minus,
-                            OpCode.NOT => UnaryType.Not,
-                            _ => throw new NotSupportedException()
-                        };
-
-                        stack.Set(instruction.A, new Unary(context, type, new Reference(context, stack.Get(instruction.B)!)));
-
-                        break;
-                    }
                     case OpCode.JUMPIFEQ:
                     case OpCode.JUMPIFLE:
                     case OpCode.JUMPIFLT:
@@ -681,7 +673,7 @@ namespace Unluau.Chunk.Luau
             throw new NotImplementedException();
         }
 
-        private BasicValue[] BuildConcatList(Context context, Stack stack, Instruction instruction)
+        private static BasicValue[] BuildConcatList(Context context, Stack stack, Instruction instruction)
         {
             var values = new BasicValue[instruction.C - instruction.B + 1];
 
@@ -689,6 +681,17 @@ namespace Unluau.Chunk.Luau
                 values[i - instruction.B] = new Reference(context, stack.Get(i)!);
 
             return values;
+        }
+
+        private static Unary BuildUnaryValue(Context context, Stack stack, Instruction instruction)
+        {
+            return new(context, instruction.Code switch
+            {
+                OpCode.LENGTH => UnaryType.Length,
+                OpCode.MINUS => UnaryType.Minus,
+                OpCode.NOT => UnaryType.Not,
+                _ => throw new NotSupportedException()
+            }, new Reference(context, stack.Get(instruction.B)!));
         }
 
         private ClosureContext GetClosureContext()

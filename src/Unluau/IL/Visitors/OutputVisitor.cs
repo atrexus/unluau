@@ -124,7 +124,7 @@ namespace Unluau.IL.Visitors
         }
 
         private static string Format(Context context, string op, string? a, string? b)
-            => Format(context, op, a, b, " ");
+            => Format(context, op, a, b, "   ");
 
         private static string Format(Context context, string op)
         {

@@ -1,16 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unluau.Utils;
+﻿using Unluau.Utils;
 
 namespace Unluau.IL.Values
 {
+    /// <summary>
+    /// The types of unary operations.
+    /// </summary>
     public enum UnaryType
     { 
+        /// <summary>
+        /// Equivalent to Luau's `not` keyword.
+        /// </summary>
         Not,
+        /// <summary>
+        /// Represents `-` operator
+        /// </summary>
         Minus,
+        /// <summary>
+        /// Represents the `#` operator.
+        /// </summary>
         Length
     }
 
