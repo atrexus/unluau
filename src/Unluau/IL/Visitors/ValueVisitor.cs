@@ -116,7 +116,7 @@ namespace Unluau.IL.Visitors
 
         public override bool Visit(Move node)
         {
-            if (node.Source.References > 1)
+            if (node.Source.References > 1 || node.Target.References == 1)
             {
                 node.Target.Id = node.Source.Id;
                 node.Target.References += node.Source.References;
