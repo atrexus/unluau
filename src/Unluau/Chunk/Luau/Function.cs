@@ -351,6 +351,7 @@ namespace Unluau.Chunk.Luau
                     case OpCode.GETIMPORT:
                     case OpCode.NEWTABLE:
                     case OpCode.DUPTABLE:
+                    case OpCode.CONCAT:
                     {
                         int aux = Instructions[pc + 1].Value;
 
@@ -370,6 +371,9 @@ namespace Unluau.Chunk.Luau
                             // zero, then we use it. Otherwise we switch to the B operand.
                             OpCode.NEWTABLE => new Table(context, aux > 0 ? Instructions[++pc].Value : (instruction.B > 0 ? (1 << (instruction.B - 1)) : 0)),
                             OpCode.DUPTABLE => ConstantToBasicValue(context, Constants[instruction.D]),
+
+                            // This instruction concatenates the list of registers together in descending order. 
+                            OpCode.CONCAT => new Concat(context, BuildConcatList(context, stack, instruction)),
 
                             // We know this won't ever happen, but the C# compiler will cry if I don't add this.
                             _ => throw new NotSupportedException()
@@ -526,19 +530,6 @@ namespace Unluau.Chunk.Luau
                         block.Statements.Add(new Move(context, ra, rb));
                         break;
                     }
-                    case OpCode.CONCAT:
-                    {
-                        var values = new Reference[instruction.C - instruction.B + 1];
-
-                        for ( var i = instruction.B; i < instruction.C + 1; ++i )
-                        {
-                            values[i - instruction.B] = new Reference(context, stack.Get(i)!);
-                        }
-
-                        stack.Set(instruction.A, new Concat(context, values));
-
-                        break;
-                    }
                     case OpCode.LENGTH:
                     case OpCode.MINUS:
                     case OpCode.NOT:
@@ -688,6 +679,16 @@ namespace Unluau.Chunk.Luau
             }
 
             throw new NotImplementedException();
+        }
+
+        private BasicValue[] BuildConcatList(Context context, Stack stack, Instruction instruction)
+        {
+            var values = new BasicValue[instruction.C - instruction.B + 1];
+
+            for (var i = instruction.B; i < instruction.C + 1; ++i)
+                values[i - instruction.B] = new Reference(context, stack.Get(i)!);
+
+            return values;
         }
 
         private ClosureContext GetClosureContext()

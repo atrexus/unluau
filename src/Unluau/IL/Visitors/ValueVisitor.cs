@@ -168,7 +168,7 @@ namespace Unluau.IL.Visitors
                 ResolveTable(table);
 
             if (value is Concat concat)
-                concat.Registers = ResolveValueList(concat.Registers);
+                concat.Values = ResolveValueList(concat.Values);
 
             if (value is Unary unary)
                 unary.Value = ResolveValue(unary.Value);

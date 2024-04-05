@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unluau.Utils;
+﻿using Unluau.Utils;
 
 namespace Unluau.IL.Values
 {
@@ -11,13 +6,13 @@ namespace Unluau.IL.Values
     /// Concatenates values in registers.
     /// </summary>
     /// <param name="context">Information about the location.</param>
-    /// <param name="registers">The registers that are concatenated together.</param>
-    public class Concat(Context context, BasicValue[] registers) : BasicValue(context)
+    /// <param name="values">The values that are concatenated together.</param>
+    public class Concat(Context context, BasicValue[] values) : BasicValue(context)
     {
         /// <summary>
         /// The registers that are concatenated together.
         /// </summary>
-        public BasicValue[] Registers { get; set; } = registers;
+        public BasicValue[] Values { get; set; } = values;
 
         /// <summary>
         /// Implements the visitor.
@@ -27,9 +22,9 @@ namespace Unluau.IL.Values
         {
             if (visitor.Visit(this))
             {
-                foreach (var reg in Registers)
+                foreach (var value in Values)
                 {
-                    reg.Visit(visitor);
+                    value.Visit(visitor);
                 }
             }
         }
@@ -38,6 +33,6 @@ namespace Unluau.IL.Values
         /// Converts the current <see cref="Concat"/> to a string.
         /// </summary>
         /// <returns>String representation.</returns>
-        public override string ToString() => $"Concat({TypeExtensions.ToString(Registers)})";
+        public override string ToString() => $"Concat({TypeExtensions.ToString(Values)})";
     }
 }
