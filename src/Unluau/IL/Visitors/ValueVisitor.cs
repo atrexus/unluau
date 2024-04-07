@@ -50,6 +50,8 @@ namespace Unluau.IL.Visitors
                 foreach (var slot in node.Slots)
                     slot.References++;
             }
+            else if (node.Slots.Length == 1)
+                TryDelete(node, node.Slots.First());
 
             return true;
         }

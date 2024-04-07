@@ -104,7 +104,7 @@ namespace Unluau.Chunk
         /// <returns>A new IL program.</returns>
         public Program Lift()
         {
-            var main = Functions[MainFunctionIndex].Lift();
+            var main = Functions[MainFunctionIndex].Lift(this);
             main.IsMain = true; 
 
             List<Closure> liftedClosures = [];
@@ -116,7 +116,7 @@ namespace Unluau.Chunk
                 if (id == MainFunctionIndex)
                     continue;
 
-                liftedClosures.Add(Functions[id].Lift());
+                liftedClosures.Add(Functions[id].Lift(this));
             }
 
             return new Program(main.Context, main, [.. liftedClosures]);

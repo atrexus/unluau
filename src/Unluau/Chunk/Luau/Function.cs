@@ -34,6 +34,11 @@ namespace Unluau.Chunk.Luau
         public byte UpvalueCount { get; private set; }
 
         /// <summary>
+        /// The list of upvalue slots (aka "up slots").
+        /// </summary>
+        public List<Slot> UpSlots { get; private set; }
+
+        /// <summary>
         /// If true, the current function is variadic ('...').
         /// </summary>
         public bool IsVariadic { get; private set; }
@@ -96,6 +101,8 @@ namespace Unluau.Chunk.Luau
             ParameterCount = reader.ReadByte();
             UpvalueCount = reader.ReadByte();
             IsVariadic = reader.ReadBoolean();
+
+            UpSlots = new(UpvalueCount);
 
             // TODO: Make this a method once they finally drop their type encoding.
             if (version.HasTypeEncoding)
@@ -314,7 +321,7 @@ namespace Unluau.Chunk.Luau
         /// Lifts the current function to a new IL closure.
         /// </summary>
         /// <returns>An IL closure.</returns>
-        public Closure Lift()
+        public Closure Lift(LuauChunk chunk)
         {
             var context = GetClosureContext();
             var stack = new Stack();
@@ -323,12 +330,12 @@ namespace Unluau.Chunk.Luau
             foreach (var variable in context.Parameters)
                 stack.Set(variable.Slot, variable);
 
-            var body = LiftBasicBlock(stack, 0);
+            var body = LiftBasicBlock(chunk, stack, 0);
 
             return new(context, body);
         }
 
-        public BasicBlock LiftBasicBlock(Stack stack, int startPc, int? endPc = null)
+        public BasicBlock LiftBasicBlock(LuauChunk chunk, Stack stack, int startPc, int? endPc = null)
         {
             var pc = startPc;
             var block = new BasicBlock(Context.Empty);
@@ -355,6 +362,9 @@ namespace Unluau.Chunk.Luau
                     case OpCode.LENGTH:
                     case OpCode.MINUS:
                     case OpCode.NOT:
+                    case OpCode.NEWCLOSURE:
+                    case OpCode.DUPCLOSURE:
+                    case OpCode.GETUPVAL:
                     {
                         int aux = Instructions[pc + 1].Value;
 
@@ -372,7 +382,7 @@ namespace Unluau.Chunk.Luau
 
                             // The size of the table varies. If the auxiliary instruction contains a value that is not
                             // zero, then we use it. Otherwise we switch to the B operand.
-                            OpCode.NEWTABLE => new Table(context, aux > 0 ? Instructions[++pc].Value : (instruction.B > 0 ? (1 << (instruction.B - 1)) : 0)),
+                            OpCode.NEWTABLE => new Table(context, aux > 0 ? Instructions[pc + 1].Value : (instruction.B > 0 ? (1 << (instruction.B - 1)) : 0)),
                             OpCode.DUPTABLE => ConstantToBasicValue(context, Constants[instruction.D]),
 
                             // This instruction concatenates the list of registers together in descending order. 
@@ -383,25 +393,51 @@ namespace Unluau.Chunk.Luau
                             OpCode.MINUS or 
                             OpCode.NOT => BuildUnaryValue(context, stack, instruction),
 
+                            // Loads an upvalue into a target register, R(A).
+                            OpCode.GETUPVAL => new Reference(context, UpSlots[instruction.B]),
+
+                            // Loading closures is a complex task. The NEWCLOSURE instruction creates a new closure from a child function prototype.
+                            // The DUPCLOSURE creates a new closure from a pre-created function object (constants).
+                            OpCode.NEWCLOSURE => new ClosureValue(context, ClosureTable[instruction.D]),
+                            OpCode.DUPCLOSURE => ConstantToBasicValue(context, Constants[instruction.D]),
+
                             // We know this won't ever happen, but the C# compiler will cry if I don't add this.
                             _ => throw new NotSupportedException()
                         };
 
+                        // If we are loading a closure (DUPCLOSURE or NEWCLOSURE), we need to capture all of the upvalues. These follow 
+                        // in a chain of CAPTURE operations.
+                        if (instruction.Code == OpCode.NEWCLOSURE || instruction.Code == OpCode.DUPCLOSURE)
+                        {
+                            ++pc;
+                            CaptureUpvalues(chunk, stack, ref pc, (ClosureValue)value);
+                        }
+
                         // Skip the AUX instruction for the following operation codes
-                        if (instruction.Code == OpCode.GETIMPORT)
+                        if (instruction.Code == OpCode.GETIMPORT || instruction.Code == OpCode.NEWTABLE)
                             pc++;
 
                         // Here we check to see if the slot we are loading our value into is initialized or not. If it has, then we
                         // check to see if this value has been set within the current block. If not then we reset it, otherwise we 
                         // just update it.
-                        if (stack.TryGet(instruction.A, out Slot? ra) && ra!.Value.Context.PcScope.Item1 < startPc)
-                            ra = stack.Update(ra.Id, value);
-                        else
-                            ra = stack.Set(instruction.A, value);
+                        var ra = stack.SetScoped(instruction.A, value, startPc);
 
                         // Note: loading a value onto the stack can be for both for constant values and environment variables.
                         // It doesn't really matter what kind we have because when we generate our AST they are treated the same.
                         block.Statements.Add(new LoadValue(context, ra, value));
+                        break;
+                    }
+                    case OpCode.SETUPVAL:
+                    {
+                        // We handle the SETUPVAL instruction a little differently. Instead of setting R(A) we set the upvalue slot instead (R(B)).
+                        // This way we can minimize the number of IL instructions and keep a clean codebase.
+                        block.Statements.Add(new LoadValue(context, UpSlots[instruction.B], new Reference(context, stack.Get(instruction.A)!)));
+                        break;
+                    }
+                    case OpCode.SETGLOBAL:
+                    {
+                        // TODO (skips pc for now).
+                        ++pc;
                         break;
                     }
                     case OpCode.FASTCALL:
@@ -434,7 +470,7 @@ namespace Unluau.Chunk.Luau
                         {
                             // When CALL's B operand is 0, the instruction is LUA_MULTRET. This means that its arguments start 
                             // at R(A) and go up to the top of the stack.
-                            var argCount = instruction.B > 0 ? instruction.B : (stack.Top.Id - instruction.A) + 1;
+                            var argCount = instruction.B > 0 ? instruction.B : stack.Top.Id - instruction.A + 1;
 
                             for (int i = 1; i < argCount; ++i)
                                 arguments.Add(new Reference(context, stack.Get(instruction.A + i)!));
@@ -448,9 +484,12 @@ namespace Unluau.Chunk.Luau
 
                         var results = new List<Slot>();
 
+                        // Calculate the number of return values
+                        var retCount = instruction.C > 0 ? instruction.C - 1 : stack.Top.Id - instruction.A + 1;
+
                         // Load all of the results onto the stack. 
-                        for (int slot = 0; slot < instruction.C - 1; ++slot)
-                            results.Add(stack.Set(slot + instruction.A, callResult));
+                        for (int slot = 0; slot < retCount; ++slot)
+                            results.Add(stack.SetScoped(slot + instruction.A, callResult, startPc));
 
                         block.Statements.Add(new Call(context, callResult, [.. results]));
                         break;
@@ -578,7 +617,7 @@ namespace Unluau.Chunk.Luau
                         };
 
                         // Now we lift the body of the block.
-                        var body = LiftBasicBlock(stack, pc + 1, pc += instruction.D - (pc - ogPc - 1));
+                        var body = LiftBasicBlock(chunk, stack, pc + 1, pc += instruction.D - (pc - ogPc - 1));
 
                         // We decrement the program counter because the for loop will increment it on the next pass.
                         --pc;
@@ -670,6 +709,9 @@ namespace Unluau.Chunk.Luau
                 return new Table(context, entries);
             }
 
+            else if (constant is ClosureConstant closureConstant)
+                return new ClosureValue(context, closureConstant.Value);
+
             throw new NotImplementedException();
         }
 
@@ -692,6 +734,25 @@ namespace Unluau.Chunk.Luau
                 OpCode.NOT => UnaryType.Not,
                 _ => throw new NotSupportedException()
             }, new Reference(context, stack.Get(instruction.B)!));
+        }
+
+        private void CaptureUpvalues(LuauChunk chunk, Stack stack, ref int pc, ClosureValue value)
+        {
+            for (var instruction = Instructions[pc]; instruction.Code == OpCode.CAPTURE; instruction = Instructions[++pc])
+            {
+                var upSlot = (CaptureType)instruction.A switch
+                {
+                    // These can be used interchangeably when lifting. These are different in the VM however.
+                    CaptureType.Reference or CaptureType.Value => stack.MarkUpValue(instruction.B),
+                    CaptureType.UpValue => UpSlots[instruction.B],
+                    _ => throw new NotImplementedException()
+                };
+
+                var function = chunk.Functions[value.Value];
+                
+                function.UpSlots.Add(upSlot);
+            }
+            --pc;
         }
 
         private ClosureContext GetClosureContext()

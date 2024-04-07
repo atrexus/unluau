@@ -1,4 +1,5 @@
-﻿using Unluau.IL.Values;
+﻿using Unluau.Chunk.Luau;
+using Unluau.IL.Values;
 
 namespace Unluau.IL
 {
@@ -70,6 +71,37 @@ namespace Unluau.IL
 
             return slot;
         }
+        
+        /// <summary>
+        /// Marks a slot as an UpValue.
+        /// </summary>
+        /// <param name="id">The slot number.</param>
+        /// <returns>The slot.</returns>
+        public Slot MarkUpValue(byte id)
+        {
+            var slot = _slots[id];
+
+            // This is the minimum number of references needed to generate a local assignment.
+            slot.References = 2;
+            slot.IsUpValue = true;
+
+            return slot;
+        }
+
+        /// <summary>
+        /// Sets/Updates the slot with the specified value, based on scope.
+        /// </summary>
+        /// <param name="id">The slot number.</param>
+        /// <param name="basicValue">The value to set.</param>
+        /// <param name="startPc">The start scope of the current block.</param>
+        /// <returns>The new slot.</returns>
+        public Slot SetScoped(byte id, BasicValue basicValue, int startPc)
+        {
+            if (TryGet(id, out Slot? ra) && ra!.Value.Context.PcScope.Item1 < startPc)
+               return Update(ra.Id, basicValue);
+
+            return Set(id, basicValue);
+        }
 
         /// <summary>
         /// Gets a slot with the specific slot number.
@@ -125,6 +157,15 @@ namespace Unluau.IL
         /// <param name="v">The slot number.</param>
         /// <param name="basicValue">The value to set.</param>
         internal Slot Set(int v, BasicValue basicValue) => Set((byte)v, basicValue);
+
+        /// <summary>
+        /// Sets/Updates the slot with the specified value, based on scope.
+        /// </summary>
+        /// <param name="id">The slot number.</param>
+        /// <param name="basicValue">The value to set.</param>
+        /// <param name="startPc">The start scope of the current block.</param>
+        /// <returns>The new slot.</returns>
+        internal Slot SetScoped(int v, BasicValue basicValue, int startPc) => SetScoped((byte)v, basicValue, startPc);
     }
 
     /// <summary>
@@ -143,6 +184,11 @@ namespace Unluau.IL
         public int References { get; set; }
 
         /// <summary>
+        /// Whether or not this slot is referenced from another closure.
+        /// </summary>
+        public bool IsUpValue { get; set; } = false;
+
+        /// <summary>
         /// The value assigned to the register.
         /// </summary>
         public required BasicValue Value { get; set; }
@@ -151,6 +197,6 @@ namespace Unluau.IL
         /// Returns a string representation of the slot number.
         /// </summary>
         /// <returns>Slot number as string.</returns>
-        public override string ToString() => $"R({Id})";
+        public override string ToString() => $"{(IsUpValue ? "UpR" : "R")}({Id})";
     }
 }

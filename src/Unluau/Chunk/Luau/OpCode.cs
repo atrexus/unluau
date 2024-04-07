@@ -477,4 +477,11 @@ namespace Unluau.Chunk.Luau
             { OpCode.IDIVK, new OpProperties(OpCode.IDIVK, OpMode.iABC, false) },
         };
     }
+
+    public enum CaptureType : byte
+    {
+        Value, 
+        Reference,
+        UpValue
+    }
 }

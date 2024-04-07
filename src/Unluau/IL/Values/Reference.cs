@@ -9,7 +9,7 @@ namespace Unluau.IL.Values
     /// <summary>
     /// A reference to a register slot in the current function.
     /// </summary>
-    /// <param name="context">Information about the refrence.</param>
+    /// <param name="context">Information about the reference.</param>
     /// <param name="slot">A register slot.</param>
     public class Reference(Context context, Slot slot) : BasicValue(context)
     {
