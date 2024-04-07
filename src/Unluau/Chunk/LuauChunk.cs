@@ -109,7 +109,9 @@ namespace Unluau.Chunk
 
             List<Closure> liftedClosures = [];
 
-            for (int id = 0; id < Functions.Length; ++id)
+            // We want to lift the closures in reversed order, starting with the first functions compiled. This way we 
+            // can add upvalues in the lifter without breaking everything.
+            for (int id = Functions.Length - 1; id >= 0; --id)
             {
                 // Most of the time the main function index is located at 0, but sometimes (for some reason...)
                 // the main function is not the first function compiled. 

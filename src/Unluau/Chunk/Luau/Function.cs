@@ -409,7 +409,7 @@ namespace Unluau.Chunk.Luau
                         // in a chain of CAPTURE operations.
                         if (instruction.Code == OpCode.NEWCLOSURE || instruction.Code == OpCode.DUPCLOSURE)
                         {
-                            ++pc;
+                            ++pc; // Point at the first CAPTURE instruction.
                             CaptureUpvalues(chunk, stack, ref pc, (ClosureValue)value);
                         }
 
