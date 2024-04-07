@@ -88,6 +88,13 @@ namespace Unluau.IL.Visitors
             return false;
         }
 
+        public override bool Visit(SetGlobal node)
+        {
+            Writer.Write(Format(node.Context, "SetGlobal", node.Global.ToString(), node.Value.ToString()));
+
+            return false;
+        }
+
         public override bool Visit(BasicBlock node)
         {
             Writer.WriteLine(Format(node.Context, "BasicBlock {"));

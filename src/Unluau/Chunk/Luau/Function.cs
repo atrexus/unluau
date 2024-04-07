@@ -436,8 +436,16 @@ namespace Unluau.Chunk.Luau
                     }
                     case OpCode.SETGLOBAL:
                     {
-                        // TODO (skips pc for now).
-                        ++pc;
+                        var value = ConstantToBasicValue(context, Constants[Instructions[++pc].Value]);
+                        
+                        // Now we convert the constant to a global type. Sometime the SETGLOBAL instruction will invoke a string constant,
+                        // so we need to account for that.
+                        var global = value is BasicValue<string> stringLiteral 
+                            ? new Global(stringLiteral.Context, [stringLiteral.Value!]) 
+                            : (Global)value;
+
+
+                        block.Statements.Add(new SetGlobal(context, global, new Reference(context, stack.Get(instruction.A)!)));
                         break;
                     }
                     case OpCode.FASTCALL:

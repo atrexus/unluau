@@ -29,6 +29,7 @@ namespace Unluau.IL
         public virtual bool Visit(Move node) => Visit(node as Instruction);
         public virtual bool Visit(Return node) => Visit(node as Instruction);
         public virtual bool Visit(SetIndex node) => Visit(node as Instruction);
+        public virtual bool Visit(SetGlobal node) => Visit(node as Instruction);
 
         // Blocks
         public virtual bool Visit(IfBlock node) => Visit(node as BasicBlock);

@@ -107,6 +107,14 @@ namespace Unluau.IL.Visitors
             return true;
         }
 
+        public override bool Visit(SetGlobal node)
+        {
+            node.Global = (Global)ResolveValue(node.Global);
+            node.Value = ResolveValue(node.Value);
+            
+            return true;
+        }
+
         public override bool Visit(LoadValue node)
         {
             TryDelete(node, node.Slot);
