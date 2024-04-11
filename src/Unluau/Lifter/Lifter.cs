@@ -426,6 +426,7 @@ namespace Unluau
                     case OpCode.JUMPXEQKS:
                     {
                         bool auxUsed = false;
+                        // Console.WriteLine(instruction.Code.ToString());
                         Expression condition = GetCondition(registers, instruction, function.Instructions[pc + 1], function.Constants, ref auxUsed);
 
                         // If the next instruction is a JUMPBACK instruction, then we must be dealing with a repeat..until loop.
@@ -716,16 +717,23 @@ namespace Unluau
 
             Expression? right = null;
 
-            if (operation == BinaryExpression.BinaryOperation.CompareEq && code != OpCode.JUMPIFEQ)
-            {
-                right = code switch
+                if (operation == BinaryExpression.BinaryOperation.CompareEq && code != OpCode.JUMPIFEQ)
                 {
-                    // Both instructions contain a constant index as the aux instruction.
-                    OpCode.JUMPXEQKN or OpCode.JUMPXEQKS => ConstantToExpression(constants[(int)aux.Value & 0xffffff]),
-                    OpCode.JUMPXEQKNIL => new NilLiteral(),
-                    _ => ConstantToExpression(constants[(int)aux.Value]),
-                };
-            }
+                if (aux.Value < constants.Count)
+                {
+                    right = code switch
+                    {
+                        // Both instructions contain a constant index as the aux instruction.
+                        OpCode.JUMPXEQKN or OpCode.JUMPXEQKS => ConstantToExpression(constants[(int)aux.Value & 0xffffff]),
+                        OpCode.JUMPXEQKNIL => new NilLiteral(),
+                        _ => ConstantToExpression(constants[(int)aux.Value]),
+                    };
+                }
+                else
+                {
+                    right = new NilLiteral(); // really bad fix
+                }
+                }
             else
                 right = registers.GetExpression((int)aux.Value);
 

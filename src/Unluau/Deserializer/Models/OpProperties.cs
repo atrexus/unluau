@@ -42,7 +42,7 @@ namespace Unluau
         // D: value (-32768..32767)
         LOADN,
 
-        // LOADK: sets register to an entry from the constant table from the proto (number/string)
+        // LOADK: sets register to an entry from the constant table from the proto (number/vector/string)
         // A: target register
         // D: constant table index (0..32767)
         LOADK,
@@ -66,12 +66,12 @@ namespace Unluau
 
         // GETUPVAL: load upvalue from the upvalue table for the current function
         // A: target register
-        // B: upvalue index (0..255)
+        // B: upvalue index
         GETUPVAL,
 
         // SETUPVAL: store value into the upvalue table for the current function
         // A: target register
-        // B: upvalue index (0..255)
+        // B: upvalue index
         SETUPVAL,
 
         // CLOSEUPVALS: close (migrate to heap) all upvalues that were captured for registers >= target
@@ -167,7 +167,7 @@ namespace Unluau
 
         // JUMPIFEQ, JUMPIFLE, JUMPIFLT, JUMPIFNOTEQ, JUMPIFNOTLE, JUMPIFNOTLT: jumps to target offset if the comparison is true (or false, for NOT variants)
         // A: source register 1
-        // D: jump offset (-32768..32767; 0 means "next instruction" aka "don't jump")
+        // D: jump offset (-32768..32767; 1 means "next instruction" aka "don't jump")
         // AUX: source register 2
         JUMPIFEQ,
         JUMPIFLE,
@@ -190,7 +190,7 @@ namespace Unluau
         // ADDK, SUBK, MULK, DIVK, MODK, POWK: compute arithmetic operation between the source register and a constant and put the result into target register
         // A: target register
         // B: source register
-        // C: constant table index (0..255)
+        // C: constant table index (0..255); must refer to a number
         ADDK,
         SUBK,
         MULK,
@@ -273,8 +273,9 @@ namespace Unluau
         // A: target register (see FORGLOOP for register layout)
         FORGPREP_NEXT,
 
-        // removed in v3
-        DEP_FORGLOOP_NEXT,
+        // NATIVECALL: start executing new function in native code
+        // this is a pseudo-instruction that is never emitted by bytecode compiler, but can be constructed at runtime to accelerate native code dispatch
+        NATIVECALL,
 
         // GETVARARGS: copy variables into the target register from vararg storage for current function
         // A: target register
@@ -352,14 +353,14 @@ namespace Unluau
 
         // JUMPXEQKNIL, JUMPXEQKB: jumps to target offset if the comparison with constant is true (or false, see AUX)
         // A: source register 1
-        // D: jump offset (-32768..32767; 0 means "next instruction" aka "don't jump")
+        // D: jump offset (-32768..32767; 1 means "next instruction" aka "don't jump")
         // AUX: constant value (for boolean) in low bit, NOT flag (that flips comparison result) in high bit
         JUMPXEQKNIL,
         JUMPXEQKB,
 
         // JUMPXEQKN, JUMPXEQKS: jumps to target offset if the comparison with constant is true (or false, see AUX)
         // A: source register 1
-        // D: jump offset (-32768..32767; 0 means "next instruction" aka "don't jump")
+        // D: jump offset (-32768..32767; 1 means "next instruction" aka "don't jump")
         // AUX: constant table index in low 24 bits, NOT flag (that flips comparison result) in high bit
         JUMPXEQKN,
         JUMPXEQKS,
@@ -464,7 +465,7 @@ namespace Unluau
             { OpCode.FORGPREP_INEXT, new OpProperties(OpCode.FORGPREP_INEXT, OpMode.iAD) },
             { OpCode.DEP_FORGLOOP_INEXT, new OpProperties(OpCode.DEP_FORGLOOP_INEXT, OpMode.iAD) },
             { OpCode.FORGPREP_NEXT, new OpProperties(OpCode.FORGPREP_NEXT, OpMode.iAD) },
-            { OpCode.DEP_FORGLOOP_NEXT, new OpProperties(OpCode.DEP_FORGLOOP_NEXT, OpMode.iAD) },
+            // { OpCode.DEP_FORGLOOP_NEXT, new OpProperties(OpCode.DEP_FORGLOOP_NEXT, OpMode.iAD) },
             { OpCode.GETVARARGS, new OpProperties(OpCode.GETVARARGS, OpMode.iABC) },
             { OpCode.DUPCLOSURE, new OpProperties(OpCode.DUPCLOSURE, OpMode.iAD) },
             { OpCode.PREPVARARGS, new OpProperties(OpCode.PREPVARARGS, OpMode.iABC) },
