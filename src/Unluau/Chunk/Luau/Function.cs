@@ -468,10 +468,15 @@ namespace Unluau.Chunk.Luau
                             // without processing the following instructions. The auxiliary instruction contains the constant index.
                             arguments.Add(new Reference(context, stack.Get(instruction.B)!));
                             arguments.Add(ConstantToBasicValue(context, Constants[Instructions[++pc].Value]));
+
+
+                            // FASTCALL2K's C, is ment to jump to CALL, but it skipped it due to +1
+                            // ++pc was used before, so it's not needed anymore?
+                            instruction = Instructions[pc += instruction.C];
                         }
 
                         // The C operand of the FASTCALL instruction is the jump index for the CALL instruction.
-                        if (instruction.Code != OpCode.CALL)
+                        if (instruction.Code != OpCode.CALL && instruction.Code != OpCode.FASTCALL2K)
                             instruction = Instructions[pc += instruction.C + 1];
 
                         if (instruction.Code != OpCode.FASTCALL2K)
