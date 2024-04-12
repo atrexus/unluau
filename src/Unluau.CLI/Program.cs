@@ -7,7 +7,7 @@ namespace Unluau.CLI
     {
         static void Main(string[] args)
         {
-            using var stream = File.OpenRead("./test/Upvalue03.luau");
+            using var stream = File.OpenRead("./test/AnimationClipEditorPlugin.luac");
             var chunk = LuauChunk.Create(stream);
 
             Console.WriteLine(chunk.ToString());

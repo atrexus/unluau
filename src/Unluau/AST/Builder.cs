@@ -7,8 +7,16 @@ using Unluau.AST.Statements;
 
 namespace Unluau.AST
 {
+    /// <summary>
+    /// Builds an abstract syntax tree from a program of IL instructions.
+    /// </summary>
     public class Builder : IL.Visitor
     {
+        /// <summary>
+        /// Builds the AST.
+        /// </summary>
+        /// <param name="program">The program to build an AST from.</param>
+        /// <returns>The root.</returns>
         public static Block Build(IL.Program program)
         {
             var builder = new Builder();
