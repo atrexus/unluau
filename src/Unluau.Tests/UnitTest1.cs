@@ -1,4 +1,4 @@
-namespace Unluau.Tests.ILTests
+namespace Unluau.Tests
 {
     [TestClass]
     public class UnitTest1
