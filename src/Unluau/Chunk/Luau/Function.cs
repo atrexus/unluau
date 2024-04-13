@@ -7,7 +7,6 @@ using Unluau.IL.Values;
 using Unluau.IL.Values.Conditions;
 using Unluau.Utils;
 using Index = Unluau.IL.Values.Index;
-using Microsoft.Win32;
 
 namespace Unluau.Chunk.Luau
 {

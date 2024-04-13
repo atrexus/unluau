@@ -9,8 +9,4 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="AST\Expressions\" />
-  </ItemGroup>
-
 </Project>

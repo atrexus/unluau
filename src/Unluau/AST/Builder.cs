@@ -22,14 +22,11 @@ namespace Unluau.AST
             var builder = new Builder();
             program.Visit(builder);
 
-            return builder.Root;
+            return builder.Root!;
         }
 
-        public Block Root { get; set; }
+        public Block? Root { get; set; }
 
-        private Builder() 
-        {
-            
-        }
+        private Builder() { }
     }
 }
