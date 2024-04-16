@@ -685,11 +685,16 @@ namespace Unluau.Chunk.Luau
                     case OpCode.ORK:
                     case OpCode.AND:
                     case OpCode.ANDK:
+                    case OpCode.IDIV:
+                    case OpCode.IDIVK:
                     {
                         // Gets the left value. All of the instructions that end with 'K' contain an index to a constant in the C operand.
                         // Otherwise we just get the value from the register.
-                        var leftValue = (instruction.Code >= OpCode.ADDK) ? ConstantToBasicValue(context, Constants[instruction.C]) : new Reference(context, stack.Get(instruction.C)!);
-                        var rightValue = new Reference(context, stack.Get(instruction.B)!);
+                        var rightValue = (instruction.Code >= OpCode.ADDK && instruction.Code != OpCode.IDIV) 
+                            ? ConstantToBasicValue(context, Constants[instruction.C]) 
+                            : new Reference(context, stack.Get(instruction.C)!);
+
+                        var leftValue = new Reference(context, stack.Get(instruction.B)!);
 
                         // Now we create the instruction.
                         BasicBinary value = instruction.Code switch 
@@ -702,6 +707,7 @@ namespace Unluau.Chunk.Luau
                             OpCode.DIV or OpCode.DIVK => new Divide(context, leftValue, rightValue),
                             OpCode.MOD or OpCode.MODK => new Modulus(context, leftValue, rightValue),
                             OpCode.POW or OpCode.POWK => new Power(context, leftValue, rightValue),
+                            OpCode.IDIV or OpCode.IDIVK => new FloorDivide(context, leftValue, rightValue),
                             _ => throw new NotImplementedException()
                         };
 

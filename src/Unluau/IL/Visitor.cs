@@ -68,5 +68,6 @@ namespace Unluau.IL
         public virtual bool Visit(Power node) => Visit(node as BasicBinary);
         public virtual bool Visit(And node) => Visit(node as BasicBinary);
         public virtual bool Visit(Or node) => Visit(node as BasicBinary);
+        public virtual bool Visit(FloorDivide node) => Visit(node as BasicBinary);
     }
 }

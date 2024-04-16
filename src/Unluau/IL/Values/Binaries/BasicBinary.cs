@@ -44,6 +44,11 @@
         /// The logical OR operation.
         /// </summary>
         Or,
+
+        /// <summary>
+        /// The logical floor division (//) operation.
+        /// </summary>
+        FloorDivide,
     }
 
     /// <summary>

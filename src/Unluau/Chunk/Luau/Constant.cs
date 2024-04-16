@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Unluau.Chunk.Luau
 {
     /// <summary>
-    /// The type of constants avalible.
+    /// The type of constants available.
     /// </summary>
     public enum ConstantType : byte
     {

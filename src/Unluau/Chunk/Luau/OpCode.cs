@@ -19,7 +19,7 @@ namespace Unluau.Chunk.Luau
         iE,
         AUX,
 
-        // Represents an empy instruction (contans no args)
+        // Represents an empty instruction (contains no args)
         None
     }
 
