@@ -1,6 +1,14 @@
-﻿namespace Unluau.AST.Statements
+﻿using Unluau.AST.Expressions;
+
+namespace Unluau.AST.Statements
 {
-    public class LocalDefinition(Location location, Variable[] variables, )
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="location"></param>
+    /// <param name="variables"></param>
+    /// <param name="expressions"></param>
+    public class LocalDefinition(Location location, Variable[] variables, ExpressionList expressions) : Statement(location)
     {
     }
 }

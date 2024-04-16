@@ -3,7 +3,9 @@ using Unluau.IL.Statements;
 using Unluau.IL.Statements.Blocks;
 using Unluau.IL.Statements.Instructions;
 using Unluau.IL.Values;
+using Unluau.IL.Values.Binaries;
 using Unluau.IL.Values.Conditions;
+using Unluau.IL.Values.Unaries;
 
 namespace Unluau.IL.Visitors
 {
@@ -180,8 +182,14 @@ namespace Unluau.IL.Visitors
             if (value is Concat concat)
                 concat.Values = ResolveValueList(concat.Values);
 
-            if (value is Unary unary)
+            if (value is BasicUnary unary)
                 unary.Value = ResolveValue(unary.Value);
+
+            if (value is BasicBinary binary)
+            {
+                binary.Left = ResolveValue(binary.Left);
+                binary.Right = ResolveValue(binary.Right);
+            }
 
             return value;
         }

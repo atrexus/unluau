@@ -7,6 +7,8 @@ using Unluau.IL.Values;
 using Unluau.IL.Values.Conditions;
 using Unluau.Utils;
 using Index = Unluau.IL.Values.Index;
+using Unluau.IL.Values.Unaries;
+using Unluau.IL.Values.Binaries;
 
 namespace Unluau.Chunk.Luau
 {
@@ -358,9 +360,6 @@ namespace Unluau.Chunk.Luau
                     case OpCode.NEWTABLE:
                     case OpCode.DUPTABLE:
                     case OpCode.CONCAT:
-                    case OpCode.LENGTH:
-                    case OpCode.MINUS:
-                    case OpCode.NOT:
                     case OpCode.NEWCLOSURE:
                     case OpCode.DUPCLOSURE:
                     case OpCode.GETUPVAL:
@@ -386,11 +385,6 @@ namespace Unluau.Chunk.Luau
 
                             // This instruction concatenates the list of registers together in descending order. 
                             OpCode.CONCAT => new Concat(context, BuildConcatList(context, stack, instruction)),
-
-                            // Unary operations...
-                            OpCode.LENGTH or 
-                            OpCode.MINUS or 
-                            OpCode.NOT => BuildUnaryValue(context, stack, instruction),
 
                             // Loads an upvalue into a target register, R(A).
                             OpCode.GETUPVAL => new Reference(context, UpSlots[instruction.B]),
@@ -675,6 +669,72 @@ namespace Unluau.Chunk.Luau
                         block.Statements.Add(new Return(context, values));
                         break;
                     }
+                    case OpCode.ADD:
+                    case OpCode.SUB:
+                    case OpCode.MUL:
+                    case OpCode.DIV:
+                    case OpCode.MOD:
+                    case OpCode.POW:
+                    case OpCode.ADDK:
+                    case OpCode.SUBK:
+                    case OpCode.MULK:
+                    case OpCode.DIVK:
+                    case OpCode.MODK:
+                    case OpCode.POWK:
+                    case OpCode.OR:
+                    case OpCode.ORK:
+                    case OpCode.AND:
+                    case OpCode.ANDK:
+                    {
+                        // Gets the left value. All of the instructions that end with 'K' contain an index to a constant in the C operand.
+                        // Otherwise we just get the value from the register.
+                        var leftValue = (instruction.Code >= OpCode.ADDK) ? ConstantToBasicValue(context, Constants[instruction.C]) : new Reference(context, stack.Get(instruction.C)!);
+                        var rightValue = new Reference(context, stack.Get(instruction.B)!);
+
+                        // Now we create the instruction.
+                        BasicBinary value = instruction.Code switch 
+                        { 
+                            OpCode.AND or OpCode.ANDK => new And(context, leftValue, rightValue),
+                            OpCode.OR or OpCode.ORK => new Or(context, leftValue, rightValue),
+                            OpCode.ADD or OpCode.ADDK => new Add(context, leftValue, rightValue),
+                            OpCode.SUB or OpCode.SUBK => new Subtract(context, leftValue, rightValue),
+                            OpCode.MUL or OpCode.MULK => new Multiply(context, leftValue, rightValue),
+                            OpCode.DIV or OpCode.DIVK => new Divide(context, leftValue, rightValue),
+                            OpCode.MOD or OpCode.MODK => new Modulus(context, leftValue, rightValue),
+                            OpCode.POW or OpCode.POWK => new Power(context, leftValue, rightValue),
+                            _ => throw new NotImplementedException()
+                        };
+
+                        // Now we load the binary instruction onto the stack.
+                        var ra = stack.SetScoped(instruction.A, value, startPc);
+
+                        // Now we need to add a LoadValue instruction to the block.
+                        block.Statements.Add(new LoadValue(context, ra, value));
+                        break;
+                    }
+                    case OpCode.LENGTH:
+                    case OpCode.MINUS:
+                    case OpCode.NOT:
+                    {
+                        // Gets the value to perform the unary operation on.
+                        var value = new Reference(context, stack.Get(instruction.B)!);
+
+                        // Now we create the instruction.
+                        BasicUnary unary = instruction.Code switch
+                        {
+                            OpCode.LENGTH => new Length(context, value),
+                            OpCode.MINUS => new Minus(context, value),
+                            OpCode.NOT => new Not(context, value),
+                            _ => throw new NotImplementedException()
+                        };
+
+                        // Now we load the binary instruction onto the stack.
+                        var ra = stack.SetScoped(instruction.A, unary, startPc);
+
+                        // Now we need to add a LoadValue instruction to the block.
+                        block.Statements.Add(new LoadValue(context, ra, unary));
+                        break;
+                    }
                 }
             }
 
@@ -737,17 +797,6 @@ namespace Unluau.Chunk.Luau
             return values;
         }
 
-        private static Unary BuildUnaryValue(Context context, Stack stack, Instruction instruction)
-        {
-            return new(context, instruction.Code switch
-            {
-                OpCode.LENGTH => UnaryType.Length,
-                OpCode.MINUS => UnaryType.Minus,
-                OpCode.NOT => UnaryType.Not,
-                _ => throw new NotSupportedException()
-            }, new Reference(context, stack.Get(instruction.B)!));
-        }
-
         private void CaptureUpvalues(LuauChunk chunk, Stack stack, ref int pc, ClosureValue value)
         {
             for (var instruction = Instructions[pc]; instruction.Code == OpCode.CAPTURE; instruction = Instructions[++pc])
@@ -789,5 +838,6 @@ namespace Unluau.Chunk.Luau
         }
 
         private Context GetContext(int startPc, int endPc) => new((startPc, endPc), LineInformation?.GetLines(startPc, endPc));
+  
     }
 }

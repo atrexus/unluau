@@ -1,7 +1,4 @@
-﻿using Unluau.IL.Statements.Instructions;
-using Unluau.IL.Values;
-
-namespace Unluau.IL.Statements.Blocks
+﻿namespace Unluau.IL.Statements.Blocks
 {
     /// <summary>
     /// Represents a basic block in the program.

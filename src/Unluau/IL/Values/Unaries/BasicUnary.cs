@@ -1,12 +1,10 @@
-﻿using Unluau.Utils;
-
-namespace Unluau.IL.Values
+﻿namespace Unluau.IL.Values.Unaries
 {
     /// <summary>
     /// The types of unary operations.
     /// </summary>
     public enum UnaryType
-    { 
+    {
         /// <summary>
         /// Equivalent to Luau's `not` keyword.
         /// </summary>
@@ -22,12 +20,12 @@ namespace Unluau.IL.Values
     }
 
     /// <summary>
-    /// Applies unary operation to a register.
+    /// Applies a unary operation to a value.
     /// </summary>
-    /// <param name="context">Information about the location.</param>
+    /// <param name="context">Information on the instruction.</param>
     /// <param name="type">The type of unary operation.</param>
-    /// <param name="value">The register that the unary operation is applied to.</param>
-    public class Unary(Context context, UnaryType type, BasicValue value) : BasicValue(context)
+    /// <param name="value">The value.</param>
+    public abstract class BasicUnary(Context context, UnaryType type, BasicValue value) : BasicValue(context)
     {
         /// <summary>
         /// The type of unary operation.
@@ -35,7 +33,7 @@ namespace Unluau.IL.Values
         public UnaryType Type { get; set; } = type;
 
         /// <summary>
-        /// The register that the unary operation is applied to.
+        /// The value that the unary operation is applied to.
         /// </summary>
         public BasicValue Value { get; set; } = value;
 
@@ -52,9 +50,9 @@ namespace Unluau.IL.Values
         }
 
         /// <summary>
-        /// Converts the current <see cref="Unary"/> to a string.
+        /// Creates a string representation of the <see cref="BasicUnary"/>.
         /// </summary>
         /// <returns>String representation.</returns>
-        public override string ToString() => $"{Enum.GetName(typeof(UnaryType), Type)}({TypeExtensions.ToString(Value)})";
+        public override abstract string? ToString();
     }
 }

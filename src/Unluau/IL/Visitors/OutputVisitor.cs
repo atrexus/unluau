@@ -125,19 +125,19 @@ namespace Unluau.IL.Visitors
         {
             StringBuilder stringBuilder = new();
 
-            stringBuilder.Append(string.Format(" {0, -15} {1, -15} {2, -8} {3, -30} {4, -14}", context, new string(' ', Indent * 2) + op, a, b, c));
+            stringBuilder.Append(string.Format(" {0, -10} {1} {2} {3} {4}", context, new string(' ', Indent * 2) + op, a, b, c));
 
             return stringBuilder.ToString();
         }
 
         private static string Format(Context context, string op, string? a, string? b)
-            => Format(context, op, a, b, "   ");
+            => Format(context, op, a, b, string.Empty);
 
         private static string Format(Context context, string op)
         {
             StringBuilder stringBuilder = new();
 
-            stringBuilder.Append(string.Format(" {0, -15} {1}", context, new string(' ', Indent * 2) + op));
+            stringBuilder.Append(string.Format(" {0, -10} {1}", context, new string(' ', Indent * 2) + op));
 
             return stringBuilder.ToString();
         }
