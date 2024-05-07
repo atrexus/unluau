@@ -124,6 +124,104 @@
         /// C: index register.
         /// </remarks>
         GetTable,
+
+        /// <summary>
+        /// Store source register into table using key from register
+        /// </summary>
+        /// <remarks>
+        /// A: source register.
+        /// B: table register.
+        /// C: index register.
+        /// </remarks>
+        SetTable,
+
+        /// <summary>
+        /// Load value from table into target register using constant string as a key
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// B: table register.
+        /// C: predicted slot index (based on hash).
+        /// AUX: constant table index.
+        /// </remarks>
+        GetTableKS,
+
+        /// <summary>
+        /// Store source register into table using constant string as a key
+        /// </summary>
+        /// <remarks>
+        /// A: source register.
+        /// B: table register.
+        /// C: predicted slot index (based on hash).
+        /// AUX: constant table index.
+        /// </remarks>
+        SetTableKS,
+
+        /// <summary>
+        /// Load value from table into target register using small integer index as a key
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// B: table register.
+        /// C: index-1 (index is 1..256).
+        /// </remarks>
+        GetTableN,
+
+        NewClosure,
+        NameCall,
+        Call,
+        Return,
+        Jump,
+        JumpBack,
+        JumpIf,
+        JumpIfNot,
+        JumpIfEq,
+        JumpIfLe,
+        JumpIfLt,
+        JumpIfNotEq,
+        JumpIfNotLe,
+        JumpIfNotLt,
+        
+        Add,
+        Sub,
+        Mul,
+        Div,
+        Mod,
+        Pow,
+
+        AddK,
+        SubK,
+        MulK,
+        DivK,
+        ModK,
+        PowK,
+
+        And,
+        Or,
+
+        AndK,
+        OrK,
+
+        Concat,
+
+        Not,
+        Minus,
+        Len,
+
+        NewTable,
+        DupTable,
+        SetList,
+        ForNPrep,
+        ForNLoop,
+        ForGPrep,
+        ForGLoop,
+
+        ForGPrepINext,
+
+        // Deprecated, removed in v3
+        _ForGLoopINext,
+
+        ForGPrepNext,
     }
 
     /// <summary>

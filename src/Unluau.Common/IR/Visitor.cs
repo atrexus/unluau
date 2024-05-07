@@ -141,5 +141,30 @@ namespace Unluau.Common.IR
         /// The visitor for the <see cref="GetImport"/> class.
         /// </summary>
         public virtual bool Visit(GetImport instruction) => Visit(instruction as InstructionAD);
+
+        /// <summary>
+        /// The visitor for the <see cref="GetTable"/> class.
+        /// </summary>
+        public virtual bool Visit(GetTable instruction) => Visit(instruction as InstructionABC);
+
+        /// <summary>
+        /// The visitor for the <see cref="SetTable"/> class.
+        /// </summary>
+        public virtual bool Visit(SetTable instruction) => Visit(instruction as InstructionABC);
+
+        /// <summary>
+        /// The visitor for the <see cref="GetTableKS"/> class.
+        /// </summary>
+        public virtual bool Visit(GetTableKS instruction) => Visit(instruction as InstructionABC);
+
+        /// <summary>
+        /// The visitor for the <see cref="SetTableKS"/> class.
+        /// </summary>
+        public virtual bool Visit(SetTableKS instruction) => Visit(instruction as InstructionABC);
+
+        /// <summary>
+        /// The visitor for the <see cref="GetTableN"/> class.
+        /// </summary>
+        public virtual bool Visit(GetTableN instruction) => Visit(instruction as InstructionABC);
     }
 }

@@ -135,6 +135,10 @@ namespace Unluau.Common.IR
                 OpCode.CloseUpvalues => new CloseUpvalues(ReadUInt32()),
                 OpCode.GetImport => new GetImport(ReadUInt64()),
                 OpCode.GetTable => new GetTable(ReadUInt32()),
+                OpCode.SetTable => new SetTable(ReadUInt32()),
+                OpCode.GetTableKS => new GetTableKS(ReadUInt64()),
+                OpCode.SetTableKS => new SetTableKS(ReadUInt64()),
+                OpCode.GetTableN => new GetTableN(ReadUInt32()),
                 _ => throw new Exception($"invalid opcode {code}")
             };
         }

@@ -1,9 +1,9 @@
 ﻿namespace Unluau.Common.IR.ProtoTypes.Instructions
 {
     /// <summary>
-    /// Represents a get table instruction.
+    /// Represents the `settable` instruction.
     /// </summary>
-    public class GetTable(uint value) : InstructionABC(value)
+    public class SetTable(uint value) : InstructionABC(value)
     {
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)
