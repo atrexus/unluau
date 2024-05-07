@@ -124,6 +124,17 @@ namespace Unluau.Common.IR
                 OpCode.Nop => new Nop(ReadUInt32()),
                 OpCode.Break => new Break(ReadUInt32()),
                 OpCode.LoadNil => new LoadNil(ReadUInt32()),
+                OpCode.LoadBoolean => new LoadBoolean(ReadUInt32()),
+                OpCode.LoadNumber => new LoadNumber(ReadUInt32()),
+                OpCode.LoadK => new LoadK(ReadUInt32()),
+                OpCode.Move => new Move(ReadUInt32()),
+                OpCode.GetGlobal => new GetGlobal(ReadUInt64()),
+                OpCode.SetGlobal => new SetGlobal(ReadUInt64()),
+                OpCode.GetUpvalue => new GetUpvalue(ReadUInt32()),
+                OpCode.SetUpvalue => new SetUpvalue(ReadUInt32()),
+                OpCode.CloseUpvalues => new CloseUpvalues(ReadUInt32()),
+                OpCode.GetImport => new GetImport(ReadUInt64()),
+                OpCode.GetTable => new GetTable(ReadUInt32()),
                 _ => throw new Exception($"invalid opcode {code}")
             };
         }

@@ -1,7 +1,7 @@
 ﻿namespace Unluau.Common.IR.ProtoTypes
 {
     [Flags]
-    public enum ProtoTypeFlag : byte
+    public enum ProtoTypeFlags : byte
     {
         /// <summary>
         /// Used to tag main proto for modules with --!native
@@ -25,7 +25,7 @@
         /// Returns whether the prototype has a specific flag.
         /// </summary>
         /// <param name="flag">The flag</param>
-        public bool HasFlag(ProtoTypeFlag flag) => (_flags & (byte)flag) != 0;
+        public bool HasFlag(ProtoTypeFlags flag) => (_flags & (byte)flag) != 0;
 
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)

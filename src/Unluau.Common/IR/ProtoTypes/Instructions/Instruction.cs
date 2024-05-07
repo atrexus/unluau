@@ -22,6 +22,108 @@
         /// A: target register.
         /// </remarks>
         LoadNil,
+
+        /// <summary>
+        /// Loads a boolean value into a register.
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// B: value (1/0).
+        /// C: jump offset.
+        /// </remarks>
+        LoadBoolean,
+
+        /// <summary>
+        /// Loads a number into a register.
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// D: value (-32768..32767).
+        /// </remarks>
+        LoadNumber,
+
+        /// <summary>
+        /// Sets register to an entry from the constant table from the proto (number/vector/string)
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// D: constant index (0..32767).
+        /// </remarks>
+        LoadK,
+
+        /// <summary>
+        /// Moves a value from one register to another.
+        /// </summary>
+        /// <remarks>
+        /// A: target register. B: source register.
+        /// </remarks>
+        Move,
+
+        /// <summary>
+        /// Load value from global table using constant string as a key
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// C: predicted slot index (based on hash).
+        /// AUX: constant table index.
+        /// </remarks>
+        GetGlobal,
+
+        /// <summary>
+        /// Load value from global table using constant string as a key
+        /// </summary>
+        /// <remarks>
+        /// A: source register.
+        /// C: predicted slot index (based on hash).
+        /// AUX: constant table index.
+        /// </remarks>
+        SetGlobal,
+
+        /// <summary>
+        /// Load upvalue from the upvalue table for the current function
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// B: upvalue index.
+        /// </remarks>
+        GetUpvalue,
+
+        /// <summary>
+        /// Store value into the upvalue table for the current function
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// B: upvalue index.
+        /// </remarks>
+        SetUpvalue,
+
+        /// <summary>
+        /// Close (migrate to heap) all upvalues that were captured for registers >= target
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// </remarks>
+        CloseUpvalues,
+
+        /// <summary>
+        /// Load imported global table global from the constant table
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// B: constant table index (0..32767); we assume that imports are loaded into the constant table
+        /// AUX: 3 10-bit indices of constant strings that, combined, constitute an import path; length of the path is set by the top 2 bits (1,2,3)
+        /// </remarks>
+        GetImport,
+
+        /// <summary>
+        /// Load value from table into target register using key from register
+        /// </summary>
+        /// <remarks>
+        /// A: target register.
+        /// B: table register.
+        /// C: index register.
+        /// </remarks>
+        GetTable,
     }
 
     /// <summary>
@@ -29,6 +131,11 @@
     /// </summary>
     public class Instruction(uint value) : Node
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InstructionABC"/> class.
+        /// </summary>
+        public Instruction(ulong value) : this((uint)(value >> 32)) => Aux = new Instruction((uint)value);
+
         /// <summary>
         /// Contains the raw value of the instruction.
         /// </summary>
@@ -39,6 +146,11 @@
         /// </summary>
         public OpCode Code => (OpCode)(Value & 0xFF);
 
+        /// <summary>
+        /// Gets or sets the auxiliary instruction.
+        /// </summary>
+        public Instruction? Aux { get; set; }
+
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)
         {
@@ -47,10 +159,24 @@
     }
 
     /// <summary>
-    /// Represents an instruction with an A, B, and C field. May also have an auxiliary instruction.
+    /// Represents an instruction with an A, B, and C field.
     /// </summary>
-    public abstract class InstructionABC(uint value) : Instruction(value)
+    public abstract class InstructionABC : Instruction
     {
+        /// <summary>
+        /// Creates a new instance of the <see cref="InstructionABC"/> class.
+        /// </summary>
+        protected InstructionABC(uint value) : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="InstructionABC"/> class.
+        /// </summary>
+        protected InstructionABC(ulong value) : base(value)
+        {
+        }
+
         /// <summary>
         /// Gets the A operand of the instruction.
         /// </summary>
@@ -76,8 +202,22 @@
     /// <summary>
     /// Represents an instruction with an A and D field.
     /// </summary>
-    public abstract class InstructionAD(uint value) : Instruction(value)
+    public abstract class InstructionAD : Instruction
     {
+        /// <summary>
+        /// Creates a new instance of the <see cref="InstructionAD"/> class.
+        /// </summary>
+        protected InstructionAD(uint value) : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="InstructionAD"/> class.
+        /// </summary>
+        protected InstructionAD(ulong value) : base(value)
+        {
+        }
+
         /// <summary>
         /// Gets the A operand of the instruction.
         /// </summary>
