@@ -1,6 +1,4 @@
-﻿using Unluau.Common.IR.ProtoTypes.Instructions;
-
-namespace Unluau.Common.IR.ProtoTypes
+﻿namespace Unluau.Common.IR.ProtoTypes
 {
     /// <summary>
     /// A low level representation of a Lua function (its a "prototype" of a function).
