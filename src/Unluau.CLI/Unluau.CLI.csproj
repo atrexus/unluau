@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Unluau.Common\Unluau.Common.csproj" />
+    <ProjectReference Include="..\Unluau.Dissasembler\Unluau.Disassembler.csproj" />
     <ProjectReference Include="..\Unluau\Unluau.csproj" />
   </ItemGroup>
 

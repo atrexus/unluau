@@ -1,4 +1,6 @@
-﻿namespace Unluau.Common.IR.ProtoTypes
+﻿using Unluau.Common.IR.Constants;
+
+namespace Unluau.Common.IR.ProtoTypes
 {
     /// <summary>
     /// A low level representation of a Lua function (its a "prototype" of a function).
@@ -21,14 +23,34 @@
         public bool IsVararg { get; set; }
 
         /// <summary>
+        /// If the function is the main function.
+        /// </summary>
+        public bool IsMain { get; set; }
+
+        /// <summary>
         /// The flags of the function prototype.
         /// </summary>
         public Flags? Flags { get; set; }
 
         /// <summary>
+        /// The size of the instructions in the function prototype.
+        /// </summary>
+        public int InstructionSize { get; set; }
+
+        /// <summary>
         /// The list of instructions in the function prototype.
         /// </summary>
         public List<Instruction> Instructions { get; set; } = [];
+
+        /// <summary>
+        /// The list of constants in the function prototype.
+        /// </summary>
+        public List<Constant> Constants { get; set; } = [];
+
+        /// <summary>
+        /// The list of prototypes in the function prototype.
+        /// </summary>
+        public List<ProtoType> ProtoTypes { get; set; } = [];
 
         /// <summary>
         /// The line that the function was defined on.

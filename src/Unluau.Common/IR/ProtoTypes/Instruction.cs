@@ -31,7 +31,7 @@
         /// B: value (1/0).
         /// C: jump offset.
         /// </remarks>
-        LoadBoolean,
+        LoadB,
 
         /// <summary>
         /// Loads a number into a register.
@@ -40,7 +40,7 @@
         /// A: target register.
         /// D: value (-32768..32767).
         /// </remarks>
-        LoadNumber,
+        LoadN,
 
         /// <summary>
         /// Sets register to an entry from the constant table from the proto (number/vector/string)
@@ -86,7 +86,7 @@
         /// A: target register.
         /// B: upvalue index.
         /// </remarks>
-        GetUpvalue,
+        GetUpval,
 
         /// <summary>
         /// Store value into the upvalue table for the current function
@@ -95,7 +95,7 @@
         /// A: target register.
         /// B: upvalue index.
         /// </remarks>
-        SetUpvalue,
+        SetUpval,
 
         /// <summary>
         /// Close (migrate to heap) all upvalues that were captured for registers >= target
@@ -103,7 +103,7 @@
         /// <remarks>
         /// A: target register.
         /// </remarks>
-        CloseUpvalues,
+        CloseUpvals,
 
         /// <summary>
         /// Load imported global table global from the constant table
@@ -315,7 +315,7 @@
         // B: source register
         Not,
         Minus,
-        Len,
+        Length,
 
         /// <summary>
         /// Create table in target register
@@ -326,19 +326,206 @@
         /// AUX: array size
         /// </remarks>
         NewTable,
+
+        /// <summary>
+        /// Duplicate table using the constant table template to target register
+        /// </summary>
+        /// <remarks>
+        /// A: target register
+        /// D: constant table index (0..32767)
+        /// </remarks>
         DupTable,
         SetList,
         ForNPrep,
         ForNLoop,
-        ForGPrep,
         ForGLoop,
 
+        /// <summary>
+        /// Prepare FORGLOOP with 2 output variables (no AUX encoding), assuming generator is luaB_inext, and jump to FORGLOOP
+        /// </summary>
+        /// <remarks>
+        /// A: target register (see FORGLOOP for register layout)
+        /// </remarks>
         ForGPrepINext,
 
         // Deprecated, removed in v3
         _ForGLoopINext,
 
+        /// <summary>
+        /// Prepare FORGLOOP with 2 output variables (no AUX encoding), assuming generator is luaB_next, and jump to FORGLOOP
+        /// </summary>
+        /// <remarks>
+        /// A: target register (see FORGLOOP for register layout)
+        /// </remarks>
         ForGPrepNext,
+
+        /// <summary>
+        /// Start executing new function in native code
+        /// </summary>
+        /// <remarks>
+        /// This is a pseudo-instruction that is never emitted by bytecode compiler, but can be constructed at runtime to accelerate native code dispatch
+        /// </remarks>
+        NativeCall,
+
+        /// <summary>
+        /// Copy variables into the target register from vararg storage for current function.
+        /// </summary>
+        /// <remarks>
+        /// A: target register
+        /// B: variable count + 1, or 0 to copy all variables and adjust top (MULTRET)
+        /// </remarks>
+        GetVarArgs,
+
+        /// <summary>
+        /// Create closure from a pre-created function object (reusing it unless environments diverge).
+        /// </summary>
+        /// <remarks>
+        /// A: target register
+        /// D: constant table index (0..32767)
+        /// </remarks>
+        DupClosure,
+
+        /// <summary>
+        /// Prepare stack for variadic functions so that GETVARARGS works correctly.
+        /// </summary>
+        /// <remarks>
+        /// A: number of fixed arguments
+        /// </remarks>
+        PrepVarArgs,
+
+        /// <summary>
+        /// Sets register to an entry from the constant table from the proto (number/string).
+        /// </summary>
+        /// <remarks>
+        /// A: target register
+        /// AUX: constant table index
+        /// </remarks>
+        LoadKX,
+
+        /// <summary>
+        /// Jumps to the target offset; like JUMPBACK, supports interruption.
+        /// </summary>  
+        /// <remarks>
+        /// E: jump offset (-2^23..2^23; 0 means "next instruction" aka "don't jump")
+        /// </remarks>
+        JumpX,
+
+        /// <summary>
+        /// Perform a fast call of a built-in function.
+        /// </summary>
+        /// <remarks>
+        /// A: built-in function id (see LuauBuiltinFunction)
+        /// C: jump offset to get to following CALL
+        /// FASTCALL is followed by one of (GETIMPORT, MOVE, GETUPVAL) instructions and by CALL instruction
+        /// This is necessary so that if FASTCALL can't perform the call inline, it can continue normal execution
+        /// If FASTCALL *can* perform the call, it jumps over the instructions *and* over the next CALL
+        /// Note that FASTCALL will read the actual call arguments, such as argument/result registers and counts, from the CALL instruction
+        /// </remarks>
+        FastCall,
+
+        /// <summary>
+        /// Update coverage information stored in the instruction.
+        /// </summary>
+        /// <remarks>
+        /// E: hit count for the instruction (0..2^23-1)
+        /// The hit count is incremented by VM every time the instruction is executed, and saturates at 2^23-1
+        /// </remarks>
+        Coverage,
+
+        /// <summary>
+        /// Capture a local or an upvalue as an upvalue into a newly created closure; only valid after NEWCLOSURE.
+        /// </summary>
+        /// <remarks>
+        /// A: capture type, see LuauCaptureType
+        /// B: source register (for VAL/REF) or upvalue index (for UPVAL/UPREF)
+        /// </remarks>
+        Capture,
+
+        // SUBRK, DIVRK: compute arithmetic operation between the constant and a source register and put the result into target register
+        // A: target register
+        // B: source register
+        // C: constant table index (0..255); must refer to a number
+        SubRK,
+        DivRK,
+
+        /// <summary>
+        /// Perform a fast call of a built-in function using 1 register argument.
+        /// </summary>
+        /// <remarks>
+        /// A: builtin function id (see LuauBuiltinFunction)
+        /// B: source argument register
+        /// C: jump offset to get to following CALL
+        /// </remarks>
+        FastCall1,
+
+        /// <summary>
+        /// Perform a fast call of a built-in function using 2 register argument.
+        /// </summary>
+        /// <remarks>
+        /// A: builtin function id (see LuauBuiltinFunction)
+        /// B: source argument register
+        /// C: jump offset to get to following CALL
+        /// AUX: source register 2 in least-significant byte
+        /// </remarks>
+        FastCall2,
+
+        /// <summary>
+        /// Perform a fast call of a built-in function using 1 register argument and 1 constant argument
+        /// </summary>
+        /// <remarks>
+        /// A: builtin function id (see LuauBuiltinFunction)
+        /// B: source argument register
+        /// C: jump offset to get to following CALL
+        /// AUX: constant index
+        /// </remarks>
+        FastCall2K,
+
+        /// <summary>
+        /// Prepare loop variables for a generic for loop, jump to the loop backedge unconditionally.
+        /// </summary>
+        /// <remarks>
+        /// A: target register; generic for loops assume a register layout [generator, state, index, variables...]
+        /// D: jump offset (-32768..32767)
+        /// </remarks>
+        ForGPrep,
+
+        /// <summary>
+        /// Jumps to target offset if the comparison with constant is true (or false, see AUX)
+        /// </summary>
+        /// <remarks>
+        /// A: source register 1
+        /// D: jump offset (-32768..32767; 1 means "next instruction" aka "don't jump")
+        /// AUX: constant value (for boolean) in low bit, NOT flag (that flips comparison result) in high bit
+        /// </remarks>
+        JumpXEqKNil,
+        JumpXEqKB,
+
+        // JUMPXEQKN, JUMPXEQKS: jumps to target offset if the comparison with constant is true (or false, see AUX)
+        // A: source register 1
+        // D: jump offset (-32768..32767; 1 means "next instruction" aka "don't jump")
+        // AUX: constant table index in low 24 bits, NOT flag (that flips comparison result) in high bit
+        JumpXEqKN,
+        JumpXEqKS,
+
+        /// <summary>
+        /// Compute floor division between two source registers and put the result into target register
+        /// </summary>
+        /// <remarks>
+        /// A: target register
+        /// B: source register 1
+        /// C: source register 2
+        /// </remarks>
+        IDiv,
+
+        /// <summary>
+        /// Compute floor division between the source register and a constant and put the result into target register.
+        /// </summary>
+        /// <remarks>
+        /// A: target register
+        /// B: source register
+        /// C: constant table index (0..255)
+        /// </remarks>
+        IDivK,
     }
 
     /// <summary>
@@ -349,7 +536,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InstructionABC"/> class.
         /// </summary>
-        public Instruction(ulong value) : this((uint)(value >> 32)) => Aux = new Instruction((uint)value);
+        public Instruction(ulong value) : this((uint)(value & 0xFFFFFFFF)) => Aux = new Instruction((uint)(value >> 32));
 
         /// <summary>
         /// Contains the raw value of the instruction.
@@ -365,6 +552,11 @@
         /// Gets or sets the auxiliary instruction.
         /// </summary>
         public Instruction? Aux { get; set; }
+
+        /// <summary>
+        /// The line that the instruction was defined on.
+        /// </summary>
+        public int? LineDefined { get; set; }
 
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)
@@ -406,6 +598,73 @@
         /// Gets the C operand of the instruction.
         /// </summary>
         public byte C => (byte)(Value >> 24 & 0xFF);
+
+        /// <inheritdoc/>
+        public override void Accept(Visitor visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
+
+    /// <summary>
+    /// Represents an instruction with an A and B field.
+    /// </summary>
+    public class InstructionAB : Instruction
+    {
+        /// <summary>
+        /// Creates a new instance of the <see cref="InstructionAB"/> class.
+        /// </summary>
+        public InstructionAB(uint value) : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="InstructionAB"/> class.
+        /// </summary>
+        public InstructionAB(ulong value) : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Gets the A operand of the instruction.
+        /// </summary>
+        public byte A => (byte)(Value >> 8 & 0xFF);
+
+        /// <summary>
+        /// Gets the B operand of the instruction.
+        /// </summary>
+        public byte B => (byte)(Value >> 16 & 0xFF);
+
+        /// <inheritdoc/>
+        public override void Accept(Visitor visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
+
+    /// <summary>
+    /// Represents an instruction with an A field.
+    /// </summary>
+    public class InstructionA : Instruction
+    {
+        /// <summary>
+        /// Creates a new instance of the <see cref="InstructionAB"/> class.
+        /// </summary>
+        public InstructionA(uint value) : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="InstructionAB"/> class.
+        /// </summary>
+        public InstructionA(ulong value) : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Gets the A operand of the instruction.
+        /// </summary>
+        public byte A => (byte)(Value >> 8 & 0xFF);
 
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)

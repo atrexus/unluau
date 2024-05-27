@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau", "Unluau\Unluau.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.CLI", "Unluau.CLI\Unluau.CLI.csproj", "{C442BD3C-DD52-4DC1-A7B2-2BD7FBBBAF01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.Common", "Unluau.Common\Unluau.Common.csproj", "{26B0ABEB-20C2-4E92-9339-CC443EF29892}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.Common", "Unluau.Common\Unluau.Common.csproj", "{26B0ABEB-20C2-4E92-9339-CC443EF29892}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unluau.Disassembler", "Unluau.Dissasembler\Unluau.Disassembler.csproj", "{BDCB8309-25AF-44E7-AF98-E3BB2A8B9C2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{26B0ABEB-20C2-4E92-9339-CC443EF29892}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26B0ABEB-20C2-4E92-9339-CC443EF29892}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26B0ABEB-20C2-4E92-9339-CC443EF29892}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDCB8309-25AF-44E7-AF98-E3BB2A8B9C2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDCB8309-25AF-44E7-AF98-E3BB2A8B9C2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDCB8309-25AF-44E7-AF98-E3BB2A8B9C2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDCB8309-25AF-44E7-AF98-E3BB2A8B9C2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

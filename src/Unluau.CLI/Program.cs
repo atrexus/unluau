@@ -1,6 +1,5 @@
 ﻿using Unluau.Chunk;
-using Unluau.Common.IR;
-using Unluau.IL.Visitors;
+using Unluau.Disassembler;
 
 namespace Unluau.CLI
 {
@@ -8,14 +7,13 @@ namespace Unluau.CLI
     {
         static void Main(string[] args)
         {
-            using var stream = File.OpenRead("./test/Types.luau");
-            using var reader = new Reader(stream);
+            using var reader = new Lifter(new FileInfo("./test/IfElse.luau"));
 
-            reader.ReadModule();
-            
-            /*var chunk = LuauChunk.Create(stream);
-
-            Console.WriteLine(chunk.ToString());
+            var module = reader.LiftModule();
+            Writer.WriteTo(Console.OpenStandardOutput(), module);
+            //IRWriter.WriteTo(Console.OpenStandardOutput(), module);
+               
+/*            Console.WriteLine(chunk.ToString());
             var program = chunk.Lift();
 
             using var output = Console.OpenStandardOutput();

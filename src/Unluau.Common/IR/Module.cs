@@ -9,6 +9,11 @@ namespace Unluau.Common.IR
     public class Module : Node
     {
         /// <summary>
+        /// The computed checksum of the module.
+        /// </summary>
+        public required Checksum Checksum { get; set; }
+
+        /// <summary>
         /// The version of the module.
         /// </summary>
         public required Version Version { get; set; }
@@ -27,7 +32,12 @@ namespace Unluau.Common.IR
         /// The entry point of the module.
         /// </summary>
         public required int EntryPoint { get; set; }
-                                                                                                                                                                                                                                         
+                  
+        /// <summary>
+        /// The elapsed time to disassemble the module.
+        /// </summary>
+        public required TimeSpan ElapsedTime { get; set; }
+
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)
         {

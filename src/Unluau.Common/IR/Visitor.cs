@@ -67,6 +67,16 @@ namespace Unluau.Common.IR
         public virtual bool Visit(InstructionABC instruction) => Visit(instruction as Instruction);
 
         /// <summary>
+        /// The visitor for the <see cref="InstructionAB"/> class.
+        /// </summary>
+        public virtual bool Visit(InstructionAB instruction) => Visit(instruction as Instruction);
+
+        /// <summary>
+        /// The visitor for the <see cref="InstructionA"/> class.
+        /// </summary>
+        public virtual bool Visit(InstructionA instruction) => Visit(instruction as Instruction);
+
+        /// <summary>
         /// The visitor for the <see cref="InstructionAD"/> class.
         /// </summary>
         public virtual bool Visit(InstructionAD instruction) => Visit(instruction as Instruction);
