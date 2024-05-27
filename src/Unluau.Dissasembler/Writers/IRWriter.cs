@@ -102,13 +102,13 @@ namespace Unluau.Disassembler.Writers
             {
                 // Now lets write all of the locals to the stream.
                 _stream.WriteLine($"\n{_tab}locals ({protoType.Locals.Count})");
-                _stream.WriteLine($"{_tab}{_tab}{string.Format("{0, -6} {1,-8} {2, -8}, {3}", "index", "name", "startpc", "endpc")}");
+                _stream.WriteLine($"{_tab}{_tab}{string.Format("{0, -6} {1,-8} {2, -8} {3, -8} {4}", "index", "name", "startpc", "endpc", "type")}");
 
                 for (int i = 0; i < protoType.Locals.Count; ++i)
                 {
                     var local = protoType.Locals[i];
 
-                    _stream.WriteLine($"{_tab}{_tab}{string.Format("{0, -6} {1,-8} {2, -8}, {3}", i, local.Name, local.Scope.Item1, local.Scope.Item2)}");
+                    _stream.WriteLine($"{_tab}{_tab}{string.Format("{0, -6} {1,-8} {2, -8} {3, -8} {4}", i, local.Name, local.Scope.Item1, local.Scope.Item2, local.Type)}");
                 }
             }
 

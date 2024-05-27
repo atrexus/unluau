@@ -220,10 +220,7 @@ namespace Unluau.Disassembler
                 {
                     var name = ReadStringRef();
 
-                    protoType.Upvalues.Add(new Upvalue()
-                    {
-                        Name = name
-                    });
+                    protoType.Upvalues[i].Name = name;
                 }
             }
 
