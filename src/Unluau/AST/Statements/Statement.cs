@@ -1,4 +1,4 @@
-﻿namespace Unluau.AST.Statements
+﻿namespace Unluau.Decompile.AST.Statements
 {
     /// <summary>
     /// Represents a basic statement in the AST.

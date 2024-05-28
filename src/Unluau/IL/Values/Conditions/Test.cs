@@ -1,4 +1,4 @@
-﻿namespace Unluau.IL.Values.Conditions
+﻿namespace Unluau.Decompile.IL.Values.Conditions
 {
     /// <summary>
     /// Condition that checks if the basic value is valid (not null or true boolean).

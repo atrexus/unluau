@@ -9,4 +9,8 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Unluau.Common\Unluau.Common.csproj" />
+  </ItemGroup>
+
 </Project>

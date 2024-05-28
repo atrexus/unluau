@@ -1,13 +1,13 @@
 ﻿using System.Xml.Linq;
-using Unluau.IL.Statements;
-using Unluau.IL.Statements.Blocks;
-using Unluau.IL.Statements.Instructions;
-using Unluau.IL.Values;
-using Unluau.IL.Values.Binaries;
-using Unluau.IL.Values.Conditions;
-using Unluau.IL.Values.Unaries;
+using Unluau.Decompile.IL.Statements;
+using Unluau.Decompile.IL.Statements.Blocks;
+using Unluau.Decompile.IL.Statements.Instructions;
+using Unluau.Decompile.IL.Values;
+using Unluau.Decompile.IL.Values.Binaries;
+using Unluau.Decompile.IL.Values.Conditions;
+using Unluau.Decompile.IL.Values.Unaries;
 
-namespace Unluau.IL.Visitors
+namespace Unluau.Decompile.IL.Visitors
 {
     /// <summary>
     /// Visits the IL and resolves references if possible.

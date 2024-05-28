@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Unluau.Utils;
+using Unluau.Decompile.Utils;
 
-namespace Unluau.IL.Values
+namespace Unluau.Decompile.IL.Values
 {
     /// <summary>
     /// Represents a global/imported value.

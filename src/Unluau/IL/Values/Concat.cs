@@ -1,6 +1,6 @@
-﻿using Unluau.Utils;
+﻿using Unluau.Decompile.Utils;
 
-namespace Unluau.IL.Values
+namespace Unluau.Decompile.IL.Values
 {
     /// <summary>
     /// Concatenates values in registers.

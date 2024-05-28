@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace Unluau.AST.Expressions
+namespace Unluau.Decompile.AST.Expressions
 {
     /// <summary>
     /// Creates a new instance of <see cref="ExpressionList"/>.

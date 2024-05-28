@@ -1,16 +1,28 @@
-﻿namespace Unluau.IL.Statements.Blocks
+﻿namespace Unluau.Decompile.IL.Statements.Blocks
 {
     /// <summary>
     /// Represents a basic block in the program.
     /// </summary>
-    /// <param name="context">Provides context about the block.</param>
-    /// <param name="statements">A list of statements.</param>
-    public class BasicBlock(Context context, List<Statement> statements) : Statement(context)
+    public class BasicBlock : Statement
     {
+        /// <summary>
+        /// Creates a new <see cref="BasicBlock"/>.
+        /// </summary> 
+        public BasicBlock() : base(new Context())
+            => Statements = [];
+
+        /// <summary>
+        /// Creates a new <see cref="BasicBlock"/>.
+        /// </summary>
+        /// <param name="context">Provides context about the block.</param>
+        /// <param name="statements">A list of statements.</param>
+        public BasicBlock(Context context, List<Statement> statements) : base(context)
+            => Statements = statements;
+
         /// <summary>
         /// The statements within the block.
         /// </summary>
-        public List<Statement> Statements { get; set; } = statements;
+        public List<Statement> Statements { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="BasicBlock"/>.

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Unluau.IL.Values
+namespace Unluau.Decompile.IL.Values
 {
     /// <summary>
     /// A new variable that doesn't have a known value.

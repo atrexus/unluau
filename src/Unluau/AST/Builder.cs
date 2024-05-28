@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Unluau.AST.Statements;
+using Unluau.Decompile.AST.Statements;
 
-namespace Unluau.AST
+namespace Unluau.Decompile.AST
 {
     /// <summary>
     /// Builds an abstract syntax tree from a program of IL instructions.

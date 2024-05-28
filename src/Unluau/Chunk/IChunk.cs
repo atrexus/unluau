@@ -1,6 +1,6 @@
-﻿using Unluau.IL;
+﻿using Unluau.Decompile.IL;
 
-namespace Unluau.Chunk
+namespace Unluau.Decompile.Chunk
 {
     /// <summary>
     /// Represents a chunk of compiled machine code.

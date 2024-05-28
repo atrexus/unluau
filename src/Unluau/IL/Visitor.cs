@@ -1,13 +1,13 @@
-﻿using Unluau.IL.Statements;
-using Unluau.IL.Statements.Blocks;
-using Unluau.IL.Statements.Instructions;
-using Unluau.IL.Values;
-using Unluau.IL.Values.Binaries;
-using Unluau.IL.Values.Conditions;
-using Unluau.IL.Values.Unaries;
-using Index = Unluau.IL.Values.Index;
+﻿using Unluau.Decompile.IL.Statements;
+using Unluau.Decompile.IL.Statements.Blocks;
+using Unluau.Decompile.IL.Statements.Instructions;
+using Unluau.Decompile.IL.Values;
+using Unluau.Decompile.IL.Values.Binaries;
+using Unluau.Decompile.IL.Values.Conditions;
+using Unluau.Decompile.IL.Values.Unaries;
+using Index = Unluau.Decompile.IL.Values.Index;
 
-namespace Unluau.IL
+namespace Unluau.Decompile.IL
 {
     public class Visitor
     {

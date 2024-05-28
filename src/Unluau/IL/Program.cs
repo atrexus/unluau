@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Unluau.IL.Statements;
+using Unluau.Decompile.IL.Statements;
 
-namespace Unluau.IL
+namespace Unluau.Decompile.IL
 {
     /// <summary>
     /// The main IL program that contains all of the closures.

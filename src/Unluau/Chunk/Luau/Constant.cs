@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Unluau.Chunk.Luau
+namespace Unluau.Decompile.Chunk.Luau
 {
     /// <summary>
     /// The type of constants available.

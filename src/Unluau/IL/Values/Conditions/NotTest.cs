@@ -1,4 +1,4 @@
-﻿namespace Unluau.IL.Values.Conditions
+﻿namespace Unluau.Decompile.IL.Values.Conditions
 {
     /// <summary>
     /// Checks to see if a value is invalid (null or false).

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Unluau.IL.Values;
+using Unluau.Decompile.IL.Values;
 
-namespace Unluau.IL.Statements.Instructions
+namespace Unluau.Decompile.IL.Statements.Instructions
 {
     /// <summary>
     /// Gets a value from a table using an index.

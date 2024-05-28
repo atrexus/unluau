@@ -1,7 +1,7 @@
-﻿using Unluau.AST.Statements;
-using Unluau.AST.Expressions;
+﻿using Unluau.Decompile.AST.Statements;
+using Unluau.Decompile.AST.Expressions;
 
-namespace Unluau.AST
+namespace Unluau.Decompile.AST
 {
     /// <summary>
     /// The recursive visitor pattern used for traversing the AST

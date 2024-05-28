@@ -1,4 +1,4 @@
-﻿namespace Unluau.IL.Values
+﻿namespace Unluau.Decompile.IL.Values
 {
     /// <summary>
     /// Contains a reference to a <see cref="Statements.Closure"/> in the IL.

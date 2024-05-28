@@ -1,4 +1,4 @@
-﻿namespace Unluau.AST
+﻿namespace Unluau.Decompile.AST
 {
     /// <summary>
     /// Describes a position in a script.

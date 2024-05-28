@@ -1,7 +1,7 @@
-﻿using Unluau.Chunk.Luau;
-using Unluau.IL.Values;
+﻿using Unluau.Decompile.Chunk.Luau;
+using Unluau.Decompile.IL.Values;
 
-namespace Unluau.IL
+namespace Unluau.Decompile.IL
 {
     /// <summary>
     /// Contains information on a frame of register slots.

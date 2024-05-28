@@ -1,10 +1,10 @@
-﻿using Unluau.Utils;
-using Unluau.Chunk.Luau;
-using Unluau.IL;
+﻿using Unluau.Decompile.Utils;
+using Unluau.Decompile.Chunk.Luau;
+using Unluau.Decompile.IL;
 using System.Text;
-using Unluau.IL.Statements;
+using Unluau.Decompile.IL.Statements;
 
-namespace Unluau.Chunk
+namespace Unluau.Decompile.Chunk
 {
     public class LuauChunk : IChunk
     {

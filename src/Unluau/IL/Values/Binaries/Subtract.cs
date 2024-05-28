@@ -1,4 +1,4 @@
-﻿namespace Unluau.IL.Values.Binaries
+﻿namespace Unluau.Decompile.IL.Values.Binaries
 {
     /// <summary>
     /// Represents a subtraction operation in the IL.

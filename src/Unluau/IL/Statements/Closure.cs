@@ -1,7 +1,8 @@
-﻿using Unluau.IL.Statements.Blocks;
-using Unluau.IL.Values;
+﻿using Unluau.Common.IR.ProtoTypes;
+using Unluau.Decompile.IL.Statements.Blocks;
+using Unluau.Decompile.IL.Values;
 
-namespace Unluau.IL.Statements
+namespace Unluau.Decompile.IL.Statements
 
 {
     /// <summary>
@@ -9,6 +10,26 @@ namespace Unluau.IL.Statements
     /// </summary>
     public struct ClosureContext
     {
+        /// <summary>
+        /// Creates a new <see cref="ClosureContext"/> from a <see cref="ProtoType"/>.
+        /// </summary>
+        /// <param name="protoType">The function proto type.</param>
+        public ClosureContext(ProtoType protoType)
+        {
+            var pcScope = (0, protoType.Instructions.Count - 1);
+            var lines = (protoType.LineDefined, protoType.Instructions.Last().LineDefined ?? protoType.LineDefined);
+
+            Context = new Context(pcScope, lines);
+
+            Parameters = new Variable[protoType.ParameterCount];
+
+            for (int slot = 0; slot < protoType.ParameterCount; ++slot)
+                Parameters[slot] = new Variable(Context, slot);
+
+            IsVariadic = protoType.IsVararg;
+            Symbol = protoType.Name;
+        }
+
         /// <summary>
         /// A list of variables that act as parameters to the closure.
         /// </summary>

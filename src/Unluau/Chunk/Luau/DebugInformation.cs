@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Unluau.Utils;
+using Unluau.Decompile.Utils;
 
-namespace Unluau.Chunk.Luau
+namespace Unluau.Decompile.Chunk.Luau
 {
     public struct LocalVariable
     {

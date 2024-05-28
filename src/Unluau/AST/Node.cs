@@ -1,4 +1,4 @@
-﻿namespace Unluau.AST
+﻿namespace Unluau.Decompile.AST
 {
     /// <summary>
     /// A base node for all AST items.

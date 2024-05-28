@@ -1,4 +1,4 @@
-﻿namespace Unluau.Chunk.Luau
+﻿namespace Unluau.Decompile.Chunk.Luau
 {
     // Note: Ported from Luau source code.
     public enum BuiltinFunction : byte

@@ -1,7 +1,7 @@
-﻿using Unluau.IL.Statements.Instructions;
-using Unluau.IL.Values.Conditions;
+﻿using Unluau.Decompile.IL.Statements.Instructions;
+using Unluau.Decompile.IL.Values.Conditions;
 
-namespace Unluau.IL.Statements.Blocks
+namespace Unluau.Decompile.IL.Statements.Blocks
 {
     /// <summary>
     /// A block of code that gets executed if the condition succeeds.

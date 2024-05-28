@@ -1,5 +1,4 @@
-﻿using Unluau.Chunk;
-using Unluau.Disassembler;
+﻿using Unluau.Disassembler;
 
 namespace Unluau.CLI
 {
@@ -7,7 +6,7 @@ namespace Unluau.CLI
     {
         static void Main(string[] args)
         {
-            using var reader = new Lifter(new FileInfo("./test/Upvalue03.luau"));
+            using var reader = new Lifter(new FileInfo("./test/IfElse.luau"));
 
             var module = reader.LiftModule();
             Writer.WriteTo(Console.OpenStandardOutput(), module);

@@ -1,6 +1,6 @@
-﻿using Unluau.IL.Values;
+﻿using Unluau.Decompile.IL.Values;
 
-namespace Unluau.IL.Statements.Instructions
+namespace Unluau.Decompile.IL.Statements.Instructions
 {
     /// <summary>
     /// Assigns a global to a value.

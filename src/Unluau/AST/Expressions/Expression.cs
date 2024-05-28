@@ -1,4 +1,4 @@
-﻿namespace Unluau.AST.Expressions
+﻿namespace Unluau.Decompile.AST.Expressions
 {
     /// <summary>
     /// Represents a basic expression in the AST.

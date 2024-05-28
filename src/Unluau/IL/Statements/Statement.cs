@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Unluau.IL.Statements
+namespace Unluau.Decompile.IL.Statements
 {
     /// <summary>
     /// A statement in the IL. These include blocks and instructions.

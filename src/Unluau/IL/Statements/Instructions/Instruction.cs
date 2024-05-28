@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Unluau.IL.Statements.Instructions
+namespace Unluau.Decompile.IL.Statements.Instructions
 {
     /// <summary>
     /// Creates a new instance of <see cref="Instruction"/>.

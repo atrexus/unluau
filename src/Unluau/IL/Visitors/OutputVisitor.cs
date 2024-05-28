@@ -1,10 +1,10 @@
 ﻿using System.Text;
-using Unluau.IL.Statements;
-using Unluau.IL.Statements.Blocks;
-using Unluau.IL.Statements.Instructions;
-using Unluau.Utils;
+using Unluau.Decompile.IL.Statements;
+using Unluau.Decompile.IL.Statements.Blocks;
+using Unluau.Decompile.IL.Statements.Instructions;
+using Unluau.Decompile.Utils;
 
-namespace Unluau.IL.Visitors
+namespace Unluau.Decompile.IL.Visitors
 {
     public class OutputVisitor(Stream stream) : Visitor
     {

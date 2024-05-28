@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Text;
 
-namespace Unluau.Utils
+namespace Unluau.Decompile.Utils
 {
     public static class TypeExtensions
     {

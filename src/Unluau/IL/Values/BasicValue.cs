@@ -1,6 +1,6 @@
-﻿using Unluau.Utils;
+﻿using Unluau.Decompile.Utils;
 
-namespace Unluau.IL.Values
+namespace Unluau.Decompile.IL.Values
 {
     /// <summary>
     /// A basic value template in the IL. Is only to be inherited.

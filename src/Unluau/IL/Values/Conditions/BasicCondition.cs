@@ -1,4 +1,4 @@
-﻿namespace Unluau.IL.Values.Conditions
+﻿namespace Unluau.Decompile.IL.Values.Conditions
 {
     /// <summary>
     /// A condition in the IL. These include binary as well as unary comparisons.

@@ -1,4 +1,4 @@
-﻿namespace Unluau.IL.Values.Unaries
+﻿namespace Unluau.Decompile.IL.Values.Unaries
 {
     /// <summary>
     /// The types of unary operations.

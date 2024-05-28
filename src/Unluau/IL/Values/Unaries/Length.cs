@@ -1,4 +1,4 @@
-﻿namespace Unluau.IL.Values.Unaries
+﻿namespace Unluau.Decompile.IL.Values.Unaries
 {
     /// <summary>
     /// Represents a length operation in the IL.

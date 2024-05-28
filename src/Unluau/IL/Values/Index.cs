@@ -1,4 +1,4 @@
-﻿namespace Unluau.IL.Values
+﻿namespace Unluau.Decompile.IL.Values
 {
     /// <summary>
     /// Represents an index between two separate values in the IL.

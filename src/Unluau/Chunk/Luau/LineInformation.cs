@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Unluau.Chunk.Luau
+namespace Unluau.Decompile.Chunk.Luau
 {
     /// <summary>
     /// Describes the location of different instructions within the original program.

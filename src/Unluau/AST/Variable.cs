@@ -1,4 +1,4 @@
-﻿namespace Unluau.AST
+﻿namespace Unluau.Decompile.AST
 {
     /// <summary>
     /// Represents a variable in the program.

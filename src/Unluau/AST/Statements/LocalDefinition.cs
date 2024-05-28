@@ -1,6 +1,6 @@
-﻿using Unluau.AST.Expressions;
+﻿using Unluau.Decompile.AST.Expressions;
 
-namespace Unluau.AST.Statements
+namespace Unluau.Decompile.AST.Statements
 {
     /// <summary>
     /// 

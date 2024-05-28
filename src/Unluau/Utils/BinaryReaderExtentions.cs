@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Unluau.Utils
+namespace Unluau.Decompile.Utils
 {
     public static class BinaryReaderExtentions
     {

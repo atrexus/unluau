@@ -1,6 +1,6 @@
-﻿using Unluau.Utils;
+﻿using Unluau.Decompile.Utils;
 
-namespace Unluau.IL.Values
+namespace Unluau.Decompile.IL.Values
 {
     /// <summary>
     /// An entry in a table. Contains a key and a value property.

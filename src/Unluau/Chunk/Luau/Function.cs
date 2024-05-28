@@ -1,16 +1,16 @@
 ﻿using System.Text;
-using Unluau.IL;
-using Unluau.IL.Statements.Instructions;
-using Unluau.IL.Statements;
-using Unluau.IL.Statements.Blocks;
-using Unluau.IL.Values;
-using Unluau.IL.Values.Conditions;
-using Unluau.Utils;
-using Index = Unluau.IL.Values.Index;
-using Unluau.IL.Values.Unaries;
-using Unluau.IL.Values.Binaries;
+using Unluau.Decompile.IL;
+using Unluau.Decompile.IL.Statements.Instructions;
+using Unluau.Decompile.IL.Statements;
+using Unluau.Decompile.IL.Statements.Blocks;
+using Unluau.Decompile.IL.Values;
+using Unluau.Decompile.IL.Values.Conditions;
+using Unluau.Decompile.Utils;
+using Index = Unluau.Decompile.IL.Values.Index;
+using Unluau.Decompile.IL.Values.Unaries;
+using Unluau.Decompile.IL.Values.Binaries;
 
-namespace Unluau.Chunk.Luau
+namespace Unluau.Decompile.Chunk.Luau
 {
     /// <summary>
     /// Represents a function in a Luau bytecode chunk.

@@ -1,4 +1,4 @@
-﻿namespace Unluau.AST.Statements
+﻿namespace Unluau.Decompile.AST.Statements
 {
     /// <summary>
     /// A block of statements.

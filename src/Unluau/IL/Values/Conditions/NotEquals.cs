@@ -1,4 +1,4 @@
-﻿namespace Unluau.IL.Values.Conditions
+﻿namespace Unluau.Decompile.IL.Values.Conditions
 {
     /// <summary>
     /// Compares the left and right operands to see if they are not equal.
