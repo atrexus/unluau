@@ -1,4 +1,4 @@
-﻿using Unluau.Decompile.Utils;
+﻿using System.Reflection;
 
 namespace Unluau.Decompile.IL.Values
 {
@@ -24,7 +24,7 @@ namespace Unluau.Decompile.IL.Values
         /// Returns a string representation of the current object.
         /// </summary>
         /// <returns></returns>
-        public override string? ToString() => $"CallRes{{{Callee}, {TypeExtensions.ToString(Arguments)}}}";
+        public override string? ToString() => $"{{{Callee}, {ToString(Arguments)}}}";
 
         /// <summary>
         /// Implements the visitor.
@@ -36,7 +36,7 @@ namespace Unluau.Decompile.IL.Values
             {
                 Callee.Visit(visitor);
 
-                foreach (var arg in Arguments) 
+                foreach (var arg in Arguments)
                     arg.Visit(visitor);
             }
         }

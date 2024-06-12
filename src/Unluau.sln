@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.CLI", "Unluau.CLI\Un
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.Common", "Unluau.Common\Unluau.Common.csproj", "{26B0ABEB-20C2-4E92-9339-CC443EF29892}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.Disassembler", "Unluau.Dissasembler\Unluau.Disassembler.csproj", "{BDCB8309-25AF-44E7-AF98-E3BB2A8B9C2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unluau.Disassemble", "Unluau.Dissasembler\Unluau.Disassemble.csproj", "{BDCB8309-25AF-44E7-AF98-E3BB2A8B9C2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

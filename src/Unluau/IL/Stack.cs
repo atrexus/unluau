@@ -1,5 +1,4 @@
-﻿using Unluau.Decompile.Chunk.Luau;
-using Unluau.Decompile.IL.Values;
+﻿using Unluau.Decompile.IL.Values;
 
 namespace Unluau.Decompile.IL
 {
@@ -42,10 +41,10 @@ namespace Unluau.Decompile.IL
             if (_slots.ContainsKey(id))
                 Free(id);
 
-            var value = new Slot() 
-            { 
-                Id = id, 
-                Value = basicValue 
+            var value = new Slot()
+            {
+                Id = id,
+                Value = basicValue
             };
 
             _slots.Add(id, value);
@@ -71,7 +70,7 @@ namespace Unluau.Decompile.IL
 
             return slot;
         }
-        
+
         /// <summary>
         /// Marks a slot as an UpValue.
         /// </summary>
@@ -97,8 +96,8 @@ namespace Unluau.Decompile.IL
         /// <returns>The new slot.</returns>
         public Slot SetScoped(byte id, BasicValue basicValue, int startPc)
         {
-            if (TryGet(id, out Slot? ra) && ra!.Value.Context.PcScope.Item1 < startPc)
-               return Update(ra.Id, basicValue);
+            if (TryGet(id, out Slot? ra) && ra!.Value.Context.Pcs.Start.Value < startPc)
+                return Update(ra.Id, basicValue);
 
             return Set(id, basicValue);
         }
@@ -197,6 +196,6 @@ namespace Unluau.Decompile.IL
         /// Returns a string representation of the slot number.
         /// </summary>
         /// <returns>Slot number as string.</returns>
-        public override string ToString() => $"{(IsUpValue ? "UpR" : "R")}({Id})";
+        public override string ToString() => $"{(IsUpValue ? "upr" : "r")}({Id})";
     }
 }

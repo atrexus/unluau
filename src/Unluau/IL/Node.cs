@@ -1,75 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unluau.Common.IR.ProtoTypes;
+﻿using Unluau.Common.IR.ProtoTypes.Instructions;
+using Unluau.Decompile.IL.Blocks;
 
 namespace Unluau.Decompile.IL
 {
     /// <summary>
-    /// Contains information about location. 
+    /// Contains information about a node in the IL.
     /// </summary>
-    public struct Context
+    /// <remarks>
+    /// Creates a new instance of the <see cref="Context"/> struct.
+    /// </remarks>
+    /// <param name="pcs">The range of program counters.</param>
+    /// <param name="lines">The range of lines.</param>
+    public struct Context(Range pcs, Range lines)
     {
         /// <summary>
-        /// Creates a new instance of <see cref="Context"/>.
+        /// The range of program counter values that this node covers.
         /// </summary>
-        /// <param name="instructions">List of instructions.</param>
-        public Context(List<Instruction> instructions)
-        {
-            PcScope = (0, instructions.Count - 1);
-            
-            var first = instructions[0];
-            var last = instructions[^1];
+        public Range Pcs { get; set; } = pcs;
 
-            if (first.LineDefined != null && last.LineDefined != null)
-                Lines = (first.LineDefined.Value, last.LineDefined.Value);
-            else 
-                Lines = null;
+        /// <summary>
+        /// The range of lines that this node covers.
+        /// </summary>
+        public Range Lines { get; set; } = lines;
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="Context"/> struct.
+        /// </summary>
+        /// <param name="instruction">The instruction to create the context for.</param>
+        public Context(Instruction instruction) : this(new Range(instruction.Context.Pc, instruction.Context.Pc), new Range(instruction.Context.LineDefined ?? 0, instruction.Context.LineDefined ?? 0))
+        {
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="Context"/>.
+        /// Creates a new instance of the <see cref="Context"/> struct.
         /// </summary>
-        /// <param name="pcScope">The scope of program counters.</param>
-        /// <param name="lines">The scope in lines.</param>
-        public Context((int, int) pcScope, (int, int)? lines = null)
+        /// <param name="instructions">The list of instructions to build the context from.</param>
+        public Context(List<Instruction> instructions) : this(new Range(instructions[0].Context.Pc, instructions[^1].Context.Pc), new Range(instructions[0].Context.LineDefined ?? 0, instructions[^1].Context.LineDefined ?? 0))
         {
-            PcScope = pcScope;
-            Lines = lines;
         }
 
         /// <summary>
-        /// The empty context for a node in the IL.
+        /// Creates a new instance of the <see cref="Context"/> struct.
         /// </summary>
-        public static Context Empty { get; } = new();
-
-        /// <summary>
-        /// The start and end instruction the node was translated from.
-        /// </summary>
-        public (int, int) PcScope { get; set; }
-
-        /// <summary>
-        /// The line numbers from the original script.
-        /// </summary>
-        public (int, int)? Lines { get; set; }
-
-        public static bool operator ==(Context left, Context right) => Equals(left, right);
-        public static bool operator !=(Context left, Context right) => !Equals(left, right);
-
-        public override readonly string ToString()
-            => $"<{PcScope.Item1}:{PcScope.Item2}{(Lines is null ? string.Empty : $",{Lines.Value.Item1}")}>";
-
-        public override readonly bool Equals(object? obj)
+        /// <param name="controlFlow">The control flow of the program.</param>
+        public Context(List<BasicBlock> controlFlow) : this(new Range(controlFlow[0].Context.Pcs.Start, controlFlow[^1].Context.Pcs.Start), new Range(controlFlow[0].Context.Lines.Start, controlFlow[^1].Context.Lines.End))
         {
-            if (obj is Context context)
-                return context.PcScope == PcScope && Lines == context.Lines;
-
-            return false;
         }
 
-        public override readonly int GetHashCode() => base.GetHashCode();
+        /// <summary>
+        /// Appends the context of another node to this one.
+        /// </summary>
+        /// <param name="context">The context of the other node.</param>
+        public void Append(Context context)
+        {
+            if (context.Pcs.End.Value > Pcs.End.Value)
+                Pcs = new Range(Pcs.Start, context.Pcs.End);
+
+            if (context.Lines.End.Value > Lines.End.Value)
+                Lines = new Range(Lines.Start, context.Lines.End);
+        }
     }
 
     /// <summary>

@@ -1,4 +1,7 @@
-﻿using Unluau.Disassembler;
+﻿using Unluau.Decompile.Builders;
+using Unluau.Decompile.IL.Writers;
+using Unluau.Disassemble.Lifting;
+using Unluau.Disassemble.Writers;
 
 namespace Unluau.CLI
 {
@@ -6,19 +9,18 @@ namespace Unluau.CLI
     {
         static void Main(string[] args)
         {
-            using var reader = new Lifter(new FileInfo("./test/IfElse.luau"));
-
-            var module = reader.LiftModule();
-            Writer.WriteTo(Console.OpenStandardOutput(), module);
-            //IRWriter.WriteTo(Console.OpenStandardOutput(), module);
-               
-/*            Console.WriteLine(chunk.ToString());
-            var program = chunk.Lift();
-
             using var output = Console.OpenStandardOutput();
 
-            program.Visit(new ValueVisitor());
-            program.Visit(new OutputVisitor(output));*/
+
+            var lifter = new Lifter(new FileInfo("./test/IfElse.luau"));
+
+            var result = lifter.LiftSource();
+
+            new IRWriter(output).Write(result);
+
+            var program = ILBuilder.Build(result.Module);
+
+            program.Visit(new ILWriter(output));
         }
     }
 }

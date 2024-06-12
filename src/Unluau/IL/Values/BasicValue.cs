@@ -1,4 +1,4 @@
-﻿using Unluau.Decompile.Utils;
+﻿using System.Text;
 
 namespace Unluau.Decompile.IL.Values
 {
@@ -13,6 +13,44 @@ namespace Unluau.Decompile.IL.Values
         /// </summary>
         /// <returns>String representation.</returns>
         public override abstract string? ToString();
+
+        /// <summary>
+        /// Returns a string representation of a typed value.
+        /// </summary>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        /// <param name="value">The value.</param>
+        /// <returns>The string representation.</returns>
+        public static string ToString<T>(T? value)
+        {
+            if (typeof(T).IsArray && (value is Array array))
+            {
+                StringBuilder stringBuilder = new();
+
+                stringBuilder.Append('[');
+
+                for (int i = 0; i < array.Length; ++i)
+                {
+                    var item = array.GetValue(i);
+
+                    if (i > 0)
+                        stringBuilder.Append(", ");
+
+                    stringBuilder.Append(ToString(item));
+                }
+
+                stringBuilder.Append(']');
+
+                return stringBuilder.ToString();
+            }
+
+            if (value is string str)
+                return $"\"{str}\"";
+
+            if (value is null)
+                return "nil";
+
+            return value.ToString()!;
+        }
     }
 
     /// <summary>
@@ -32,7 +70,7 @@ namespace Unluau.Decompile.IL.Values
         /// Converts the current <see cref="BasicValue{T}"/> to a string.
         /// </summary>
         /// <returns>String representation.</returns>
-        public override string? ToString() => $"Val<{typeof(T).Name}>({TypeExtensions.ToString(Value)})";
+        public override string? ToString() => $"{ToString(value)}";
 
         /// <summary>
         /// Implements the recursive visitor pattern.

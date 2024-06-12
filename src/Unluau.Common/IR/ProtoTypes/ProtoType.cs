@@ -1,4 +1,5 @@
-﻿using Unluau.Common.IR.Constants;
+﻿using Unluau.Common.IR.ProtoTypes.Constants;
+using Unluau.Common.IR.ProtoTypes.Instructions;
 
 namespace Unluau.Common.IR.ProtoTypes
 {
@@ -71,6 +72,22 @@ namespace Unluau.Common.IR.ProtoTypes
         /// The list of upvalues in the function prototype.
         /// </summary>
         public List<Upvalue> Upvalues { get; set; } = [];
+
+        /// <summary>
+        /// Gets the name of a local variable by its register.
+        /// </summary>
+        /// <param name="register">The register to search for.</param>
+        /// <returns>The name of the local.</returns>
+        public string? GetLocalName(int register)
+        {
+            foreach (var local in Locals)
+            {
+                if (local.Register == register)
+                    return local.Name;
+            }
+
+            return null;
+        }
 
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)

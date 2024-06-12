@@ -1,39 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unluau.Decompile.IL.Statements;
-
-namespace Unluau.Decompile.IL
+﻿namespace Unluau.Decompile.IL
 {
     /// <summary>
-    /// The main IL program that contains all of the closures.
+    /// The main IL program that contains all of the code.
     /// </summary>
-    public class Program(Context context, Closure main, Closure[] closures) : Node(context)
+    public class Program(Context context, List<Function> functions, int mainIndex) : Node(context)
     {
         /// <summary>
-        /// The main closure.
+        /// The version of the IL program.
         /// </summary>
-        public Closure Main { get; set; } = main;
+        public const string Version = "2.0.0";
 
         /// <summary>
-        /// The other functions in the program.
+        /// The control flow of the program.
         /// </summary>
-        public Closure[] Closures { get; set; } = closures;
+        public List<Function> Functions { get; set; } = functions;
 
         /// <summary>
-        /// Implements the visitor.
+        /// The index of the main function.
         /// </summary>
-        /// <param name="visitor">The visitor.</param>
+        public int MainIndex { get; set; } = mainIndex;
+
+        /// <inheritdoc/>
         public override void Visit(Visitor visitor)
         {
             if (visitor.Visit(this))
             {
-                Main.Visit(visitor);
-
-                foreach (var c in Closures) 
-                    c.Visit(visitor);
+                foreach (var f in Functions)
+                    f.Visit(visitor);
             }
         }
     }

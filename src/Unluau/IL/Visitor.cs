@@ -1,73 +1,83 @@
-﻿using Unluau.Decompile.IL.Statements;
-using Unluau.Decompile.IL.Statements.Blocks;
-using Unluau.Decompile.IL.Statements.Instructions;
+﻿using Unluau.Decompile.IL.Blocks;
+using Unluau.Decompile.IL.Conditions;
+using Unluau.Decompile.IL.Instructions;
 using Unluau.Decompile.IL.Values;
-using Unluau.Decompile.IL.Values.Binaries;
-using Unluau.Decompile.IL.Values.Conditions;
-using Unluau.Decompile.IL.Values.Unaries;
-using Index = Unluau.Decompile.IL.Values.Index;
 
 namespace Unluau.Decompile.IL
 {
+    /// <summary>
+    /// Represents a visitor for IL instructions.
+    /// </summary>
     public class Visitor
     {
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="Node"/>.
+        /// </summary>
         public virtual bool Visit(Node node) => true;
 
-        // Nodes
-        public virtual bool Visit(Program node) => Visit(node as Node);
-        public virtual bool Visit(Statement node) => Visit(node as Node);
-        public virtual bool Visit(BasicValue node) => Visit(node as Node);
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="Program"/>.
+        /// </summary>
+        public virtual bool Visit(Program program) => Visit(program as Node);
 
-        // Statements 
-        public virtual bool Visit(Closure node) => Visit(node as Statement);
-        public virtual bool Visit(Instruction node) => Visit(node as Statement);
-        public virtual bool Visit(BasicBlock node) => Visit(node as Statement);
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="Function"/>.
+        /// </summary>
+        public virtual bool Visit(Function function) => Visit(function as Node);
 
-        // Instructions
-        public virtual bool Visit(LoadValue node) => Visit(node as Instruction);
-        public virtual bool Visit(Call node) => Visit(node as Instruction);
-        public virtual bool Visit(GetIndex node) => Visit(node as Instruction);
-        public virtual bool Visit(GetIndexSelf node) => Visit(node as Instruction);
-        public virtual bool Visit(Move node) => Visit(node as Instruction);
-        public virtual bool Visit(Return node) => Visit(node as Instruction);
-        public virtual bool Visit(SetIndex node) => Visit(node as Instruction);
-        public virtual bool Visit(SetGlobal node) => Visit(node as Instruction);
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="BasicBlock"/>.
+        /// </summary>
+        public virtual bool Visit(BasicBlock block) => Visit(block as Node);
 
-        // Blocks
-        public virtual bool Visit(IfBlock node) => Visit(node as BasicBlock);
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="Instruction"/>.
+        /// </summary>
+        public virtual bool Visit(Instruction instruction) => Visit(instruction as Node);
 
-        // Values
-        public virtual bool Visit(Global node) => Visit(node as BasicValue);
-        public virtual bool Visit(Variable node) => Visit(node as BasicValue);
-        public virtual bool Visit(Reference node) => Visit(node as BasicValue);
-        public virtual bool Visit(Index node) => Visit(node as BasicValue);
-        public virtual bool Visit(CallResult node) => Visit(node as BasicValue);
-        public virtual bool Visit(BasicCondition node) => Visit(node as BasicValue);
-        public virtual bool Visit(Concat concat) => Visit(concat as BasicValue);
-        public virtual bool Visit(ClosureValue closure) => Visit(closure as BasicValue);
-        public virtual bool Visit(BasicBinary node) => Visit(node as BasicValue);
-        public virtual bool Visit(BasicUnary node) => Visit(node as BasicValue);
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="LoadValue"/>.
+        /// </summary>
+        public virtual bool Visit(LoadValue instruction) => Visit(instruction as Instruction);
 
-        // Conditions
-        public virtual bool Visit(Equals node) => Visit(node as BasicCondition);
-        public virtual bool Visit(NotEquals node) => Visit(node as BasicCondition);
-        public virtual bool Visit(Test node) => Visit(node as BasicCondition);
-        public virtual bool Visit(NotTest node) => Visit(node as BasicCondition);
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="LoadValue"/>.
+        /// </summary>
+        public virtual bool Visit(Call instruction) => Visit(instruction as Instruction);
 
-        // Unary
-        public virtual bool Visit(Not node) => Visit(node as BasicUnary);
-        public virtual bool Visit(Length node) => Visit(node as BasicUnary);
-        public virtual bool Visit(Minus node) => Visit(node as BasicUnary);
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="Return"/>.
+        /// </summary>
+        public virtual bool Visit(Return instruction) => Visit(instruction as Instruction);
 
-        // Binary
-        public virtual bool Visit(Add node) => Visit(node as BasicBinary);
-        public virtual bool Visit(Subtract node) => Visit(node as BasicBinary);
-        public virtual bool Visit(Multiply node) => Visit(node as BasicBinary);
-        public virtual bool Visit(Divide node) => Visit(node as BasicBinary);
-        public virtual bool Visit(Modulus node) => Visit(node as BasicBinary);
-        public virtual bool Visit(Power node) => Visit(node as BasicBinary);
-        public virtual bool Visit(And node) => Visit(node as BasicBinary);
-        public virtual bool Visit(Or node) => Visit(node as BasicBinary);
-        public virtual bool Visit(FloorDivide node) => Visit(node as BasicBinary);
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="BasicValue"/>.
+        /// </summary>
+        public virtual bool Visit(BasicValue basicValue) => Visit(basicValue as Node);
+
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="Variable"/>.
+        /// </summary>
+        public virtual bool Visit(Variable variable) => Visit(variable as BasicValue);
+
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="Global"/>.
+        /// </summary>
+        public virtual bool Visit(Global global) => Visit(global as BasicValue);
+
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="CallResult"/>.
+        /// </summary>
+        public virtual bool Visit(CallResult callResult) => Visit(callResult as BasicValue);
+
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="BasicCondition"/>.
+        /// </summary>
+        public virtual bool Visit(BasicCondition condition) => Visit(condition as BasicValue);
+
+        /// <summary>
+        /// Implements the visitor pattern for a <see cref="Equals"/>.
+        /// </summary>
+        public virtual bool Visit(Equals condition) => Visit(condition as BasicCondition);
     }
 }

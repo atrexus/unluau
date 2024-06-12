@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unluau.Decompile.Utils;
+﻿using System.Reflection;
 
 namespace Unluau.Decompile.IL.Values
 {
@@ -27,6 +22,6 @@ namespace Unluau.Decompile.IL.Values
         /// Converts the current <see cref="Global"/> to a string.
         /// </summary>
         /// <returns>String representation.</returns>
-        public override string ToString() => $"Global({TypeExtensions.ToString(Value)})";
+        public override string ToString() => $"global({ToString(Value)})";
     }
 }

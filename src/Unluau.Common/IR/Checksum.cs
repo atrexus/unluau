@@ -14,7 +14,6 @@ namespace Unluau.Common.IR
     /// <param name="stream">The stream.</param>
     public class Checksum(HashAlgorithm hashAlgorithm, Stream stream, string source)
     {
-        private readonly Stream _stream = stream;
         public readonly byte[] _hash = hashAlgorithm.ComputeHash(stream);
 
         /// <summary>

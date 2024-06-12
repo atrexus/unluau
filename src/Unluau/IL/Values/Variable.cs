@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Unluau.Decompile.IL.Values
+﻿namespace Unluau.Decompile.IL.Values
 {
     /// <summary>
     /// A new variable that doesn't have a known value.
@@ -28,7 +22,7 @@ namespace Unluau.Decompile.IL.Values
         /// Converts the current <see cref="Variable"/> to a string.
         /// </summary>
         /// <returns>String representation.</returns>
-        public override string? ToString() => $"Variable({Slot}, {Symbol})";
+        public override string? ToString() => $"variable({Slot}, {Symbol})";
 
         /// <summary>
         /// Implements the recursive visitor pattern.

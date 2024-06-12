@@ -1,4 +1,5 @@
 ﻿using Unluau.Common.IR.ProtoTypes;
+using Unluau.Common.IR.ProtoTypes.Instructions;
 using Unluau.Common.IR.Versions;
 using Type = Unluau.Common.IR.ProtoTypes.Type;
 using Version = Unluau.Common.IR.Versions.Version;

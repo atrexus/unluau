@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Unluau.Decompile.IL.Values
+﻿namespace Unluau.Decompile.IL.Values
 {
     /// <summary>
     /// A reference to a register slot in the current function.
@@ -22,7 +16,7 @@ namespace Unluau.Decompile.IL.Values
         /// Converts the curren <see cref="Reference"/> to a string representation.
         /// </summary>
         /// <returns>String representation.</returns>
-        public override string? ToString() => $"Ref({Slot})";
+        public override string? ToString() => $"({Slot})";
 
         /// <summary>
         /// Implements the visitor.
