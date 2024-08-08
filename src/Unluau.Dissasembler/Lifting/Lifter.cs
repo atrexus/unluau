@@ -14,7 +14,12 @@ namespace Unluau.Disassemble.Lifting
     /// <summary>
     /// Lifts the raw bytecode to an intermediate representation.
     /// </summary>
-    public class Lifter : BinaryReader
+    /// <remarks>
+    /// Creates a new instance of <see cref="Lifter"/>.
+    /// </remarks>
+    /// <param name="source">The source file name.</param>
+    /// <param name="input">The input stream.</param>
+    public class Lifter(Stream input, string source = "input-file.luau", Decoder? decoder = null) : BinaryReader(input)
     {
         /// <summary>
         /// The bit that indicates if a type is optional or not.
@@ -24,47 +29,14 @@ namespace Unluau.Disassemble.Lifting
         private readonly List<string> _symbolTable = [];
         private Version _version = new();
         private readonly List<ProtoType> _protoTypes = [];
-        private readonly string _source = "input-file.luau";
+        private readonly Decoder _decoder = decoder ?? new();
 
         /// <summary>
         /// Creates a new instance of <see cref="Lifter"/>.
         /// </summary>
         /// <param name="fileInfo">The file.</param>
-        public Lifter(FileInfo fileInfo) : this(fileInfo.Name, fileInfo.OpenRead())
+        public Lifter(FileInfo fileInfo) : this(fileInfo.OpenRead(), fileInfo.Name)
         {
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="Lifter"/>.
-        /// </summary>
-        /// <param name="source">The source file name.</param>
-        /// <param name="input">The input stream.</param>
-        public Lifter(string source, Stream input) : base(input)
-        {
-            _source = source;
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="Lifter"/>.
-        /// </summary>
-        /// <param name="source">The source file name.</param>
-        /// <param name="input">The input stream.</param>
-        /// <param name="encoding">The encoding to use.</param>
-        public Lifter(string source, Stream input, Encoding encoding) : base(input, encoding)
-        {
-            _source = source;
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="Lifter"/>.
-        /// </summary>
-        /// <param name="source">The source file name.</param>
-        /// <param name="input">The input stream.</param>
-        /// <param name="encoding">The encoding to use.</param>
-        /// <param name="leaveOpen">Leaves the stream open.</param>
-        public Lifter(string source, Stream input, Encoding encoding, bool leaveOpen) : base(input, encoding, leaveOpen)
-        {
-            _source = source;
         }
 
         /// <summary>
@@ -94,7 +66,7 @@ namespace Unluau.Disassemble.Lifting
         public Module LiftModule()
         {
             // First we compute the checksum of the stream. We will need to reset the position of the stream after we are done.
-            var checksum = new Checksum(MD5.Create(), BaseStream, _source);
+            var checksum = new Checksum(MD5.Create(), BaseStream, source);
             BaseStream.Position = 0;
 
             _version = LiftVersion();
@@ -256,7 +228,10 @@ namespace Unluau.Disassemble.Lifting
         public Instruction LiftInstruction()
         {
             // Now we will peek the next byte as it will be the opcode of the following instruction.
-            var code = (OpCode)PeekChar();
+            var code = _decoder.DecodeOpCode(ReadByte());
+
+            BaseStream.Position--;
+
             return code switch
             {
                 OpCode.Nop => new Instruction(ReadUInt32()),
@@ -378,40 +353,40 @@ namespace Unluau.Disassemble.Lifting
                         constants[i] = new StringConstant(ReadStringRef()!);
                         break;
                     case ConstantType.Import:
+                    {
+                        var id = ReadUInt32(); // uint, because Negative values error out here
+                        var nameCount = id >> 30;
+
+                        var names = new List<StringConstant>();
+
+                        // Load all of the string constants into the import constant. Luau does this differently. 
+                        // I've decided to go with a loop here to conserve space.
+                        for (int j = 0; j < nameCount; ++j)
                         {
-                            var id = ReadUInt32(); // uint, because Negative values error out here
-                            var nameCount = id >> 30;
+                            var constantIndex = id >> 20 - j * 10 & 1023;
 
-                            var names = new List<StringConstant>();
-
-                            // Load all of the string constants into the import constant. Luau does this differently. 
-                            // I've decided to go with a loop here to conserve space.
-                            for (int j = 0; j < nameCount; ++j)
-                            {
-                                var constantIndex = id >> 20 - j * 10 & 1023;
-
-                                names.Add((StringConstant)constants[constantIndex]);
-                            }
-
-                            constants[i] = new ImportConstant(names);
-                            break;
+                            names.Add((StringConstant)constants[constantIndex]);
                         }
+
+                        constants[i] = new ImportConstant(names);
+                        break;
+                    }
                     case ConstantType.Table:
+                    {
+                        var keyCount = Read7BitEncodedInt();
+
+                        var keys = new List<Constant>(keyCount);
+
+                        for (int j = 0; j < keyCount; ++j)
                         {
-                            var keyCount = Read7BitEncodedInt();
+                            var keyIndex = Read7BitEncodedInt();
 
-                            var keys = new List<Constant>(keyCount);
-
-                            for (int j = 0; j < keyCount; ++j)
-                            {
-                                var keyIndex = Read7BitEncodedInt();
-
-                                keys.Add(constants[keyIndex]);
-                            }
-
-                            constants[i] = new TableConstant(keys);
-                            break;
+                            keys.Add(constants[keyIndex]);
                         }
+
+                        constants[i] = new TableConstant(keys);
+                        break;
+                    }
                     case ConstantType.Closure:
                         constants[i] = new ClosureConstant(Read7BitEncodedInt());
                         break;

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="IR\ControlFlow\" />
+    <Folder Include="IR\ProtoTypes\ControlFlow\" />
   </ItemGroup>
 
 </Project>
