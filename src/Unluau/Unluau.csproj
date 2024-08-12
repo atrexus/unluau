@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="DotNetGraph" Version="3.2.0" />
+  </ItemGroup>
+
 </Project>

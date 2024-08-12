@@ -41,6 +41,24 @@ namespace Unluau.IR.Writers
         /// <param name="protoType">The prototype.</param>
         public override bool Visit(ProtoType protoType)
         {
+            var labelBuilder = new StringBuilder();
+
+            // Write the function name.
+            labelBuilder.Append($"function {(protoType.IsMain ? "main" : (protoType.Name ?? "prototype"))}(");
+
+            // Write the function arguments.
+            for (int i = 0; i < protoType.ParameterCount; ++i)
+            {
+                labelBuilder.Append($"v{i + 1}");
+
+                if (i + 1 < protoType.ParameterCount + (protoType.IsVararg ? 1 : 0))
+                    labelBuilder.Append(", ");
+            }
+
+            if (protoType.IsVararg)
+                labelBuilder.Append("...");
+
+            labelBuilder.Append(')');
 
             return false;
         }
