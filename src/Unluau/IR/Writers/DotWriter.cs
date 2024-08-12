@@ -1,8 +1,5 @@
 ﻿using System.Text;
-using Unluau.IR.ProtoTypes.ControlFlow;
-using Unluau.IR.ProtoTypes.Instructions;
 using Unluau.IR.ProtoTypes;
-using Unluau.IR.Versions;
 using DotNetGraph.Compilation;
 using DotNetGraph.Core;
 using DotNetGraph.Extensions;
