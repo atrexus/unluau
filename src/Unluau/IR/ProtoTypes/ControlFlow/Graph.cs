@@ -48,7 +48,7 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
 
                 if (instruction.Context.Pc == pc + 1)
                 {
-                    if (_currentBlock == oldBlock)
+                    if (_currentBlock == oldBlock && _currentBlock.Instructions.Count > 0)
                         _currentBlock = new();
 
                     block.AddEdge(_currentBlock);
@@ -59,6 +59,9 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
 
             _currentBlock.Instructions.Add(instruction);
 
+            if (_currentBlock != oldBlock && oldBlock.IsDead)
+                oldBlock.AddEdge(_currentBlock);
+
             switch (instruction.Code)
             {
                 case OpCode.JumpX:
@@ -68,8 +71,6 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
                 }
                 case OpCode.LoadB:
                 {
-                    var branchType = instruction.C > 0 ? BranchType.Always : BranchType.Never;
-
                     AddEdge(instruction.C, instruction.Context.Pc, _currentBlock, BranchType.Always);
                     break;
                 }
@@ -79,21 +80,25 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
                     AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Always);
                     break;
                 }
+                case OpCode.ForNPrep:
+                {
+                    AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                    break;
+                }
                 case OpCode.Return:
                 {
                     AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Never);
-                    goto default;
+                    break;
                 }
                 case OpCode.JumpXEqKNil:
                 case OpCode.JumpXEqKB:
                 case OpCode.JumpXEqKN:
                 case OpCode.JumpXEqKS:
                 {
-                    var branchType = instruction.D > 0 ? BranchType.Can : BranchType.Never;
-
-                    AddEdge(instruction.D == 1 ? 0 : instruction.D, instruction.Context.Pc, _currentBlock, branchType);
+                    AddEdge(instruction.D == 1 ? 0 : instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Can);
                     break;
                 }
+                case OpCode.ForNLoop:
                 case OpCode.JumpIf:
                 case OpCode.JumpIfNot:
                 case OpCode.JumpIfEq:
@@ -103,15 +108,7 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
                 case OpCode.JumpIfLt:
                 case OpCode.JumpIfNotLt:
                 {
-                    var branchType = instruction.D > 0 ? BranchType.Can : BranchType.Never;
-
-                    AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, branchType);
-                    break;
-                }
-                default:
-                {
-                    if (_currentBlock != oldBlock)
-                        oldBlock.AddEdge(_currentBlock);
+                    AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Can);
                     break;
                 }
             }

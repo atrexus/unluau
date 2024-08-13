@@ -73,7 +73,7 @@ namespace Unluau.IR.Writers
             _graph!.Add(_protoSubGraph);
 
             // Visit all basic blocks in the control flow graph.
-            protoType.ControlFlow.Accept(this);
+            protoType.ControlFlow!.Accept(this);
 
             return false;
         }
@@ -144,7 +144,9 @@ namespace Unluau.IR.Writers
                 .From($"block_{edge.Source.GetHashCode()}").To($"block_{edge.Target.GetHashCode()}")
                 .WithArrowHead(DotEdgeArrowType.Vee)
                 .WithArrowTail(DotEdgeArrowType.None)
-                .WithAttribute("fontname", "Helvetica");
+                .WithAttribute("fontname", "Helvetica")
+                .WithAttribute("headport", "n")
+                .WithAttribute("tailport", "s");
 
             if (_edgeName != null)
                 myEdge = myEdge.WithLabel(_edgeName);

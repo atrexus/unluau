@@ -20,7 +20,7 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
         /// <summary>
         /// This block never branches.
         /// </summary>
-        Never
+        Never,
     }
 
     /// <summary>
@@ -31,7 +31,7 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
         /// <summary>
         /// The kind of branch that is taken.
         /// </summary>
-        public BranchType Branch { get; set; } = BranchType.Always;
+        public BranchType? Branch { get; set; }
 
         /// <summary>
         /// The list of instructions in the basic block.
@@ -44,6 +44,8 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
         public List<Edge> OutgoingEdges { get; set; } = [];
 
         public void AddEdge(BasicBlock target) => OutgoingEdges.Add(new Edge(this, target));
+
+        public bool IsDead => OutgoingEdges.Count == 0 && Branch == null;
 
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)
