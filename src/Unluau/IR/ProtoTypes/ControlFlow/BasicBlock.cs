@@ -16,6 +16,11 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
         /// The block always branches.
         /// </summary>
         Always,
+
+        /// <summary>
+        /// This block never branches.
+        /// </summary>
+        Never
     }
 
     /// <summary>
@@ -37,6 +42,8 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
         /// The list of edges that are outgoing from the current block.
         /// </summary>
         public List<Edge> OutgoingEdges { get; set; } = [];
+
+        public void AddEdge(BasicBlock target) => OutgoingEdges.Add(new Edge(this, target));
 
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)

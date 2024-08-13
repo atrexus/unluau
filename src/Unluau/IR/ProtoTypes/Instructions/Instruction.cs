@@ -59,12 +59,12 @@
         /// <summary>
         /// Gets the D operand of the instruction.
         /// </summary>
-        public int D => (int)(Value >> 16);
+        public int D => (int)Value >> 16;
 
         /// <summary>
         /// Gets the E operand of the instruction.
         /// </summary>
-        public int E => (int)(Value >> 8);
+        public int E => (int)Value >> 8;
 
         /// <summary>
         /// Gets or sets the auxiliary instruction.

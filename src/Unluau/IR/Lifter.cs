@@ -124,7 +124,6 @@ namespace Unluau.IR
 
             // Now we read all of the instructions in the function prototype.
             var instructionCount = Read7BitEncodedInt();
-            var instructions = new List<Instruction>(instructionCount);
 
             for (int i = 0; i < instructionCount; i++)
             {
@@ -133,7 +132,7 @@ namespace Unluau.IR
                 if (instruction.Aux != null)
                     i++;
 
-                instructions.Add(instruction);
+                protoType.Instructions.Add(instruction);
             }
 
             // Now we read the constants of the function prototype.
@@ -177,7 +176,7 @@ namespace Unluau.IR
 
                 // Now we assign the line information to the instructions. Each instruction has a line number.
                 int pc = 0;
-                foreach (var instruction in instructions)
+                foreach (var instruction in protoType.Instructions)
                 {
                     instruction.Context.LineDefined = absLineInfo[pc >> lineGapLog2] + lineInfo[pc];
                     instruction.Context.Pc = pc++;
@@ -186,11 +185,11 @@ namespace Unluau.IR
                     if (instruction.Aux != null)
                     {
                         instruction.Aux.Context.LineDefined = absLineInfo[pc >> lineGapLog2] + lineInfo[pc];
-                        instruction.Context.Pc = pc++;
+                        instruction.Aux.Context.Pc = pc++;
                     }
                 }
 
-                protoType.LastLineDefined = instructions.Last().Context.LineDefined;
+                protoType.LastLineDefined = protoType.Instructions.Last().Context.LineDefined;
             }
 
             // Read the debug information flag. If it is set, then we read the debug information.
@@ -222,9 +221,8 @@ namespace Unluau.IR
 
             protoType.InstructionSize = instructionCount * 4;
 
-            // Now we lift the control flow of the function prototype.
-            foreach (var instruction in instructions)
-                protoType.ControlFlow.AddInstruction(instruction);
+            // Now we create the control flow graph of the function prototype.
+            protoType.ControlFlow = new(protoType.Instructions);
 
             return protoType;
         }

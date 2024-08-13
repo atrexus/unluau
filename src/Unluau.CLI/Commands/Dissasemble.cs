@@ -50,11 +50,14 @@ namespace Unluau.CLI.Commands
 
                 var result = new Lifter(input).LiftSource();
 
-                (format switch
+                Writer writer = format switch
                 {
                     "ir" => new IRWriter(output),
+                    "dot" => new DotWriter(output),
                     _ => throw new ArgumentException("Invalid format")
-                }).Write(result);
+                };
+
+                writer.Write(result);
             }, _inputOption, _outputOption, _formatOption);
         }
     }

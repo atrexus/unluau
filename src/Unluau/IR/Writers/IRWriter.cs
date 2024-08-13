@@ -42,7 +42,7 @@ namespace Unluau.IR.Writers
             _pc = 0;
 
             // First we write the prototype header with basic info
-            _writer.WriteLine($"{(protoType.IsMain ? "main" : "function")} <{_module!.Checksum.Source}:{protoType.LineDefined}> ({protoType.ControlFlow.InstructionCount} instructions, {protoType.InstructionSize} bytes)");
+            _writer.WriteLine($"{(protoType.IsMain ? "main" : "function")} <{_module!.Checksum.Source}:{protoType.LineDefined}> ({protoType.Instructions.Count} instructions, {protoType.InstructionSize} bytes)");
 
             // Now we write function specific information
             _writer.WriteLine($"{protoType.ParameterCount}{(protoType.IsVararg ? "+" : "")} params, " +
@@ -66,15 +66,18 @@ namespace Unluau.IR.Writers
             if (lastLineDefined != null)
                 _writer.WriteLine($") -- line {protoType.LineDefined} through {lastLineDefined}");
 
-            // Now lets accept all of the blocks in the control flow graph.
-            for (int i = 0; i < protoType.ControlFlow.Blocks.Count; ++i)
+            // Now we write all of the instructions to the stream.
+            foreach (var instruction in protoType.Instructions)
             {
-                if (i != 0)
-                    _writer.WriteLine($"{_tab}---");
+                var pc = (_pc + 1).ToString().PadRight(5);
+                _writer.Write($"{_tab}{pc}");
 
-                protoType.ControlFlow.Blocks.ElementAt(i).Accept(this);
+                // Now accept the instruction into the current visitor.
+                instruction.Accept(this);
+
+                _writer.WriteLine();
+                ++_pc;
             }
-                
 
             if (protoType.Constants.Count > 0)
             {
@@ -171,24 +174,6 @@ namespace Unluau.IR.Writers
 
             _writer.Write($"{instruction.A} {instruction.D}");
             WriteAux(instruction.Aux);
-            return false;
-        }
-
-        public override bool Visit(BasicBlock block)
-        {
-            // Now we write all of the instructions to the stream.
-            foreach (var instruction in block.Instructions)
-            {
-                var pc = (_pc + 1).ToString().PadRight(5);
-                _writer.Write($"{_tab}{pc}");
-
-                // Now accept the instruction into the current visitor.
-                instruction.Accept(this);
-
-                _writer.WriteLine();
-                ++_pc;
-            }
-
             return false;
         }
 

@@ -7,7 +7,7 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
     /// </summary>
     public class Graph : Node
     {
-        private readonly Queue<(int, BasicBlock)> _edgeQueue = new();
+        private readonly List<(int, BasicBlock)> _edgeQueue = [];
         private readonly BasicBlock _entryBlock;
         private BasicBlock _currentBlock;
 
@@ -17,11 +17,6 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
         public int BlockCount { get; private set; }
 
         /// <summary>
-        /// The count of instructions in the graph.
-        /// </summary>
-        public int InstructionCount { get; private set; }
-
-        /// <summary>
         /// A list of all the blocks in the graph.
         /// </summary>
         public HashSet<BasicBlock> Blocks { get; } = [];
@@ -29,65 +24,135 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
         /// <summary>
         /// Creates a new control flow graph.
         /// </summary>
-        public Graph()
+        public Graph(List<Instruction> instructions)
         {
             _entryBlock = new BasicBlock();
             _currentBlock = _entryBlock;
+
+            foreach (var instruction in instructions)
+                AddInstruction(instruction);
         }
 
         /// <summary>
         /// Adds an instruction to the current block. Handles the branching logic.
         /// </summary>
         /// <param name="instruction">The instruction.</param>
-        public void AddInstruction(Instruction instruction)
+        private void AddInstruction(Instruction instruction)
         {
-            // check if we have any edges to add
-            if (_edgeQueue.TryPeek(out var edge) && edge.Item1 == InstructionCount)
-            {
-                _edgeQueue.Dequeue();
+            var oldBlock = _currentBlock;
 
-                edge.Item2.OutgoingEdges.Add(new Edge(_currentBlock, edge.Item2));
+            // Check if there are any edges that need to be added to the current block.
+            for (var i = 0; i < _edgeQueue.Count; i++)
+            {
+                var (pc, block) = _edgeQueue[i];
+
+                if (instruction.Context.Pc == pc + 1)
+                {
+                    if (_currentBlock == oldBlock)
+                        _currentBlock = new();
+
+                    block.AddEdge(_currentBlock);
+                    _edgeQueue.RemoveAt(i);
+                    i--;
+                }
             }
 
             _currentBlock.Instructions.Add(instruction);
-            
-            // save the current block for branching
-            var currentBlock = _currentBlock;
 
             switch (instruction.Code)
             {
+                case OpCode.JumpX:
+                {
+                    AddEdge(instruction.E, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                    break;
+                }
+                case OpCode.LoadB:
+                {
+                    var branchType = instruction.C > 0 ? BranchType.Always : BranchType.Never;
+
+                    AddEdge(instruction.C, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                    break;
+                }
                 case OpCode.JumpBack:
                 case OpCode.Jump:
                 {
-                    currentBlock.Branch = BranchType.Always;
-
-                    _edgeQueue.Enqueue((InstructionCount + instruction.D, currentBlock));
-
-                    _currentBlock = new BasicBlock();
+                    AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Always);
                     break;
                 }
                 case OpCode.Return:
                 {
-                    currentBlock.Branch = BranchType.Always;
-
-                    _currentBlock = new BasicBlock();
-                    break;
+                    AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Never);
+                    goto default;
                 }
-                case OpCode.JumpIfNotEq:
+                case OpCode.JumpXEqKNil:
+                case OpCode.JumpXEqKB:
+                case OpCode.JumpXEqKN:
+                case OpCode.JumpXEqKS:
                 {
-                    currentBlock.Branch = BranchType.Can;
+                    var branchType = instruction.D > 0 ? BranchType.Can : BranchType.Never;
 
-                    _edgeQueue.Enqueue((InstructionCount + instruction.D, currentBlock));
-
-                    _currentBlock = new BasicBlock();
-                    currentBlock.OutgoingEdges.Add(new Edge(currentBlock, _currentBlock));
+                    AddEdge(instruction.D == 1 ? 0 : instruction.D, instruction.Context.Pc, _currentBlock, branchType);
                     break;
                 }
+                case OpCode.JumpIf:
+                case OpCode.JumpIfNot:
+                case OpCode.JumpIfEq:
+                case OpCode.JumpIfNotEq:
+                case OpCode.JumpIfLe:
+                case OpCode.JumpIfNotLe:
+                case OpCode.JumpIfLt:
+                case OpCode.JumpIfNotLt:
+                {
+                    var branchType = instruction.D > 0 ? BranchType.Can : BranchType.Never;
 
+                    AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, branchType);
+                    break;
+                }
+                default:
+                {
+                    if (_currentBlock != oldBlock)
+                        oldBlock.AddEdge(_currentBlock);
+                    break;
+                }
             }
 
-            Blocks.Add(_currentBlock); // will fail if the block is already in the set
-            InstructionCount++;
+            if (_currentBlock.Instructions.Count != 0)
+                Blocks.Add(_currentBlock); // will fail if the block is already in the set
+        }
+
+        private void AddEdge(int jmp, int pc, BasicBlock block, BranchType type)
+        {
+            block.Branch = type;
+
+            if (type != BranchType.Never)
+            {
+                _currentBlock = new BasicBlock();
+
+                if (type == BranchType.Can)
+                    block.AddEdge(_currentBlock);
+
+                // If the instruction comes after the current instruction, we need to utilize the edge queue.
+                if (jmp > 0)
+                    _edgeQueue.Add((jmp + pc, block));
+                else if (jmp < 0)
+                {
+                    // Now we need to try and find the block that we are branching to. We need to check each block 
+                    // to see if it contains the instruction we are branching to.
+                    foreach (var targetBlock in Blocks)
+                    {
+                        if (targetBlock.Instructions.Any(instruction => instruction.Context.Pc == pc + jmp + 1))
+                        {
+                            block.AddEdge(targetBlock);
+                            break;
+                        }
+                    }
+                }
+                else if (jmp == 0)
+                {
+                    // If the jump is zero, we are branching to the next instruction.
+                    block.AddEdge(_currentBlock);
+                }
+            }
         }
 
         /// <inheritdoc/>

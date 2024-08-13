@@ -40,9 +40,14 @@ namespace Unluau.IR.ProtoTypes
         public int InstructionSize { get; set; }
 
         /// <summary>
+        /// The count of instructions in the function prototype.
+        /// </summary>
+        public List<Instruction> Instructions { get; set; } = [];
+
+        /// <summary>
         /// The control flow graph of the function prototype.
         /// </summary>
-        public Graph ControlFlow { get; set; } = new();
+        public Graph? ControlFlow { get; set; }
 
         /// <summary>
         /// The list of constants in the function prototype.
@@ -107,6 +112,11 @@ namespace Unluau.IR.ProtoTypes
 
                 foreach (var upvalue in Upvalues)
                     upvalue.Accept(visitor);
+
+                foreach (var constant in Constants)
+                    constant.Accept(visitor);
+
+                ControlFlow.Accept(visitor);
             }
         }
     }
