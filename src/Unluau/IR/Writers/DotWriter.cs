@@ -13,13 +13,12 @@ namespace Unluau.IR.Writers
     /// </summary>
     public class DotWriter(Stream stream) : Writer(stream)
     {
-        private string? _edgeName;
         private int _protoId = 0;
 
         private DotGraph? _graph;
         private DotSubgraph? _protoSubGraph;
         private StringBuilder? _builder; // used to build basic block contents
-        private HashSet<BasicBlock> _blockCache = [];
+        private readonly HashSet<BasicBlock> _blockCache = [];
 
         /// <summary>
         /// Writes the main module to the stream.
@@ -129,27 +128,17 @@ namespace Unluau.IR.Writers
             edge.Source.Accept(this);
             edge.Target.Accept(this);
 
-            _edgeName = null;
-
-            if (edge.Source.Branch == BranchType.Can)
-            {
-                if (edge.Source.OutgoingEdges.Last() == edge)
-                    _edgeName = "true";
-                else if (edge.Source.OutgoingEdges.First() == edge)
-                    _edgeName = "false";
-            }
-
             // Create an edge with identifiers
             var myEdge = new DotEdge()
                 .From($"block_{edge.Source.GetHashCode()}").To($"block_{edge.Target.GetHashCode()}")
                 .WithArrowHead(DotEdgeArrowType.Vee)
                 .WithArrowTail(DotEdgeArrowType.None)
-                .WithAttribute("fontname", "Helvetica")
-                .WithAttribute("headport", "n")
-                .WithAttribute("tailport", "s");
+                .WithAttribute("fontname", "Helvetica");
+                //.WithAttribute("headport", "n");
+                //.WithAttribute("tailport", "s");
 
-            if (_edgeName != null)
-                myEdge = myEdge.WithLabel(_edgeName);
+            if (edge.Label is not null)
+                myEdge = myEdge.WithLabel(edge.Label);
 
             _protoSubGraph.Add(myEdge);
             return false;

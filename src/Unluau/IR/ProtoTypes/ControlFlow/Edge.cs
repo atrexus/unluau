@@ -3,8 +3,13 @@
     /// <summary>
     /// Represents an edge in the control flow graph.
     /// </summary>
-    public class Edge(BasicBlock source, BasicBlock target) : Node
+    public class Edge(BasicBlock source, BasicBlock target, string? label = null) : Node
     {
+        /// <summary>
+        /// The label of the edge.
+        /// </summary>
+        public string? Label { get; set; } = label;
+
         /// <summary>
         /// The source of the edge.
         /// </summary>

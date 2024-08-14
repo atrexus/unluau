@@ -43,9 +43,11 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
         /// </summary>
         public List<Edge> OutgoingEdges { get; set; } = [];
 
-        public void AddEdge(BasicBlock target) => OutgoingEdges.Add(new Edge(this, target));
-
-        public bool IsDead => OutgoingEdges.Count == 0 && Branch == null;
+        /// <summary>
+        /// Adds an edge to the current block.
+        /// </summary>
+        /// <param name="target">The target block.</param>
+        public void AddEdge(BasicBlock target, string? label = null) => OutgoingEdges.Add(new Edge(this, target, label));
 
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)

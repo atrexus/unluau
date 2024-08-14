@@ -7,7 +7,7 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
     /// </summary>
     public class Graph : Node
     {
-        private readonly List<(int, BasicBlock)> _edgeQueue = [];
+        private readonly List<(int, BasicBlock, string?)> _edgeQueue = [];
         private readonly BasicBlock _entryBlock;
         private BasicBlock _currentBlock;
 
@@ -44,14 +44,15 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
             // Check if there are any edges that need to be added to the current block.
             for (var i = 0; i < _edgeQueue.Count; i++)
             {
-                var (pc, block) = _edgeQueue[i];
+                var (pc, block, label) = _edgeQueue[i];
 
                 if (instruction.Context.Pc == pc + 1)
                 {
+                    // We only want to create a new block if this is the first edge that we are adding.
                     if (_currentBlock == oldBlock && _currentBlock.Instructions.Count > 0)
                         _currentBlock = new();
 
-                    block.AddEdge(_currentBlock);
+                    block.AddEdge(_currentBlock, label);
                     _edgeQueue.RemoveAt(i);
                     i--;
                 }
@@ -59,7 +60,9 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
 
             _currentBlock.Instructions.Add(instruction);
 
-            if (_currentBlock != oldBlock && oldBlock.IsDead)
+            // If we have created a new block, and the old one has no branches, we need to add an edge to the new block.
+            // This way this block will be reachable from the old block.
+            if (_currentBlock != oldBlock && oldBlock.Branch is null)
                 oldBlock.AddEdge(_currentBlock);
 
             switch (instruction.Code)
@@ -126,11 +129,13 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
                 _currentBlock = new BasicBlock();
 
                 if (type == BranchType.Can)
-                    block.AddEdge(_currentBlock);
+                    block.AddEdge(_currentBlock, "false");
+
+                var label = type == BranchType.Can ? "true" : null;
 
                 // If the instruction comes after the current instruction, we need to utilize the edge queue.
                 if (jmp > 0)
-                    _edgeQueue.Add((jmp + pc, block));
+                    _edgeQueue.Add((jmp + pc, block, label));
                 else if (jmp < 0)
                 {
                     // Now we need to try and find the block that we are branching to. We need to check each block 
@@ -139,7 +144,7 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
                     {
                         if (targetBlock.Instructions.Any(instruction => instruction.Context.Pc == pc + jmp + 1))
                         {
-                            block.AddEdge(targetBlock);
+                            block.AddEdge(targetBlock, label);
                             break;
                         }
                     }
