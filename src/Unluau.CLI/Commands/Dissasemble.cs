@@ -1,4 +1,6 @@
-﻿using System.CommandLine;
+﻿using Microsoft.Extensions.Logging;
+using System.CommandLine;
+using Unluau.CLI.Utils;
 using Unluau.IR;
 using Unluau.IR.Writers;
 
@@ -36,19 +38,24 @@ namespace Unluau.CLI.Commands
                 return null;
             });
 
+        private readonly Option<bool> _debugFlag = new(
+            ["--debug", "-d"],
+            description: "Enables debug logging");
+
         public Disassemble() : base("disassemble", "Disassembles a Luau bytecode file")
         {
             AddOption(_inputOption);
             AddOption(_outputOption);
             AddOption(_formatOption);
+            AddOption(_debugFlag);
 
-            this.SetHandler((inputOpt, outputOpt, formatOpt) =>
+            this.SetHandler((inputOpt, outputOpt, formatOpt, debugFlag) =>
             {
                 Stream input = inputOpt ?? Console.OpenStandardInput();
                 Stream output = outputOpt ?? Console.OpenStandardOutput();
                 string format = formatOpt ?? "ir";
 
-                var result = new Lifter(input).LiftSource();
+                var result = new Lifter(input, Logging.CreateLoggerFactory(debugFlag)).LiftSource();
 
                 Writer writer = format switch
                 {
@@ -58,7 +65,7 @@ namespace Unluau.CLI.Commands
                 };
 
                 writer.Write(result);
-            }, _inputOption, _outputOption, _formatOption);
+            }, _inputOption, _outputOption, _formatOption, _debugFlag);
         }
     }
 }

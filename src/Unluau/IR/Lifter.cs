@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using Unluau.IR.ProtoTypes;
@@ -16,9 +17,10 @@ namespace Unluau.IR
     /// <remarks>
     /// Creates a new instance of <see cref="Lifter"/>.
     /// </remarks>
-    /// <param name="source">The source file name.</param>
     /// <param name="input">The input stream.</param>
-    public class Lifter(Stream input, string source = "input-file.luau", Decoder? decoder = null) : BinaryReader(input)
+    /// <param name="loggerFactory">The logger factory.</param>
+    /// <param name="source">The source file name.</param>
+    public class Lifter(Stream input, ILoggerFactory loggerFactory, string source = "input-file.luau", Decoder? decoder = null) : BinaryReader(input)
     {
         /// <summary>
         /// The bit that indicates if a type is optional or not.
@@ -30,11 +32,13 @@ namespace Unluau.IR
         private readonly List<ProtoType> _protoTypes = [];
         private readonly Decoder _decoder = decoder ?? new();
 
+        private readonly ILogger _logger = loggerFactory.CreateLogger<Lifter>();
+
         /// <summary>
         /// Creates a new instance of <see cref="Lifter"/>.
         /// </summary>
         /// <param name="fileInfo">The file.</param>
-        public Lifter(FileInfo fileInfo) : this(fileInfo.OpenRead(), fileInfo.Name)
+        public Lifter(FileInfo fileInfo, ILoggerFactory loggerFactory) : this(fileInfo.OpenRead(), loggerFactory, fileInfo.Name)
         {
         }
 
@@ -70,18 +74,28 @@ namespace Unluau.IR
 
             _version = LiftVersion();
 
+            _logger.LogDebug("lifting module with version {}", _version);
+
             // Now we read the symbol table. We will use this globally to reference strings.
             var stringCount = Read7BitEncodedInt();
+
+            _logger.LogDebug("lifting {} strings", stringCount);
+
             for (var i = 0; i < stringCount; i++)
                 _symbolTable.Add(ReadString());
 
             // Now we read all of the function prototypes in this module.
             var protoTypeCount = Read7BitEncodedInt();
+
+            _logger.LogDebug("lifting {} prototypes", protoTypeCount);
+
             for (var i = 0; i < protoTypeCount; i++)
                 _protoTypes.Add(LiftProtoType());
 
             // The entry point is the index of the function prototype that is the entry point.
             var entryPoint = Read7BitEncodedInt();
+
+            _logger.LogDebug("entry point is prototype #{}", entryPoint);
 
             _protoTypes[entryPoint].IsMain = true;
 
@@ -119,11 +133,16 @@ namespace Unluau.IR
 
                 // As of right now I see no way to use type info unless compiled natively. Therefore, we just skip it.
                 if (typeSize > 0)
+                {
+                    _logger.LogWarning("skipping {} bytes of type information (not supported)", typeSize);
                     FillBuffer(typeSize);
+                }  
             }
 
             // Now we read all of the instructions in the function prototype.
             var instructionCount = Read7BitEncodedInt();
+
+            _logger.LogDebug("lifting {} instructions", instructionCount);
 
             for (int i = 0; i < instructionCount; i++)
             {
@@ -154,6 +173,8 @@ namespace Unluau.IR
             // Read the line information flag. If it is set, then we read the line information.
             if (ReadBoolean())
             {
+                _logger.LogDebug("lifting line information for prototype {:x}", protoType.GetHashCode());
+
                 // Now we read the line information for each instruction. 
                 var lineGapLog2 = ReadByte();
 
@@ -195,6 +216,8 @@ namespace Unluau.IR
             // Read the debug information flag. If it is set, then we read the debug information.
             if (ReadBoolean())
             {
+                _logger.LogDebug("lifting debug information for prototype {:x}", protoType.GetHashCode());
+
                 var localVariableCount = Read7BitEncodedInt();
 
                 for (int i = 0; i < localVariableCount; i++)
@@ -331,6 +354,8 @@ namespace Unluau.IR
         public List<Constant> LiftConstants()
         {
             var constantCount = Read7BitEncodedInt();
+
+            _logger.LogDebug("lifting {} constants", constantCount);
 
             var constants = new Constant[constantCount];
 

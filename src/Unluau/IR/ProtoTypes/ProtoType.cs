@@ -116,7 +116,7 @@ namespace Unluau.IR.ProtoTypes
                 foreach (var constant in Constants)
                     constant.Accept(visitor);
 
-                ControlFlow.Accept(visitor);
+                ControlFlow!.Accept(visitor);
             }
         }
     }

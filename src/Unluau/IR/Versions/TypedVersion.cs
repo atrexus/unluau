@@ -28,5 +28,7 @@
         {
             visitor.Visit(this);
         }
+
+        public override string ToString() => $"{Number}.{(int)Kind}";
     }
 }

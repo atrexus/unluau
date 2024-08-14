@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="DotNetGraph" Version="3.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0-preview.7.24405.7" />
   </ItemGroup>
 
 </Project>

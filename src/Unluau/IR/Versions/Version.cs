@@ -26,6 +26,8 @@
             visitor.Visit(this);
         }
 
+        public override string ToString() => $"{Number}";
+
         /// <summary>
         /// Returns whether the version is supported.
         /// </summary>

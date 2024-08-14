@@ -22,12 +22,7 @@ namespace Unluau.IR.Writers
         /// <param name="module">The module.</param>
         public override bool Visit(Module module)
         {
-            var version = new StringBuilder(module.Version.Number.ToString());
-
-            if (module.Version is TypedVersion typedVersion)
-                version.Append($".{(byte)typedVersion.Kind}");
-
-            _writer.WriteLine($"{module.Checksum.Source}: Luau bytecode executable, version {version}, hash: 0x{module.Checksum}\n");
+            _writer.WriteLine($"{module.Checksum.Source}: Luau bytecode executable, version {module.Version}, hash: 0x{module.Checksum}\n");
 
             _module = module;
             return true;
