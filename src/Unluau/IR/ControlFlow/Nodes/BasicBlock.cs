@@ -1,6 +1,7 @@
-﻿using Unluau.IR.ProtoTypes.Instructions;
+﻿using Unluau.IR;
+using Unluau.IR.ProtoTypes.Instructions;
 
-namespace Unluau.IR.ProtoTypes.ControlFlow
+namespace Unluau.IR.ControlFlow
 {
     /// <summary>
     /// The type of branch that is taken.

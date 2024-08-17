@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 
 namespace Unluau.CLI
@@ -12,7 +13,11 @@ namespace Unluau.CLI
                 new Commands.Disassemble()
             };
 
-            return await rootCommand.InvokeAsync(args);
+            var parser = new CommandLineBuilder(rootCommand)
+                .UseDefaults()
+                .Build();
+
+            return await parser.InvokeAsync(args);
         }
     }
 }

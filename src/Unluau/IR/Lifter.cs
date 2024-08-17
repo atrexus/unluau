@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using Unluau.IR.Decoders;
 using Unluau.IR.ProtoTypes;
 using Unluau.IR.ProtoTypes.Constants;
 using Unluau.IR.ProtoTypes.Instructions;
@@ -20,7 +21,7 @@ namespace Unluau.IR
     /// <param name="input">The input stream.</param>
     /// <param name="loggerFactory">The logger factory.</param>
     /// <param name="source">The source file name.</param>
-    public class Lifter(Stream input, ILoggerFactory loggerFactory, string source = "input-file.luau", Decoder? decoder = null) : BinaryReader(input)
+    public class Lifter(Stream input, ILoggerFactory loggerFactory, string source = "input-file.luau", Decoders.Decoder? decoder = null) : BinaryReader(input)
     {
         /// <summary>
         /// The bit that indicates if a type is optional or not.
@@ -30,7 +31,7 @@ namespace Unluau.IR
         private readonly List<string> _symbolTable = [];
         private Version _version = new();
         private readonly List<ProtoType> _protoTypes = [];
-        private readonly Decoder _decoder = decoder ?? new();
+        private readonly Decoders.Decoder _decoder = decoder ?? new();
 
         private readonly ILogger _logger = loggerFactory.CreateLogger<Lifter>();
 
@@ -136,7 +137,7 @@ namespace Unluau.IR
                 {
                     _logger.LogWarning("skipping {} bytes of type information (not supported)", typeSize);
                     FillBuffer(typeSize);
-                }  
+                }
             }
 
             // Now we read all of the instructions in the function prototype.
@@ -244,9 +245,6 @@ namespace Unluau.IR
 
             protoType.InstructionSize = instructionCount * 4;
 
-            // Now we create the control flow graph of the function prototype.
-            protoType.ControlFlow = new(protoType.Instructions);
-
             return protoType;
         }
 
@@ -256,95 +254,95 @@ namespace Unluau.IR
         public Instruction LiftInstruction()
         {
             // Now we will peek the next byte as it will be the opcode of the following instruction.
-            var code = _decoder.DecodeOpCode(ReadByte());
+            var code = (OpCode)_decoder.DecodeOpCode(ReadByte());
 
             BaseStream.Position--;
 
             return code switch
             {
-                OpCode.Nop => new Instruction(ReadUInt32()),
-                OpCode.Break => new Instruction(ReadUInt32()),
-                OpCode.LoadNil => new InstructionA(ReadUInt32()),
-                OpCode.LoadB => new InstructionABC(ReadUInt32()),
-                OpCode.LoadN => new InstructionAD(ReadUInt32()),
-                OpCode.LoadK => new InstructionAD(ReadUInt32()),
-                OpCode.Move => new InstructionAB(ReadUInt32()),
-                OpCode.GetGlobal => new InstructionABC(ReadUInt64()),
-                OpCode.SetGlobal => new InstructionABC(ReadUInt64()),
-                OpCode.GetUpval => new InstructionAB(ReadUInt32()),
-                OpCode.SetUpval => new InstructionAB(ReadUInt32()),
-                OpCode.CloseUpvals => new InstructionA(ReadUInt32()),
-                OpCode.GetImport => new InstructionAD(ReadUInt64()),
-                OpCode.GetTable => new InstructionABC(ReadUInt32()),
-                OpCode.SetTable => new InstructionABC(ReadUInt32()),
-                OpCode.GetTableKS => new InstructionABC(ReadUInt64()),
-                OpCode.SetTableKS => new InstructionABC(ReadUInt64()),
-                OpCode.GetTableN => new InstructionABC(ReadUInt32()),
-                OpCode.SetTableN => new InstructionABC(ReadUInt32()),
-                OpCode.NewClosure => new InstructionAD(ReadUInt32()),
-                OpCode.NameCall => new InstructionABC(ReadUInt64()),
-                OpCode.Call => new InstructionABC(ReadUInt32()),
-                OpCode.Return => new InstructionAB(ReadUInt32()),
-                OpCode.Jump => new InstructionAD(ReadUInt32()),
-                OpCode.JumpBack => new InstructionAD(ReadUInt32()),
-                OpCode.JumpIf => new InstructionAD(ReadUInt32()),
-                OpCode.JumpIfNot => new InstructionAD(ReadUInt32()),
-                OpCode.JumpIfEq => new InstructionAD(ReadUInt64()),
-                OpCode.JumpIfLe => new InstructionAD(ReadUInt64()),
-                OpCode.JumpIfLt => new InstructionAD(ReadUInt64()),
-                OpCode.JumpIfNotEq => new InstructionAD(ReadUInt64()),
-                OpCode.JumpIfNotLe => new InstructionAD(ReadUInt64()),
-                OpCode.JumpIfNotLt => new InstructionAD(ReadUInt64()),
-                OpCode.Add => new InstructionABC(ReadUInt32()),
-                OpCode.Sub => new InstructionABC(ReadUInt32()),
-                OpCode.Mul => new InstructionABC(ReadUInt32()),
-                OpCode.Div => new InstructionABC(ReadUInt32()),
-                OpCode.Mod => new InstructionABC(ReadUInt32()),
-                OpCode.Pow => new InstructionABC(ReadUInt32()),
-                OpCode.AddK => new InstructionABC(ReadUInt32()),
-                OpCode.SubK => new InstructionABC(ReadUInt32()),
-                OpCode.MulK => new InstructionABC(ReadUInt32()),
-                OpCode.DivK => new InstructionABC(ReadUInt32()),
-                OpCode.ModK => new InstructionABC(ReadUInt32()),
-                OpCode.PowK => new InstructionABC(ReadUInt32()),
-                OpCode.And => new InstructionABC(ReadUInt32()),
-                OpCode.Or => new InstructionABC(ReadUInt32()),
-                OpCode.AndK => new InstructionABC(ReadUInt32()),
-                OpCode.OrK => new InstructionABC(ReadUInt32()),
-                OpCode.Concat => new InstructionABC(ReadUInt32()),
-                OpCode.Not => new InstructionAB(ReadUInt32()),
-                OpCode.Minus => new InstructionAB(ReadUInt32()),
-                OpCode.Length => new InstructionAB(ReadUInt32()),
-                OpCode.NewTable => new InstructionAB(ReadUInt64()),
-                OpCode.DupTable => new InstructionAD(ReadUInt32()),
-                OpCode.SetList => new InstructionABC(ReadUInt64()),
-                OpCode.ForNPrep => new InstructionAD(ReadUInt32()),
-                OpCode.ForNLoop => new InstructionAD(ReadUInt32()),
-                OpCode.ForGLoop => new InstructionAD(ReadUInt64()),
-                OpCode.ForGPrepINext => new InstructionA(ReadUInt32()),
-                OpCode.ForGPrepNext => new InstructionA(ReadUInt32()),
-                OpCode.NativeCall => new Instruction(ReadUInt32()),
-                OpCode.GetVarArgs => new InstructionAB(ReadUInt32()),
-                OpCode.DupClosure => new InstructionAD(ReadUInt64()),
-                OpCode.PrepVarArgs => new InstructionA(ReadUInt32()),
-                OpCode.LoadKX => new InstructionA(ReadUInt64()),
-                OpCode.JumpX => new InstructionE(ReadUInt32()),
-                OpCode.FastCall => new InstructionABC(ReadUInt32()),
-                OpCode.Coverage => new InstructionE(ReadUInt32()),
-                OpCode.Capture => new InstructionABC(ReadUInt32()),
-                OpCode.SubRK => new InstructionABC(ReadUInt32()),
-                OpCode.DivRK => new InstructionABC(ReadUInt32()),
-                OpCode.FastCall1 => new InstructionABC(ReadUInt32()),
-                OpCode.FastCall2 => new InstructionABC(ReadUInt64()),
-                OpCode.FastCall2K => new InstructionABC(ReadUInt64()),
-                OpCode.ForGPrep => new InstructionAD(ReadUInt32()),
-                OpCode.JumpXEqKNil => new InstructionAD(ReadUInt64()),
-                OpCode.JumpXEqKB => new InstructionAD(ReadUInt64()),
-                OpCode.JumpXEqKN => new InstructionAD(ReadUInt64()),
-                OpCode.JumpXEqKS => new InstructionAD(ReadUInt64()),
-                OpCode.IDiv => new InstructionABC(ReadUInt32()),
-                OpCode.IDivK => new InstructionABC(ReadUInt32()),
-                _ => throw new Exception($"invalid opcode {code}")
+                OpCode.Nop => new Instruction(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Break => new Instruction(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.LoadNil => new InstructionA(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.LoadB => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.LoadN => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.LoadK => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Move => new InstructionAB(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.GetGlobal => new InstructionABC(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.SetGlobal => new InstructionABC(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.GetUpval => new InstructionAB(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.SetUpval => new InstructionAB(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.CloseUpvals => new InstructionA(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.GetImport => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.GetTable => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.SetTable => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.GetTableKS => new InstructionABC(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.SetTableKS => new InstructionABC(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.GetTableN => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.SetTableN => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.NewClosure => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.NameCall => new InstructionABC(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.Call => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Return => new InstructionAB(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Jump => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.JumpBack => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.JumpIf => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.JumpIfNot => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.JumpIfEq => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.JumpIfLe => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.JumpIfLt => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.JumpIfNotEq => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.JumpIfNotLe => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.JumpIfNotLt => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.Add => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Sub => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Mul => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Div => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Mod => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Pow => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.AddK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.SubK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.MulK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.DivK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.ModK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.PowK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.And => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Or => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.AndK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.OrK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Concat => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Not => new InstructionAB(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Minus => new InstructionAB(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Length => new InstructionAB(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.NewTable => new InstructionAB(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.DupTable => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.SetList => new InstructionABC(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.ForNPrep => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.ForNLoop => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.ForGLoop => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.ForGPrepINext => new InstructionA(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.ForGPrepNext => new InstructionA(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.NativeCall => new Instruction(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.GetVarArgs => new InstructionAB(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.DupClosure => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.PrepVarArgs => new InstructionA(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.LoadKX => new InstructionA(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.JumpX => new InstructionE(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.FastCall => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Coverage => new InstructionE(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.Capture => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.SubRK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.DivRK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.FastCall1 => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.FastCall2 => new InstructionABC(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.FastCall2K => new InstructionABC(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.ForGPrep => new InstructionAD(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.JumpXEqKNil => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.JumpXEqKB => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.JumpXEqKN => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.JumpXEqKS => new InstructionAD(_decoder.DecodeInstruction(ReadUInt64())),
+                OpCode.IDiv => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                OpCode.IDivK => new InstructionABC(_decoder.DecodeInstruction(ReadUInt32())),
+                _ => throw new Exception($"Invalid opcode {code}")
             };
         }
 
@@ -385,40 +383,40 @@ namespace Unluau.IR
                         constants[i] = new StringConstant(ReadStringRef()!);
                         break;
                     case ConstantType.Import:
+                    {
+                        var id = ReadUInt32(); // uint, because Negative values error out here
+                        var nameCount = id >> 30;
+
+                        var names = new List<StringConstant>();
+
+                        // Load all of the string constants into the import constant. Luau does this differently. 
+                        // I've decided to go with a loop here to conserve space.
+                        for (int j = 0; j < nameCount; ++j)
                         {
-                            var id = ReadUInt32(); // uint, because Negative values error out here
-                            var nameCount = id >> 30;
+                            var constantIndex = id >> 20 - j * 10 & 1023;
 
-                            var names = new List<StringConstant>();
-
-                            // Load all of the string constants into the import constant. Luau does this differently. 
-                            // I've decided to go with a loop here to conserve space.
-                            for (int j = 0; j < nameCount; ++j)
-                            {
-                                var constantIndex = id >> 20 - j * 10 & 1023;
-
-                                names.Add((StringConstant)constants[constantIndex]);
-                            }
-
-                            constants[i] = new ImportConstant(names);
-                            break;
+                            names.Add((StringConstant)constants[constantIndex]);
                         }
+
+                        constants[i] = new ImportConstant(names);
+                        break;
+                    }
                     case ConstantType.Table:
+                    {
+                        var keyCount = Read7BitEncodedInt();
+
+                        var keys = new List<Constant>(keyCount);
+
+                        for (int j = 0; j < keyCount; ++j)
                         {
-                            var keyCount = Read7BitEncodedInt();
+                            var keyIndex = Read7BitEncodedInt();
 
-                            var keys = new List<Constant>(keyCount);
-
-                            for (int j = 0; j < keyCount; ++j)
-                            {
-                                var keyIndex = Read7BitEncodedInt();
-
-                                keys.Add(constants[keyIndex]);
-                            }
-
-                            constants[i] = new TableConstant(keys);
-                            break;
+                            keys.Add(constants[keyIndex]);
                         }
+
+                        constants[i] = new TableConstant(keys);
+                        break;
+                    }
                     case ConstantType.Closure:
                         constants[i] = new ClosureConstant(Read7BitEncodedInt());
                         break;
@@ -461,7 +459,53 @@ namespace Unluau.IR
         {
             length ??= Read7BitEncodedInt();
 
-            return Encoding.ASCII.GetString(ReadBytes(length.Value));
+            var s = Encoding.ASCII.GetString(ReadBytes(length.Value));
+
+            var builder = new StringBuilder();
+
+            foreach (var c in s)
+            {
+                switch (c)
+                {
+                    case '\"':
+                        builder.Append("\\\"");
+                        break;
+                    case '\'':
+                        builder.Append("\\'");
+                        break;
+                    case '\n':
+                        builder.Append("\\n");
+                        break;
+                    case '\\':
+                        builder.Append("\\\\");
+                        break;
+                    case '\b':
+                        builder.Append("\\b");
+                        break;
+                    case '\t':
+                        builder.Append("\\t");
+                        break;
+                    case '\v':
+                        builder.Append("\\v");
+                        break;
+                    case '\a':
+                        builder.Append("\\a");
+                        break;
+                    case '\f':
+                        builder.Append("\\f");
+                        break;
+                    case '\r':
+                        builder.Append("\\r");
+                        break;
+                    default:
+                        builder.Append(c);
+                        break;
+
+                }
+
+            }
+
+            return builder.ToString();
         }
 
         /// <summary>

@@ -1,4 +1,6 @@
-﻿namespace Unluau.IR.ProtoTypes.ControlFlow
+﻿using Unluau.IR;
+
+namespace Unluau.IR.ControlFlow
 {
     /// <summary>
     /// Represents an edge in the control flow graph.

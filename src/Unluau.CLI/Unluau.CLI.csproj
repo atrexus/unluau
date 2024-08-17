@@ -8,6 +8,8 @@
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
     <StartupObject>Unluau.CLI.Program</StartupObject>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <VersionSuffix>beta</VersionSuffix>
   </PropertyGroup>
 
   <ItemGroup>

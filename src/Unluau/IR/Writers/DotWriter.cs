@@ -3,8 +3,8 @@ using Unluau.IR.ProtoTypes;
 using DotNetGraph.Compilation;
 using DotNetGraph.Core;
 using DotNetGraph.Extensions;
-using Unluau.IR.ProtoTypes.ControlFlow;
 using Unluau.IR.ProtoTypes.Instructions;
+using Unluau.IR.ControlFlow;
 
 namespace Unluau.IR.Writers
 {
@@ -72,7 +72,7 @@ namespace Unluau.IR.Writers
             _graph!.Add(_protoSubGraph);
 
             // Visit all basic blocks in the control flow graph.
-            protoType.ControlFlow!.Accept(this);
+            protoType.ControlFlow?.Accept(this);
 
             return false;
         }

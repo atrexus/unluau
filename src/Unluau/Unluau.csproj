@@ -4,11 +4,17 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <VersionSuffix>beta</VersionSuffix>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="DotNetGraph" Version="3.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0-preview.7.24405.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="IR\ControlFlow\Nodes\" />
   </ItemGroup>
 
 </Project>

@@ -15,7 +15,11 @@ namespace Unluau.CLI.Utils
         {
             var loggerFactory = LoggerFactory.Create(builder =>
             {
-                builder.AddSimpleConsole().AddConsole();
+                builder.AddSimpleConsole(options => 
+                { 
+                    options.SingleLine = true;
+                    options.TimestampFormat = "HH:mm:ss ";
+                });
                 builder.SetMinimumLevel(debug ? LogLevel.Debug : LogLevel.Information);
             });
 

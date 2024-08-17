@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using System.CommandLine;
+﻿using System.CommandLine;
 using Unluau.CLI.Utils;
 using Unluau.IR;
+using Unluau.IR.Decoders;
 using Unluau.IR.Writers;
 
 namespace Unluau.CLI.Commands
@@ -10,12 +10,17 @@ namespace Unluau.CLI.Commands
     {
         private static readonly HashSet<string> _supportedFormats = ["ir", "dot"];
 
-        private readonly Option<Stream?> _inputOption = new(
+        private static readonly Dictionary<string, Decoder> _supportedDecoders = new()
+        {
+            ["roblox"] = new RobloxDecoder()
+        };
+
+        private readonly Option<FileInfo?> _inputOption = new(
             ["-input", "-i" ],
             description: "The input file to disassemble",
             parseArgument: result =>
             {
-                return new FileStream(result.Tokens[0].Value, FileMode.Open);
+                return new FileInfo(result.Tokens[0].Value);
             });
 
         private readonly Option<Stream> _outputOption = new(
@@ -42,20 +47,35 @@ namespace Unluau.CLI.Commands
             ["--debug", "-d"],
             description: "Enables debug logging");
 
+        private readonly Option<Decoder?> _decoderOption = new(
+            ["--decoder"],
+            description: "The decoder to use for the input file",
+            parseArgument: result =>
+            {
+                if (_supportedDecoders.TryGetValue(result.Tokens[0].Value, out var decoder))
+                    return decoder;
+
+                result.ErrorMessage = $"Invalid decoder; supported decoders are: {string.Join(", ", _supportedDecoders.Keys)}";
+                return null;
+            });
+
         public Disassemble() : base("disassemble", "Disassembles a Luau bytecode file")
         {
             AddOption(_inputOption);
             AddOption(_outputOption);
             AddOption(_formatOption);
             AddOption(_debugFlag);
+            AddOption(_decoderOption);
 
-            this.SetHandler((inputOpt, outputOpt, formatOpt, debugFlag) =>
+            this.SetHandler(static (inputOpt, outputOpt, formatOpt, debugFlag, decoderOpt) =>
             {
-                Stream input = inputOpt ?? Console.OpenStandardInput();
+                Stream input = inputOpt?.OpenRead() ?? Console.OpenStandardInput();
+                string source = inputOpt?.Name ?? "input-file.luau";
                 Stream output = outputOpt ?? Console.OpenStandardOutput();
                 string format = formatOpt ?? "ir";
+                Decoder decoder = decoderOpt ?? new Decoder();
 
-                var result = new Lifter(input, Logging.CreateLoggerFactory(debugFlag)).LiftSource();
+                var result = new Lifter(input, Logging.CreateLoggerFactory(debugFlag), source, decoder).LiftSource();
 
                 Writer writer = format switch
                 {
@@ -65,7 +85,7 @@ namespace Unluau.CLI.Commands
                 };
 
                 writer.Write(result);
-            }, _inputOption, _outputOption, _formatOption, _debugFlag);
+            }, _inputOption, _outputOption, _formatOption, _debugFlag, _decoderOption);
         }
     }
 }

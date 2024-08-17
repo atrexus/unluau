@@ -1,5 +1,5 @@
-﻿using Unluau.IR.ProtoTypes;
-using Unluau.IR.ProtoTypes.ControlFlow;
+﻿using Unluau.IR.ControlFlow;
+using Unluau.IR.ProtoTypes;
 using Unluau.IR.ProtoTypes.Instructions;
 using Unluau.IR.Versions;
 using Type = Unluau.IR.ProtoTypes.Type;

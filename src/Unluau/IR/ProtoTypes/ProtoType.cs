@@ -1,5 +1,5 @@
-﻿using Unluau.IR.ProtoTypes.Constants;
-using Unluau.IR.ProtoTypes.ControlFlow;
+﻿using Unluau.IR.ControlFlow;
+using Unluau.IR.ProtoTypes.Constants;
 using Unluau.IR.ProtoTypes.Instructions;
 
 namespace Unluau.IR.ProtoTypes
@@ -116,7 +116,7 @@ namespace Unluau.IR.ProtoTypes
                 foreach (var constant in Constants)
                     constant.Accept(visitor);
 
-                ControlFlow!.Accept(visitor);
+                ControlFlow?.Accept(visitor);
             }
         }
     }

@@ -1,6 +1,7 @@
-﻿using Unluau.IR.ProtoTypes.Instructions;
+﻿using Unluau.IR;
+using Unluau.IR.ProtoTypes.Instructions;
 
-namespace Unluau.IR.ProtoTypes.ControlFlow
+namespace Unluau.IR.ControlFlow
 {
     /// <summary>
     /// Represents the control flow graph of the IR. It consists of a sequence of blocks that are connected by edges.
@@ -68,39 +69,39 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
             switch (instruction.Code)
             {
                 case OpCode.JumpX:
-                {
-                    AddEdge(instruction.E, instruction.Context.Pc, _currentBlock, BranchType.Always);
-                    break;
-                }
+                    {
+                        AddEdge(instruction.E, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                        break;
+                    }
                 case OpCode.LoadB:
-                {
-                    AddEdge(instruction.C, instruction.Context.Pc, _currentBlock, BranchType.Always);
-                    break;
-                }
+                    {
+                        AddEdge(instruction.C, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                        break;
+                    }
                 case OpCode.JumpBack:
                 case OpCode.Jump:
-                {
-                    AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Always);
-                    break;
-                }
+                    {
+                        AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                        break;
+                    }
                 case OpCode.ForNPrep:
-                {
-                    AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Always);
-                    break;
-                }
+                    {
+                        AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                        break;
+                    }
                 case OpCode.Return:
-                {
-                    AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Never);
-                    break;
-                }
+                    {
+                        AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Never);
+                        break;
+                    }
                 case OpCode.JumpXEqKNil:
                 case OpCode.JumpXEqKB:
                 case OpCode.JumpXEqKN:
                 case OpCode.JumpXEqKS:
-                {
-                    AddEdge(instruction.D == 1 ? 0 : instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Can);
-                    break;
-                }
+                    {
+                        AddEdge(instruction.D == 1 ? 0 : instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Can);
+                        break;
+                    }
                 case OpCode.ForNLoop:
                 case OpCode.JumpIf:
                 case OpCode.JumpIfNot:
@@ -110,10 +111,10 @@ namespace Unluau.IR.ProtoTypes.ControlFlow
                 case OpCode.JumpIfNotLe:
                 case OpCode.JumpIfLt:
                 case OpCode.JumpIfNotLt:
-                {
-                    AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Can);
-                    break;
-                }
+                    {
+                        AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Can);
+                        break;
+                    }
             }
 
             if (_currentBlock.Instructions.Count != 0)
