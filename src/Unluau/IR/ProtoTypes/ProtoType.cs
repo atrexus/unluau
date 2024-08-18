@@ -1,4 +1,5 @@
 ﻿using Unluau.IR.ControlFlow;
+using Unluau.IR.ControlFlow.Nodes;
 using Unluau.IR.ProtoTypes.Constants;
 using Unluau.IR.ProtoTypes.Instructions;
 
@@ -47,7 +48,7 @@ namespace Unluau.IR.ProtoTypes
         /// <summary>
         /// The control flow graph of the function prototype.
         /// </summary>
-        public Graph? ControlFlow { get; set; }
+        public BasicBlock? ControlFlow { get; set; }
 
         /// <summary>
         /// The list of constants in the function prototype.

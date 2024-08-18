@@ -1,4 +1,5 @@
 ﻿using Unluau.IR.ControlFlow;
+using Unluau.IR.ControlFlow.Nodes;
 using Unluau.IR.ProtoTypes;
 using Unluau.IR.ProtoTypes.Instructions;
 using Unluau.IR.Versions;
@@ -97,10 +98,5 @@ namespace Unluau.IR
         /// The visitor for the <see cref="BasicBlock"/> class.
         /// </summary>
         public virtual bool Visit(BasicBlock block) => Visit(block as Node);
-
-        /// <summary>
-        /// The visitor for the <see cref="Graph"/> class.
-        /// </summary>
-        public virtual bool Visit(Graph graph) => Visit(graph as Node);
     }
 }

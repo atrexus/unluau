@@ -3,6 +3,7 @@ using Unluau.CLI.Utils;
 using Unluau.IR;
 using Unluau.IR.Decoders;
 using Unluau.IR.Writers;
+using Unluau.IR.ControlFlow;
 
 namespace Unluau.CLI.Commands
 {
@@ -75,7 +76,12 @@ namespace Unluau.CLI.Commands
                 string format = formatOpt ?? "ir";
                 Decoder decoder = decoderOpt ?? new Decoder();
 
-                var result = new Lifter(input, Logging.CreateLoggerFactory(debugFlag), source, decoder).LiftSource();
+                var loggerFactory = Logging.CreateLoggerFactory(debugFlag);
+
+                var result = new Lifter(input, loggerFactory, source, decoder).LiftSource();
+
+                // lift control flow for the module
+                ControlFlowBuilder.Build(loggerFactory, result.Module);
 
                 Writer writer = format switch
                 {

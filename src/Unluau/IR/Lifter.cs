@@ -75,7 +75,7 @@ namespace Unluau.IR
 
             _version = LiftVersion();
 
-            _logger.LogDebug("lifting module with version {}", _version);
+            _logger.LogInformation("lifting module with version {}", _version);
 
             // Now we read the symbol table. We will use this globally to reference strings.
             var stringCount = Read7BitEncodedInt();
@@ -124,126 +124,130 @@ namespace Unluau.IR
                 IsVararg = ReadBoolean(),
             };
 
-            // Now we read type information of the function prototype if type encoding is enabled.
-            if (_version is TypedVersion)
+            using (_logger.BeginScope(protoType))
             {
-                // Now we read the flags of the function prototype. They contain information about the function.
-                protoType.Flags = new(ReadByte());
-
-                var typeSize = Read7BitEncodedInt();
-
-                // As of right now I see no way to use type info unless compiled natively. Therefore, we just skip it.
-                if (typeSize > 0)
+                // Now we read type information of the function prototype if type encoding is enabled.
+                if (_version is TypedVersion)
                 {
-                    _logger.LogWarning("skipping {} bytes of type information (not supported)", typeSize);
-                    FillBuffer(typeSize);
-                }
-            }
+                    // Now we read the flags of the function prototype. They contain information about the function.
+                    protoType.Flags = new(ReadByte());
 
-            // Now we read all of the instructions in the function prototype.
-            var instructionCount = Read7BitEncodedInt();
+                    var typeSize = Read7BitEncodedInt();
 
-            _logger.LogDebug("lifting {} instructions", instructionCount);
-
-            for (int i = 0; i < instructionCount; i++)
-            {
-                var instruction = LiftInstruction();
-
-                if (instruction.Aux != null)
-                    i++;
-
-                protoType.Instructions.Add(instruction);
-            }
-
-            // Now we read the constants of the function prototype.
-            protoType.Constants = LiftConstants();
-
-            // Now we read the function prototypes in the function prototype.
-            var protoTypeCount = Read7BitEncodedInt();
-
-            for (var i = 0; i < protoTypeCount; i++)
-            {
-                var fid = Read7BitEncodedInt();
-                protoType.ProtoTypes.Insert(i, _protoTypes[fid]);
-            }
-
-            protoType.LineDefined = Read7BitEncodedInt();
-            protoType.LastLineDefined = null;
-            protoType.Name = ReadStringRef();
-
-            // Read the line information flag. If it is set, then we read the line information.
-            if (ReadBoolean())
-            {
-                _logger.LogDebug("lifting line information for prototype {:x}", protoType.GetHashCode());
-
-                // Now we read the line information for each instruction. 
-                var lineGapLog2 = ReadByte();
-
-                int intervals = (instructionCount - 1 >> lineGapLog2) + 1;
-                int absOffset = instructionCount + 3 & ~3;
-
-                int lineInfoCount = absOffset + intervals * sizeof(int);
-
-                var lineInfo = new byte[lineInfoCount];
-                var absLineInfo = new int[lineInfoCount - absOffset];
-
-                byte lastOffset = 0;
-                int lastLine = 0;
-
-                for (int i = 0; i < instructionCount; i++)
-                    lineInfo[i] = lastOffset += ReadByte();
-
-                for (int i = 0; i < intervals; i++)
-                    absLineInfo[i] = lastLine += ReadInt32();
-
-                // Now we assign the line information to the instructions. Each instruction has a line number.
-                int pc = 0;
-                foreach (var instruction in protoType.Instructions)
-                {
-                    instruction.Context.LineDefined = absLineInfo[pc >> lineGapLog2] + lineInfo[pc];
-                    instruction.Context.Pc = pc++;
-
-                    // If the instruction has an auxiliary instruction, then we need to skip the next instruction.
-                    if (instruction.Aux != null)
+                    // As of right now I see no way to use type info unless compiled natively. Therefore, we just skip it.
+                    if (typeSize > 0)
                     {
-                        instruction.Aux.Context.LineDefined = absLineInfo[pc >> lineGapLog2] + lineInfo[pc];
-                        instruction.Aux.Context.Pc = pc++;
+                        _logger.LogWarning("skipping {} bytes of type information (not supported)", typeSize);
+                        FillBuffer(typeSize);
                     }
                 }
 
-                protoType.LastLineDefined = protoType.Instructions.Last().Context.LineDefined;
-            }
+                // Now we read all of the instructions in the function prototype.
+                var instructionCount = Read7BitEncodedInt();
 
-            // Read the debug information flag. If it is set, then we read the debug information.
-            if (ReadBoolean())
-            {
-                _logger.LogDebug("lifting debug information for prototype {:x}", protoType.GetHashCode());
+                _logger.LogDebug("lifting {} instructions", instructionCount);
 
-                var localVariableCount = Read7BitEncodedInt();
-
-                for (int i = 0; i < localVariableCount; i++)
+                for (int i = 0; i < instructionCount; i++)
                 {
-                    var name = ReadStringRef();
-                    var scope = (Read7BitEncodedInt(), Read7BitEncodedInt());
-                    var register = ReadByte();
+                    var instruction = LiftInstruction();
 
-                    protoType.Locals.Add(new Local(register, scope)
+                    if (instruction.Aux != null)
+                        i++;
+
+                    protoType.Instructions.Add(instruction);
+                }
+
+                // Now we read the constants of the function prototype.
+                protoType.Constants = LiftConstants();
+
+                // Now we read the function prototypes in the function prototype.
+                var protoTypeCount = Read7BitEncodedInt();
+
+                for (var i = 0; i < protoTypeCount; i++)
+                {
+                    var fid = Read7BitEncodedInt();
+                    protoType.ProtoTypes.Insert(i, _protoTypes[fid]);
+                }
+
+                protoType.LineDefined = Read7BitEncodedInt();
+                protoType.LastLineDefined = null;
+                protoType.Name = ReadStringRef();
+
+                // Read the line information flag. If it is set, then we read the line information.
+                if (ReadBoolean())
+                {
+                    _logger.LogDebug("lifting line information for prototype {:x}", protoType.GetHashCode());
+
+                    // Now we read the line information for each instruction. 
+                    var lineGapLog2 = ReadByte();
+
+                    int intervals = (instructionCount - 1 >> lineGapLog2) + 1;
+                    int absOffset = instructionCount + 3 & ~3;
+
+                    int lineInfoCount = absOffset + intervals * sizeof(int);
+
+                    var lineInfo = new byte[lineInfoCount];
+                    var absLineInfo = new int[lineInfoCount - absOffset];
+
+                    byte lastOffset = 0;
+                    int lastLine = 0;
+
+                    for (int i = 0; i < instructionCount; i++)
+                        lineInfo[i] = lastOffset += ReadByte();
+
+                    for (int i = 0; i < intervals; i++)
+                        absLineInfo[i] = lastLine += ReadInt32();
+
+                    // Now we assign the line information to the instructions. Each instruction has a line number.
+                    int pc = 0;
+                    foreach (var instruction in protoType.Instructions)
                     {
-                        Name = name
-                    });
+                        instruction.Context.LineDefined = absLineInfo[pc >> lineGapLog2] + lineInfo[pc];
+                        instruction.Context.Pc = pc++;
+
+                        // If the instruction has an auxiliary instruction, then we need to skip the next instruction.
+                        if (instruction.Aux != null)
+                        {
+                            instruction.Aux.Context.LineDefined = absLineInfo[pc >> lineGapLog2] + lineInfo[pc];
+                            instruction.Aux.Context.Pc = pc++;
+                        }
+                    }
+
+                    protoType.LastLineDefined = protoType.Instructions.Last().Context.LineDefined;
                 }
 
-                var upvalueCount = Read7BitEncodedInt();
-
-                for (int i = 0; i < upvalueCount; i++)
+                // Read the debug information flag. If it is set, then we read the debug information.
+                if (ReadBoolean())
                 {
-                    var name = ReadStringRef();
+                    _logger.LogDebug("lifting debug information for prototype {:x}", protoType.GetHashCode());
 
-                    protoType.Upvalues[i].Name = name;
+                    var localVariableCount = Read7BitEncodedInt();
+
+                    for (int i = 0; i < localVariableCount; i++)
+                    {
+                        var name = ReadStringRef();
+                        var scope = (Read7BitEncodedInt(), Read7BitEncodedInt());
+                        var register = ReadByte();
+
+                        protoType.Locals.Add(new Local(register, scope)
+                        {
+                            Name = name
+                        });
+                    }
+
+                    var upvalueCount = Read7BitEncodedInt();
+
+                    for (int i = 0; i < upvalueCount; i++)
+                    {
+                        var name = ReadStringRef();
+
+                        protoType.Upvalues[i].Name = name;
+                    }
                 }
-            }
 
-            protoType.InstructionSize = instructionCount * 4;
+                protoType.InstructionSize = instructionCount * 4;
+
+            }
 
             return protoType;
         }

@@ -4,7 +4,7 @@ using DotNetGraph.Compilation;
 using DotNetGraph.Core;
 using DotNetGraph.Extensions;
 using Unluau.IR.ProtoTypes.Instructions;
-using Unluau.IR.ControlFlow;
+using Unluau.IR.ControlFlow.Nodes;
 
 namespace Unluau.IR.Writers
 {

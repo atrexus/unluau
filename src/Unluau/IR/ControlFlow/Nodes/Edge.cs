@@ -1,6 +1,6 @@
 ﻿using Unluau.IR;
 
-namespace Unluau.IR.ControlFlow
+namespace Unluau.IR.ControlFlow.Nodes
 {
     /// <summary>
     /// Represents an edge in the control flow graph.

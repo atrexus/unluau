@@ -19,6 +19,7 @@ namespace Unluau.CLI.Utils
                 { 
                     options.SingleLine = true;
                     options.TimestampFormat = "HH:mm:ss ";
+                    options.IncludeScopes = true;
                 });
                 builder.SetMinimumLevel(debug ? LogLevel.Debug : LogLevel.Information);
             });
