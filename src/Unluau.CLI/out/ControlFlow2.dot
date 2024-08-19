@@ -1,0 +1,175 @@
+digraph "ControlFlow2.luau" {
+	subgraph cluster_0 {
+		"label"="function main(...)"
+		"style"="filled"
+		"color"="#F5F5F5"
+		"fontname"=Helvetica
+		block_41421720 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">prepvarargs         </TD><TD ALIGN="LEFT"></TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 1<BR ALIGN="LEFT"/>1073741824</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">2 3<BR ALIGN="LEFT"/>1075838976</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnoteq         </TD><TD ALIGN="LEFT">1 23<BR ALIGN="LEFT"/>2</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_41421720 -> block_37251161 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="false"
+		]
+		block_41421720 -> block_6480969 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="true"
+		]
+		block_37251161 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 3</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getglobal           </TD><TD ALIGN="LEFT">1 0 130<BR ALIGN="LEFT"/>4</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnot           </TD><TD ALIGN="LEFT">1 1</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_37251161 -> block_66824994 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="false"
+		]
+		block_37251161 -> block_64554036 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="true"
+		]
+		block_66824994 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 4</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_66824994 -> block_64554036 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+		]
+		block_64554036 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 6<BR ALIGN="LEFT"/>1078984704</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnot           </TD><TD ALIGN="LEFT">1 10</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_64554036 -> block_44115416 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="false"
+		]
+		block_64554036 -> block_720107 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="true"
+		]
+		block_44115416 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 5</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 8<BR ALIGN="LEFT"/>1081081856</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnot           </TD><TD ALIGN="LEFT">1 2</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_44115416 -> block_61494432 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="false"
+		]
+		block_44115416 -> block_16578980 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="true"
+		]
+		block_61494432 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 6</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jump                </TD><TD ALIGN="LEFT">0 4</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_61494432 -> block_720107 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+		]
+		block_16578980 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 10<BR ALIGN="LEFT"/>1083179008</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnot           </TD><TD ALIGN="LEFT">1 1</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_16578980 -> block_14993092 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="false"
+		]
+		block_16578980 -> block_720107 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="true"
+		]
+		block_14993092 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 7</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_14993092 -> block_720107 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+		]
+		block_720107 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">1 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">setglobal           </TD><TD ALIGN="LEFT">1 0 130<BR ALIGN="LEFT"/>4</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jump                </TD><TD ALIGN="LEFT">0 19</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_720107 -> block_27006480 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+		]
+		block_6480969 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 2</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 12<BR ALIGN="LEFT"/>1085276160</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">call                </TD><TD ALIGN="LEFT">1 1 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 12<BR ALIGN="LEFT"/>1085276160</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">loadk               </TD><TD ALIGN="LEFT">2 13</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">call                </TD><TD ALIGN="LEFT">1 2 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getglobal           </TD><TD ALIGN="LEFT">1 0 130<BR ALIGN="LEFT"/>4</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnot           </TD><TD ALIGN="LEFT">1 5</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_6480969 -> block_58328727 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="false"
+		]
+		block_6480969 -> block_55196503 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="true"
+		]
+		block_58328727 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 12<BR ALIGN="LEFT"/>1085276160</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">loadk               </TD><TD ALIGN="LEFT">2 14</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">call                </TD><TD ALIGN="LEFT">1 2 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jump                </TD><TD ALIGN="LEFT">0 3</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_58328727 -> block_27006480 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+		]
+		block_55196503 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">1 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">setglobal           </TD><TD ALIGN="LEFT">1 0 130<BR ALIGN="LEFT"/>4</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_55196503 -> block_27006480 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+		]
+		block_27006480 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 12<BR ALIGN="LEFT"/>1085276160</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">move                </TD><TD ALIGN="LEFT">2 0</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">call                </TD><TD ALIGN="LEFT">1 2 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">return              </TD><TD ALIGN="LEFT">0 1</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+	}
+}

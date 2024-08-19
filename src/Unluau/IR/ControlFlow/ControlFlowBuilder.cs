@@ -10,7 +10,7 @@ namespace Unluau.IR.ControlFlow
     /// </summary>
     public class ControlFlowBuilder : Visitor
     {
-        private readonly ILogger<ControlFlowBuilder> _logger;
+        private readonly ILogger _logger;
         private readonly List<(int, BasicBlock, string?)> _edgeQueue = [];
         private readonly HashSet<BasicBlock> _blocks = [];
         private BasicBlock _entryBlock = new();
@@ -20,7 +20,7 @@ namespace Unluau.IR.ControlFlow
         /// Creates a new instance of the <see cref="ControlFlowBuilder"/> class.
         /// </summary>
         /// <param name="loggerFactory">The logger factory to use.</param>
-        private ControlFlowBuilder(ILoggerFactory loggerFactory) => _logger = loggerFactory.CreateLogger<ControlFlowBuilder>();
+        private ControlFlowBuilder(ILoggerFactory loggerFactory) => _logger = loggerFactory.CreateLogger("ControlFlowBuilder");
 
         /// <summary>
         /// Builds the control flow graphs for all function prototypes in the module.

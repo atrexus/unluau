@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Unluau.IR
+﻿namespace Unluau.IR
 {
     /// <summary>
     /// Represents a summary of the lifted code.

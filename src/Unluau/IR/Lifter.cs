@@ -2,11 +2,11 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
-using Unluau.IR.Decoders;
 using Unluau.IR.ProtoTypes;
 using Unluau.IR.ProtoTypes.Constants;
 using Unluau.IR.ProtoTypes.Instructions;
 using Unluau.IR.Versions;
+using Decoder = Unluau.IR.Decoders.Decoder;
 using Type = Unluau.IR.ProtoTypes.Type;
 using Version = Unluau.IR.Versions.Version;
 
@@ -33,9 +33,9 @@ namespace Unluau.IR
         /// <summary>
         /// Creates a new instance of <see cref="Lifter"/>.
         /// </summary>
-        private Lifter(Stream input, ILoggerFactory loggerFactory, string source = "input-file.luau", Decoders.Decoder? decoder = null) : base(input)
+        private Lifter(Stream input, ILoggerFactory loggerFactory, string source = "input-file.luau", Decoder? decoder = null) : base(input)
         {
-            _logger = loggerFactory.CreateLogger<Lifter>();
+            _logger = loggerFactory.CreateLogger("Lifter");
             _source = source;
             _decoder = decoder ?? new Decoders.Decoder();
         }
@@ -47,7 +47,7 @@ namespace Unluau.IR
         /// <param name="loggerFactory">The logging factory use.</param>
         /// <param name="source">The name of the source.</param>
         /// <param name="decoder">The decoder to use.</param>
-        public static LiftResult Lift(Stream input, ILoggerFactory loggerFactory, string source = "input-file.luau", Decoders.Decoder? decoder = null)
+        public static LiftResult Lift(Stream input, ILoggerFactory loggerFactory, string source = "input-file.luau", Decoder? decoder = null)
         {
             var lifter = new Lifter(input, loggerFactory, source, decoder);
             var stopwatch = new Stopwatch();
@@ -125,7 +125,7 @@ namespace Unluau.IR
                 IsVararg = ReadBoolean(),
             };
 
-            using (_logger.BeginScope(protoType))
+            using (_logger.BeginScope($"[{protoType.GetHashCode():x}]"))
             {
                 // Now we read type information of the function prototype if type encoding is enabled.
                 if (_version is TypedVersion)

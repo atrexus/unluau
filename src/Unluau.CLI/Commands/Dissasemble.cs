@@ -78,11 +78,14 @@ namespace Unluau.CLI.Commands
                 Stream output = outputOpt ?? Console.OpenStandardOutput();
                 string format = formatOpt ?? "ir";
                 Decoder decoder = decoderOpt ?? new Decoder();
-
                 var loggerFactory = Logging.CreateLoggerFactory(debugFlag);
 
+                // First we lift the raw bytecode into a high level representation. This representation can be traversed
+                // and manipulated easily. This is the first step in the disassembly process.
                 var result = Lifter.Lift(input, loggerFactory, source, decoder);
 
+                // Next, we build a control flow graph from the lifted module. This allows us to visualize the flow of
+                // the code and analyze it more easily.
                 ControlFlowBuilder.Build(loggerFactory, result.Module);
 
                 Writer writer = format switch
