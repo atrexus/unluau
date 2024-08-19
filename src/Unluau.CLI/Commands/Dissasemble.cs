@@ -9,7 +9,7 @@ namespace Unluau.CLI.Commands
 {
     public class Disassemble : Command
     {
-        private static readonly HashSet<string> _supportedFormats = ["ir", "dot"];
+        private static readonly HashSet<string> _supportedFormats = ["ir", "dot", "json"];
 
         private static readonly Dictionary<string, Decoder> _supportedDecoders = new()
         {
@@ -21,6 +21,9 @@ namespace Unluau.CLI.Commands
             description: "The input file to disassemble",
             parseArgument: result =>
             {
+                if (result.Tokens.Count == 0)
+                    return null;
+
                 return new FileInfo(result.Tokens[0].Value);
             });
 
@@ -78,15 +81,15 @@ namespace Unluau.CLI.Commands
 
                 var loggerFactory = Logging.CreateLoggerFactory(debugFlag);
 
-                var result = new Lifter(input, loggerFactory, source, decoder).LiftSource();
+                var result = Lifter.Lift(input, loggerFactory, source, decoder);
 
-                // lift control flow for the module
                 ControlFlowBuilder.Build(loggerFactory, result.Module);
 
                 Writer writer = format switch
                 {
                     "ir" => new IRWriter(output),
                     "dot" => new DotWriter(output),
+                    "json" => new JsonWriter(output),
                     _ => throw new ArgumentException("Invalid format")
                 };
 

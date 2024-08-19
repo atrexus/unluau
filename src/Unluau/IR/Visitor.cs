@@ -1,10 +1,13 @@
-﻿using Unluau.IR.ControlFlow;
+﻿using System.Reflection.Metadata;
+using Unluau.IR.ControlFlow;
 using Unluau.IR.ControlFlow.Nodes;
 using Unluau.IR.ProtoTypes;
 using Unluau.IR.ProtoTypes.Instructions;
+using Unluau.IR.ProtoTypes.Constants;
 using Unluau.IR.Versions;
 using Type = Unluau.IR.ProtoTypes.Type;
 using Version = Unluau.IR.Versions.Version;
+using Constant = Unluau.IR.ProtoTypes.Constants.Constant;
 
 namespace Unluau.IR
 {
@@ -58,6 +61,51 @@ namespace Unluau.IR
         /// The visitor for the <see cref="Type"/> class.
         /// </summary>
         public virtual bool Visit(Type type) => Visit(type as Node);
+
+        /// <summary>
+        /// The visitor for the <see cref="Constant"/> class.
+        /// </summary>
+        public virtual bool Visit(Constant constant) => Visit(constant as Node);
+
+        /// <summary>
+        /// The visitor for the <see cref="BooleanConstant"/> class.
+        /// </summary>
+        public virtual bool Visit(BooleanConstant constant) => Visit(constant as Constant);
+
+        /// <summary>
+        /// The visitor for the <see cref="ClosureConstant"/> class.
+        /// </summary>
+        public virtual bool Visit(ClosureConstant constant) => Visit(constant as Constant);
+
+        /// <summary>
+        /// The visitor for the <see cref="ImportConstant"/> class.
+        /// </summary>
+        public virtual bool Visit(ImportConstant constant) => Visit(constant as Constant);
+
+        /// <summary>
+        /// The visitor for the <see cref="NilConstant"/> class.
+        /// </summary>
+        public virtual bool Visit(NilConstant constant) => Visit(constant as Constant);
+
+        /// <summary>
+        /// The visitor for the <see cref="NumberConstant"/> class.
+        /// </summary>
+        public virtual bool Visit(NumberConstant constant) => Visit(constant as Constant);
+
+        /// <summary>
+        /// The visitor for the <see cref="StringConstant"/> class.
+        /// </summary>
+        public virtual bool Visit(StringConstant constant) => Visit(constant as Constant);
+
+        /// <summary>
+        /// The visitor for the <see cref="TableConstant"/> class.
+        /// </summary>
+        public virtual bool Visit(TableConstant constant) => Visit(constant as Constant);
+
+        /// <summary>
+        /// The visitor for the <see cref="VectorConstant"/> class.
+        /// </summary>
+        public virtual bool Visit(VectorConstant constant) => Visit(constant as Constant);
 
         /// <summary>
         /// The visitor for the <see cref="Instruction"/> class.

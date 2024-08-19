@@ -72,7 +72,7 @@ namespace Unluau.IR.Writers
             _graph!.Add(_protoSubGraph);
 
             // Visit all basic blocks in the control flow graph.
-            protoType.ControlFlow?.Accept(this);
+            protoType.ControlFlow.ForEach(block => block.Accept(this));
 
             return false;
         }
@@ -83,10 +83,6 @@ namespace Unluau.IR.Writers
         /// <param name="block">The block.</param>
         public override bool Visit(BasicBlock block)
         {
-            // If the block is empty, we don't need to write it.
-            if (_blockCache.Contains(block) || block.Instructions.Count == 0)
-                return false;
-
             _builder = new StringBuilder();
 
             _builder.Append("<TABLE BORDER=\"0\" CELLSPACING=\"0\" ALIGN=\"LEFT\">");
@@ -111,7 +107,6 @@ namespace Unluau.IR.Writers
                 .WithAttribute("fontname", "Monospace");
 
             _protoSubGraph.Add(basicBlockNode);
-            _blockCache.Add(block);
 
             // Accept all outgoing edges.
             block.OutgoingEdges.ForEach(edge => edge.Accept(this));
@@ -124,13 +119,9 @@ namespace Unluau.IR.Writers
         /// <param name="edge">The edge.</param>
         public override bool Visit(Edge edge)
         {
-            // visit the source and target blocks
-            edge.Source.Accept(this);
-            edge.Target.Accept(this);
-
             // Create an edge with identifiers
             var myEdge = new DotEdge()
-                .From($"block_{edge.Source.GetHashCode()}").To($"block_{edge.Target.GetHashCode()}")
+                .From($"block_{edge.Source}").To($"block_{edge.Target}")
                 .WithArrowHead(DotEdgeArrowType.Vee)
                 .WithArrowTail(DotEdgeArrowType.None)
                 .WithAttribute("fontname", "Helvetica");

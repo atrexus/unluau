@@ -1,0 +1,129 @@
+{
+  "version": "2.0.0.0",
+  "elapsed": "00:00:00.0770082",
+  "module": {
+    "hash": "4e7e306b0099d607d0a00280425c76ef",
+    "version": {
+      "major": 5,
+      "typed": 2
+    },
+    "symbolTable": [
+      "g",
+      "g1",
+      "b"
+    ],
+    "entryPoint": {
+      "maxStackSize": 3,
+      "parameterCount": 0,
+      "isVararg": true,
+      "controlFlow": [
+        {
+          "id": 46729429,
+          "brachType": "can",
+          "instructions": [
+            {
+              "opCode": "prepvarargs",
+              "a": 0
+            },
+            {
+              "opCode": "loadn",
+              "a": 0,
+              "d": 1
+            },
+            {
+              "opCode": "getimport",
+              "a": 1,
+              "d": 1,
+              "aux": 1073741824
+            },
+            {
+              "opCode": "getimport",
+              "a": 2,
+              "d": 3,
+              "aux": 1075838976
+            },
+            {
+              "opCode": "jumpifnoteq",
+              "a": 1,
+              "d": 3,
+              "aux": 2
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": "false",
+              "target": 17911681
+            },
+            {
+              "label": "true",
+              "target": 26987408
+            }
+          ]
+        },
+        {
+          "id": 17911681,
+          "brachType": "never",
+          "instructions": [
+            {
+              "opCode": "loadn",
+              "a": 0,
+              "d": 3
+            },
+            {
+              "opCode": "return",
+              "a": 0,
+              "b": 1
+            }
+          ],
+          "outgoingEdges": []
+        },
+        {
+          "id": 26987408,
+          "brachType": "never",
+          "instructions": [
+            {
+              "opCode": "loadn",
+              "a": 0,
+              "d": 2
+            },
+            {
+              "opCode": "return",
+              "a": 0,
+              "b": 1
+            }
+          ],
+          "outgoingEdges": []
+        }
+      ],
+      "constants": [
+        {
+          "type": "string",
+          "value": "g"
+        },
+        {
+          "type": "import",
+          "value": [
+            {
+              "type": "string",
+              "value": "g"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": "g1"
+        },
+        {
+          "type": "import",
+          "value": [
+            {
+              "type": "string",
+              "value": "g1"
+            }
+          ]
+        }
+      ],
+      "protoTypes": []
+    }
+  }
+}

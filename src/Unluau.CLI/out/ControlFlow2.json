@@ -1,0 +1,519 @@
+{
+  "version": "2.0.0.0",
+  "elapsed": "00:00:00.0718468",
+  "module": {
+    "hash": "88a66cd3c3d4304cbc49cf4739ffd480",
+    "version": {
+      "major": 5,
+      "typed": 2
+    },
+    "symbolTable": [
+      "g",
+      "g1",
+      "c",
+      "d",
+      "e",
+      "f",
+      "print",
+      "Some text",
+      "Some more text",
+      "b"
+    ],
+    "entryPoint": {
+      "maxStackSize": 3,
+      "parameterCount": 0,
+      "isVararg": true,
+      "controlFlow": [
+        {
+          "id": 46729429,
+          "brachType": "can",
+          "instructions": [
+            {
+              "opCode": "prepvarargs",
+              "a": 0
+            },
+            {
+              "opCode": "loadn",
+              "a": 0,
+              "d": 1
+            },
+            {
+              "opCode": "getimport",
+              "a": 1,
+              "d": 1,
+              "aux": 1073741824
+            },
+            {
+              "opCode": "getimport",
+              "a": 2,
+              "d": 3,
+              "aux": 1075838976
+            },
+            {
+              "opCode": "jumpifnoteq",
+              "a": 1,
+              "d": 23,
+              "aux": 2
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": "false",
+              "target": 17911681
+            },
+            {
+              "label": "true",
+              "target": 63388340
+            }
+          ]
+        },
+        {
+          "id": 17911681,
+          "brachType": "can",
+          "instructions": [
+            {
+              "opCode": "loadn",
+              "a": 0,
+              "d": 3
+            },
+            {
+              "opCode": "getglobal",
+              "a": 1,
+              "b": 0,
+              "c": 130,
+              "aux": 4
+            },
+            {
+              "opCode": "jumpifnot",
+              "a": 1,
+              "d": 1
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": "false",
+              "target": 26987408
+            },
+            {
+              "label": "true",
+              "target": 41560081
+            }
+          ]
+        },
+        {
+          "id": 26987408,
+          "brachType": "",
+          "instructions": [
+            {
+              "opCode": "loadn",
+              "a": 0,
+              "d": 4
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": null,
+              "target": 41560081
+            }
+          ]
+        },
+        {
+          "id": 41560081,
+          "brachType": "can",
+          "instructions": [
+            {
+              "opCode": "getimport",
+              "a": 1,
+              "d": 6,
+              "aux": 1078984704
+            },
+            {
+              "opCode": "jumpifnot",
+              "a": 1,
+              "d": 10
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": "false",
+              "target": 38496415
+            },
+            {
+              "label": "true",
+              "target": 44325851
+            }
+          ]
+        },
+        {
+          "id": 38496415,
+          "brachType": "can",
+          "instructions": [
+            {
+              "opCode": "loadn",
+              "a": 0,
+              "d": 5
+            },
+            {
+              "opCode": "getimport",
+              "a": 1,
+              "d": 8,
+              "aux": 1081081856
+            },
+            {
+              "opCode": "jumpifnot",
+              "a": 1,
+              "d": 2
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": "false",
+              "target": 10923418
+            },
+            {
+              "label": "true",
+              "target": 31201899
+            }
+          ]
+        },
+        {
+          "id": 10923418,
+          "brachType": "always",
+          "instructions": [
+            {
+              "opCode": "loadn",
+              "a": 0,
+              "d": 6
+            },
+            {
+              "opCode": "jump",
+              "a": 0,
+              "d": 4
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": null,
+              "target": 44325851
+            }
+          ]
+        },
+        {
+          "id": 31201899,
+          "brachType": "can",
+          "instructions": [
+            {
+              "opCode": "getimport",
+              "a": 1,
+              "d": 10,
+              "aux": 1083179008
+            },
+            {
+              "opCode": "jumpifnot",
+              "a": 1,
+              "d": 1
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": "false",
+              "target": 12381635
+            },
+            {
+              "label": "true",
+              "target": 44325851
+            }
+          ]
+        },
+        {
+          "id": 12381635,
+          "brachType": "",
+          "instructions": [
+            {
+              "opCode": "loadn",
+              "a": 0,
+              "d": 7
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": null,
+              "target": 44325851
+            }
+          ]
+        },
+        {
+          "id": 44325851,
+          "brachType": "always",
+          "instructions": [
+            {
+              "opCode": "loadn",
+              "a": 1,
+              "d": 1
+            },
+            {
+              "opCode": "setglobal",
+              "a": 1,
+              "b": 0,
+              "c": 130,
+              "aux": 4
+            },
+            {
+              "opCode": "jump",
+              "a": 0,
+              "d": 19
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": null,
+              "target": 39201736
+            }
+          ]
+        },
+        {
+          "id": 63388340,
+          "brachType": "can",
+          "instructions": [
+            {
+              "opCode": "loadn",
+              "a": 0,
+              "d": 2
+            },
+            {
+              "opCode": "getimport",
+              "a": 1,
+              "d": 12,
+              "aux": 1085276160
+            },
+            {
+              "opCode": "call",
+              "a": 1,
+              "b": 1,
+              "c": 1
+            },
+            {
+              "opCode": "getimport",
+              "a": 1,
+              "d": 12,
+              "aux": 1085276160
+            },
+            {
+              "opCode": "loadk",
+              "a": 2,
+              "d": 13
+            },
+            {
+              "opCode": "call",
+              "a": 1,
+              "b": 2,
+              "c": 1
+            },
+            {
+              "opCode": "getglobal",
+              "a": 1,
+              "b": 0,
+              "c": 130,
+              "aux": 4
+            },
+            {
+              "opCode": "jumpifnot",
+              "a": 1,
+              "d": 5
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": "false",
+              "target": 33624151
+            },
+            {
+              "label": "true",
+              "target": 34181910
+            }
+          ]
+        },
+        {
+          "id": 33624151,
+          "brachType": "always",
+          "instructions": [
+            {
+              "opCode": "getimport",
+              "a": 1,
+              "d": 12,
+              "aux": 1085276160
+            },
+            {
+              "opCode": "loadk",
+              "a": 2,
+              "d": 14
+            },
+            {
+              "opCode": "call",
+              "a": 1,
+              "b": 2,
+              "c": 1
+            },
+            {
+              "opCode": "jump",
+              "a": 0,
+              "d": 3
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": null,
+              "target": 39201736
+            }
+          ]
+        },
+        {
+          "id": 34181910,
+          "brachType": "",
+          "instructions": [
+            {
+              "opCode": "loadn",
+              "a": 1,
+              "d": 1
+            },
+            {
+              "opCode": "setglobal",
+              "a": 1,
+              "b": 0,
+              "c": 130,
+              "aux": 4
+            }
+          ],
+          "outgoingEdges": [
+            {
+              "label": null,
+              "target": 39201736
+            }
+          ]
+        },
+        {
+          "id": 39201736,
+          "brachType": "never",
+          "instructions": [
+            {
+              "opCode": "getimport",
+              "a": 1,
+              "d": 12,
+              "aux": 1085276160
+            },
+            {
+              "opCode": "move",
+              "a": 2,
+              "b": 0
+            },
+            {
+              "opCode": "call",
+              "a": 1,
+              "b": 2,
+              "c": 1
+            },
+            {
+              "opCode": "return",
+              "a": 0,
+              "b": 1
+            }
+          ],
+          "outgoingEdges": []
+        }
+      ],
+      "constants": [
+        {
+          "type": "string",
+          "value": "g"
+        },
+        {
+          "type": "import",
+          "value": [
+            {
+              "type": "string",
+              "value": "g"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": "g1"
+        },
+        {
+          "type": "import",
+          "value": [
+            {
+              "type": "string",
+              "value": "g1"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": "c"
+        },
+        {
+          "type": "string",
+          "value": "d"
+        },
+        {
+          "type": "import",
+          "value": [
+            {
+              "type": "string",
+              "value": "d"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": "e"
+        },
+        {
+          "type": "import",
+          "value": [
+            {
+              "type": "string",
+              "value": "e"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": "f"
+        },
+        {
+          "type": "import",
+          "value": [
+            {
+              "type": "string",
+              "value": "f"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": "print"
+        },
+        {
+          "type": "import",
+          "value": [
+            {
+              "type": "string",
+              "value": "print"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": "Some text"
+        },
+        {
+          "type": "string",
+          "value": "Some more text"
+        }
+      ],
+      "protoTypes": []
+    }
+  }
+}

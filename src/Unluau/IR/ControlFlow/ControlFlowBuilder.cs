@@ -46,7 +46,7 @@ namespace Unluau.IR.ControlFlow
             foreach (var instruction in protoType.Instructions)
                 instruction.Accept(this);
 
-            protoType.ControlFlow = _entryBlock;
+            protoType.ControlFlow = [.. _blocks];
 
             return false;
         }
@@ -66,14 +66,14 @@ namespace Unluau.IR.ControlFlow
                     if (_currentBlock == oldBlock && _currentBlock.Instructions.Count > 0)
                     {
                         _currentBlock = new();
-                        _logger.LogDebug("Creating new basic block {:x}", _currentBlock.GetHashCode());
+                        _logger.LogDebug("Creating new basic block {:x}", _currentBlock.Id);
                     }
 
-                    block.AddEdge(_currentBlock, label);
+                    block.AddEdge(_currentBlock.Id, label);
                     _edgeQueue.RemoveAt(i);
                     i--;
 
-                    _logger.LogDebug("Added forwards edge \"{}\" {:x} => {:x}", label ?? "always branch", block.GetHashCode(), _currentBlock.GetHashCode());
+                    _logger.LogDebug("Added forwards edge \"{}\" {:x} => {:x}", label ?? "always branch", block.Id, _currentBlock.Id);
                 }
             }
 
@@ -83,8 +83,8 @@ namespace Unluau.IR.ControlFlow
             // This way this block will be reachable from the old block.
             if (_currentBlock != oldBlock && oldBlock.Branch is null)
             {
-                oldBlock.AddEdge(_currentBlock);
-                _logger.LogDebug("Added forwards edge \"always branch\" {:x} => {:x}", oldBlock.GetHashCode(), _currentBlock.GetHashCode());
+                oldBlock.AddEdge(_currentBlock.Id);
+                _logger.LogDebug("Added forwards edge \"always branch\" {:x} => {:x}", oldBlock.Id, _currentBlock.Id);
             }
 
             switch (instruction.Code)
@@ -155,8 +155,8 @@ namespace Unluau.IR.ControlFlow
 
                 if (type == BranchType.Can)
                 {
-                    block.AddEdge(_currentBlock, "false");
-                    _logger.LogDebug("Added forwards edge \"false\" {:x} => {:x}", block.GetHashCode(), _currentBlock.GetHashCode());
+                    block.AddEdge(_currentBlock.Id, "false");
+                    _logger.LogDebug("Added forwards edge \"false\" {:x} => {:x}", block.Id, _currentBlock.Id);
                 }
 
                 var label = type == BranchType.Can ? "true" : null;
@@ -172,8 +172,8 @@ namespace Unluau.IR.ControlFlow
                     {
                         if (targetBlock.Instructions.Any(instruction => instruction.Context.Pc == pc + jmp + 1))
                         {
-                            block.AddEdge(targetBlock, label);
-                            _logger.LogDebug("Added backwards edge \"{}\" {:x} <= {:x}", label ?? "always branch", targetBlock.GetHashCode(), block.GetHashCode());
+                            block.AddEdge(targetBlock.Id, label);
+                            _logger.LogDebug("Added backwards edge \"{}\" {:x} <= {:x}", label ?? "always branch", targetBlock.Id, block.Id);
                             break;
                         }
                     }
@@ -181,8 +181,8 @@ namespace Unluau.IR.ControlFlow
                 else if (jmp == 0)
                 {
                     // If the jump is zero, we are branching to the next instruction.
-                    block.AddEdge(_currentBlock);
-                    _logger.LogDebug("Added forwards edge \"{}\" {:x} => {:x}", label ?? "always branch", block.GetHashCode(), _currentBlock.GetHashCode());
+                    block.AddEdge(_currentBlock.Id);
+                    _logger.LogDebug("Added forwards edge \"{}\" {:x} => {:x}", label ?? "always branch", block.Id, _currentBlock.Id);
                 }
             }
         }

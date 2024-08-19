@@ -15,13 +15,7 @@ namespace Unluau.IR
     /// <summary>
     /// Lifts the raw bytecode to an intermediate representation.
     /// </summary>
-    /// <remarks>
-    /// Creates a new instance of <see cref="Lifter"/>.
-    /// </remarks>
-    /// <param name="input">The input stream.</param>
-    /// <param name="loggerFactory">The logger factory.</param>
-    /// <param name="source">The source file name.</param>
-    public class Lifter(Stream input, ILoggerFactory loggerFactory, string source = "input-file.luau", Decoders.Decoder? decoder = null) : BinaryReader(input)
+    public class Lifter : BinaryReader
     {
         /// <summary>
         /// The bit that indicates if a type is optional or not.
@@ -31,28 +25,35 @@ namespace Unluau.IR
         private readonly List<string> _symbolTable = [];
         private Version _version = new();
         private readonly List<ProtoType> _protoTypes = [];
-        private readonly Decoders.Decoder _decoder = decoder ?? new();
 
-        private readonly ILogger _logger = loggerFactory.CreateLogger<Lifter>();
+        private readonly Decoders.Decoder _decoder;
+        private readonly ILogger _logger;
+        private readonly string _source;
 
         /// <summary>
         /// Creates a new instance of <see cref="Lifter"/>.
         /// </summary>
-        /// <param name="fileInfo">The file.</param>
-        public Lifter(FileInfo fileInfo, ILoggerFactory loggerFactory) : this(fileInfo.OpenRead(), loggerFactory, fileInfo.Name)
+        private Lifter(Stream input, ILoggerFactory loggerFactory, string source = "input-file.luau", Decoders.Decoder? decoder = null) : base(input)
         {
+            _logger = loggerFactory.CreateLogger<Lifter>();
+            _source = source;
+            _decoder = decoder ?? new Decoders.Decoder();
         }
 
         /// <summary>
         /// Lifts the source from the stream.
         /// </summary>
-        /// <returns>The result of the lifting.</returns>
-        public LiftResult LiftSource()
+        /// <param name="input">The input stream.</param>
+        /// <param name="loggerFactory">The logging factory use.</param>
+        /// <param name="source">The name of the source.</param>
+        /// <param name="decoder">The decoder to use.</param>
+        public static LiftResult Lift(Stream input, ILoggerFactory loggerFactory, string source = "input-file.luau", Decoders.Decoder? decoder = null)
         {
+            var lifter = new Lifter(input, loggerFactory, source, decoder);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var module = LiftModule();
+            var module = lifter.LiftModule();
 
             stopwatch.Stop();
 
@@ -70,7 +71,7 @@ namespace Unluau.IR
         public Module LiftModule()
         {
             // First we compute the checksum of the stream. We will need to reset the position of the stream after we are done.
-            var checksum = new Checksum(MD5.Create(), BaseStream, source);
+            var checksum = new Checksum(MD5.Create(), BaseStream, _source);
             BaseStream.Position = 0;
 
             _version = LiftVersion();

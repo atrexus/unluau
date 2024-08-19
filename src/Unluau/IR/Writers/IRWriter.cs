@@ -1,4 +1,5 @@
-﻿using Unluau.IR.ProtoTypes;
+﻿using System.Reflection;
+using Unluau.IR.ProtoTypes;
 using Unluau.IR.ProtoTypes.Instructions;
 
 namespace Unluau.IR.Writers
@@ -171,7 +172,9 @@ namespace Unluau.IR.Writers
 
         public override void Write(LiftResult result)
         {
-            _writer.WriteLine($"; unluau disassembler version {result.Version}, elapsed: {result.ElapsedTime.TotalSeconds}s");
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+
+            _writer.WriteLine($"; unluau disassembler version {version}, elapsed: {result.ElapsedTime.TotalSeconds}s");
 
             result.Module.Accept(this);
         }

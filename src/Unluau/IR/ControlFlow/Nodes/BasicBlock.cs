@@ -30,6 +30,11 @@ namespace Unluau.IR.ControlFlow.Nodes
     public class BasicBlock : Node
     {
         /// <summary>
+        /// Gets the unique identifier for this block.
+        /// </summary>
+        public int Id { get => GetHashCode(); }
+
+        /// <summary>
         /// The kind of branch that is taken.
         /// </summary>
         public BranchType? Branch { get; set; }
@@ -48,7 +53,7 @@ namespace Unluau.IR.ControlFlow.Nodes
         /// Adds an edge to the current block.
         /// </summary>
         /// <param name="target">The target block.</param>
-        public void AddEdge(BasicBlock target, string? label = null) => OutgoingEdges.Add(new Edge(this, target, label));
+        public void AddEdge(int target, string? label = null) => OutgoingEdges.Add(new Edge(Id, target, label));
 
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)

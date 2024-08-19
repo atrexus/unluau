@@ -48,7 +48,7 @@ namespace Unluau.IR.ProtoTypes
         /// <summary>
         /// The control flow graph of the function prototype.
         /// </summary>
-        public BasicBlock? ControlFlow { get; set; }
+        public List<BasicBlock> ControlFlow { get; set; } = [];
 
         /// <summary>
         /// The list of constants in the function prototype.
@@ -117,7 +117,8 @@ namespace Unluau.IR.ProtoTypes
                 foreach (var constant in Constants)
                     constant.Accept(visitor);
 
-                ControlFlow?.Accept(visitor);
+                foreach (var block in ControlFlow)
+                    block.Accept(visitor);
             }
         }
     }

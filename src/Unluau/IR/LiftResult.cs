@@ -1,15 +1,12 @@
-﻿namespace Unluau.IR
+﻿using System.Reflection;
+
+namespace Unluau.IR
 {
     /// <summary>
     /// Represents a summary of the lifted code.
     /// </summary>
     public record LiftResult
     {
-        /// <summary>
-        /// The version of the disassembler used to lift the code.
-        /// </summary>
-        public readonly string Version = "2.0.0";
-
         /// <summary>
         /// The total time taken to lift the code.
         /// </summary>
