@@ -115,6 +115,55 @@ namespace Unluau.IR.Writers
             });
             _jsonWriter.WriteEndArray();
 
+            _jsonWriter.WriteNumber("lineDefined", proto.LineDefined);
+
+            _jsonWriter.WritePropertyName("lastLineDefined");
+            if (proto.LastLineDefined == null)
+                _jsonWriter.WriteNullValue();
+            else 
+                _jsonWriter.WriteNumberValue((int)proto.LastLineDefined);
+
+            _jsonWriter.WriteString("name", proto.Name);
+
+            _jsonWriter.WriteStartArray("locals");
+            proto.Locals.ForEach(local =>
+            {
+                _jsonWriter.WriteStartObject();
+                local.Accept(this);
+                _jsonWriter.WriteEndObject();
+            });
+            _jsonWriter.WriteEndArray();
+
+            _jsonWriter.WriteStartArray("upvalues");
+            proto.Upvalues.ForEach(upvalue =>
+            {
+                _jsonWriter.WriteStartObject();
+                upvalue.Accept(this);
+                _jsonWriter.WriteEndObject();
+            });
+            _jsonWriter.WriteEndArray();
+
+            return false;
+        }
+
+        public override bool Visit(Local local)
+        {
+            _jsonWriter.WriteNumber("register", local.Register);
+
+            _jsonWriter.WriteStartArray("scope");
+            _jsonWriter.WriteNumberValue(local.Scope.Item1);
+            _jsonWriter.WriteNumberValue(local.Scope.Item2);
+            _jsonWriter.WriteEndArray();
+
+            _jsonWriter.WriteString("name", local.Name);
+
+            return false;
+        }
+
+        public override bool Visit(Upvalue upvalue)
+        {
+            _jsonWriter.WriteString("name", upvalue.Name);
+
             return false;
         }
 

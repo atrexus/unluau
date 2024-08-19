@@ -1,6 +1,6 @@
 {
   "version": "2.0.0.0",
-  "elapsed": "00:00:00.0718468",
+  "elapsed": "00:00:00.0661759",
   "module": {
     "hash": "88a66cd3c3d4304cbc49cf4739ffd480",
     "version": {
@@ -513,7 +513,21 @@
           "value": "Some more text"
         }
       ],
-      "protoTypes": []
+      "protoTypes": [],
+      "lineDefined": 1,
+      "lastLineDefined": 28,
+      "name": null,
+      "locals": [
+        {
+          "register": 0,
+          "scope": [
+            2,
+            54
+          ],
+          "name": "b"
+        }
+      ],
+      "upvalues": []
     }
   }
 }
