@@ -1,31 +1,7 @@
-﻿using Unluau.IR;
-using Unluau.IR.ProtoTypes.Instructions;
-
-namespace Unluau.IR.ControlFlow.Nodes
+﻿namespace Unluau.IR.ControlFlow.Nodes
 {
     /// <summary>
-    /// The type of branch that is taken.
-    /// </summary>
-    public enum BranchType
-    {
-        /// <summary>
-        /// Two blocks are associated, one for the true branch and one for the false branch.
-        /// </summary>
-        Can,
-
-        /// <summary>
-        /// The block always branches.
-        /// </summary>
-        Always,
-
-        /// <summary>
-        /// This block never branches.
-        /// </summary>
-        Never,
-    }
-
-    /// <summary>
-    /// Represents a basic block in the control flow. It consists of a sequence of instructions that are executed in order.
+    /// Represents a basic block in the control flow. Its the most basic unit of control flow.
     /// </summary>
     public class BasicBlock : Node
     {
@@ -35,37 +11,41 @@ namespace Unluau.IR.ControlFlow.Nodes
         public int Id { get => GetHashCode(); }
 
         /// <summary>
-        /// The kind of branch that is taken.
-        /// </summary>
-        public BranchType? Branch { get; set; }
-
-        /// <summary>
-        /// The list of instructions in the basic block.
-        /// </summary>
-        public List<Instruction> Instructions { get; set; } = [];
-
-        /// <summary>
         /// The list of edges that are outgoing from the current block.
         /// </summary>
         public List<Edge> OutgoingEdges { get; set; } = [];
 
         /// <summary>
+        /// The list of edges that are incoming to the current block.
+        /// </summary>
+        public List<Edge> IncomingEdges { get; set; } = [];
+
+        /// <summary>
         /// Adds an edge to the current block.
         /// </summary>
         /// <param name="target">The target block.</param>
-        public void AddEdge(int target, string? label = null) => OutgoingEdges.Add(new Edge(Id, target, label));
+        public void AddEdge(BasicBlock target, string? label = null)
+        { 
+            var edge = new Edge(this, target, label);
+
+            OutgoingEdges.Add(edge);
+            target.IncomingEdges.Add(edge);
+        }
 
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)
         {
             if (visitor.Visit(this))
             {
-                foreach (var instruction in Instructions)
-                    instruction.Accept(visitor);
-
                 foreach (var edge in OutgoingEdges)
+                    edge.Accept(visitor);
+
+                foreach (var edge in IncomingEdges)
                     edge.Accept(visitor);
             }
         }
+
+        /// <inheritdoc/>
+        public override string ToString() => Id.ToString("x");
     }
 }

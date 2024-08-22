@@ -5,7 +5,7 @@ namespace Unluau.IR.ControlFlow.Nodes
     /// <summary>
     /// Represents an edge in the control flow graph.
     /// </summary>
-    public class Edge(int source, int target, string? label = null) : Node
+    public class Edge(BasicBlock source, BasicBlock target, string? label = null) : Node
     {
         /// <summary>
         /// The label of the edge.
@@ -15,17 +15,21 @@ namespace Unluau.IR.ControlFlow.Nodes
         /// <summary>
         /// The source of the edge.
         /// </summary>
-        public int Source { get; set; } = source;
+        public BasicBlock Source { get; set; } = source;
 
         /// <summary>
         /// The target of the edge.
         /// </summary>
-        public int Target { get; set; } = target;
+        public BasicBlock Target { get; set; } = target;
 
         /// <inheritdoc/>
         public override void Accept(Visitor visitor)
         {
-            visitor.Visit(this);
+            if (visitor.Visit(this))
+            {
+                Source.Accept(visitor);
+                Target.Accept(visitor);
+            }
         }
     }
 }

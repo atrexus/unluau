@@ -1,13 +1,11 @@
-﻿using System.Reflection.Metadata;
-using Unluau.IR.ControlFlow;
-using Unluau.IR.ControlFlow.Nodes;
-using Unluau.IR.ProtoTypes;
+﻿using Unluau.IR.ProtoTypes;
 using Unluau.IR.ProtoTypes.Instructions;
 using Unluau.IR.ProtoTypes.Constants;
 using Unluau.IR.Versions;
 using Type = Unluau.IR.ProtoTypes.Type;
 using Version = Unluau.IR.Versions.Version;
 using Constant = Unluau.IR.ProtoTypes.Constants.Constant;
+using Unluau.IR.ControlFlow.Nodes;
 
 namespace Unluau.IR
 {
@@ -146,5 +144,25 @@ namespace Unluau.IR
         /// The visitor for the <see cref="BasicBlock"/> class.
         /// </summary>
         public virtual bool Visit(BasicBlock block) => Visit(block as Node);
+
+        /// <summary>
+        /// The visitor for the <see cref="CodeBlock"/> class.
+        /// </summary>
+        public virtual bool Visit(CodeBlock block) => Visit(block as BasicBlock);
+
+        /// <summary>
+        /// The visitor for the <see cref="AbstractBlock"/> class.
+        /// </summary>
+        public virtual bool Visit(AbstractBlock block) => Visit(block as BasicBlock);
+
+        /// <summary>
+        /// The visitor for the <see cref="SequentialBlock"/> class.
+        /// </summary>
+        public virtual bool Visit(SequentialBlock block) => Visit(block as AbstractBlock);
+
+        /// <summary>
+        /// The visitor for the <see cref="IfThenBlock"/> class.
+        /// </summary>
+        public virtual bool Visit(IfThenBlock block) => Visit(block as AbstractBlock);
     }
 }

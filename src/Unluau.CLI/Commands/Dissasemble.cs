@@ -51,6 +51,10 @@ namespace Unluau.CLI.Commands
             ["--debug", "-d"],
             description: "Enables debug logging");
 
+        private readonly Option<bool> _controlFlowFlag = new(
+            ["--control-flow", "-c"],
+            description: "Enables control flow analysis");
+
         private readonly Option<Decoder?> _decoderOption = new(
             ["--decoder"],
             description: "The decoder to use for the input file",
@@ -70,8 +74,9 @@ namespace Unluau.CLI.Commands
             AddOption(_formatOption);
             AddOption(_debugFlag);
             AddOption(_decoderOption);
+            AddOption(_controlFlowFlag);
 
-            this.SetHandler(static (inputOpt, outputOpt, formatOpt, debugFlag, decoderOpt) =>
+            this.SetHandler(static (inputOpt, outputOpt, formatOpt, debugFlag, decoderOpt, controlFlowOpt) =>
             {
                 Stream input = inputOpt?.OpenRead() ?? Console.OpenStandardInput();
                 string source = inputOpt?.Name ?? "input-file.luau";
@@ -88,6 +93,12 @@ namespace Unluau.CLI.Commands
                 // the code and analyze it more easily.
                 ControlFlowBuilder.Build(loggerFactory, result.Module);
 
+                // Now we analyze the control flow graph. This step is optional and can be enabled with the
+                // --control-flow flag. It groups basic blocks together into larger, abstract blocks based on
+                // various reduction patterns.
+                if (controlFlowOpt)
+                    ControlFlowAnalyzer.Analyze(loggerFactory, result.Module);
+
                 Writer writer = format switch
                 {
                     "ir" => new IRWriter(output),
@@ -97,7 +108,7 @@ namespace Unluau.CLI.Commands
                 };
 
                 writer.Write(result);
-            }, _inputOption, _outputOption, _formatOption, _debugFlag, _decoderOption);
+            }, _inputOption, _outputOption, _formatOption, _debugFlag, _decoderOption, _controlFlowFlag);
         }
     }
 }

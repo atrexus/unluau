@@ -1,0 +1,77 @@
+digraph "loadbooltest.luau" {
+	subgraph cluster_0 {
+		"label"="function main(...)"
+		"style"="filled"
+		"color"="#F5F5F5"
+		"fontname"=Helvetica
+		block_3fbab22 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">prepvarargs         </TD><TD ALIGN="LEFT"></TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">0 1<BR ALIGN="LEFT"/>1073741824</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 3<BR ALIGN="LEFT"/>1075838976</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpif              </TD><TD ALIGN="LEFT">1 2</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_3fbab22 -> block_3d90434 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="false"
+		]
+		block_3fbab22 -> block_2a125d8 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="true"
+		]
+		block_3d90434 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 5<BR ALIGN="LEFT"/>1077936128</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_3d90434 -> block_2a125d8 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+		]
+		block_2a125d8 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">call                </TD><TD ALIGN="LEFT">0 2 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">0 1<BR ALIGN="LEFT"/>1073741824</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">2 3<BR ALIGN="LEFT"/>1075838976</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">3 5<BR ALIGN="LEFT"/>1077936128</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifeq            </TD><TD ALIGN="LEFT">2 2<BR ALIGN="LEFT"/>3</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_2a125d8 -> block_3aa54a0 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="false"
+		]
+		block_2a125d8 -> block_fcf9a4 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+			"label"="true"
+		]
+		block_3aa54a0 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadb               </TD><TD ALIGN="LEFT">1 0 1</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_3aa54a0 -> block_e4c6c4 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+		]
+		block_fcf9a4 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadb               </TD><TD ALIGN="LEFT">1 1 0</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+		block_fcf9a4 -> block_e4c6c4 [
+			"arrowhead"="vee"
+			"arrowtail"="none"
+			"fontname"=Helvetica
+		]
+		block_e4c6c4 [
+			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">call                </TD><TD ALIGN="LEFT">0 2 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">return              </TD><TD ALIGN="LEFT">0 1</TD></TR></TABLE>>
+			"shape"="box"
+			"fontname"=Monospace
+		]
+	}
+}

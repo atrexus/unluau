@@ -15,7 +15,6 @@ namespace Unluau.IR.Writers
     public class JsonWriter(Stream stream) : Writer(stream)
     {
         private readonly Utf8JsonWriter _jsonWriter = new(stream, new JsonWriterOptions() { Indented = true });
-        private readonly HashSet<BasicBlock> _blocks = [];
 
         /// <summary>
         /// Writes the result to the stream.
@@ -250,7 +249,7 @@ namespace Unluau.IR.Writers
             return false;
         }
 
-        public override bool Visit(BasicBlock block)
+        public override bool Visit(CodeBlock block)
         {
             _jsonWriter.WriteNumber("id", block.Id);
             _jsonWriter.WriteString("brachType", block.Branch!.ToString()!.ToLower());
@@ -278,7 +277,7 @@ namespace Unluau.IR.Writers
         public override bool Visit(Edge edge)
         {
             _jsonWriter.WriteString("label", edge.Label);
-            _jsonWriter.WriteNumber("target", edge.Target);
+            _jsonWriter.WriteString("target", edge.Target.ToString());
 
             return false;
         }

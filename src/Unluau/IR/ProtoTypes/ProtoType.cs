@@ -1,5 +1,4 @@
-﻿using Unluau.IR.ControlFlow;
-using Unluau.IR.ControlFlow.Nodes;
+﻿using Unluau.IR.ControlFlow.Nodes;
 using Unluau.IR.ProtoTypes.Constants;
 using Unluau.IR.ProtoTypes.Instructions;
 

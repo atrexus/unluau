@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Unluau.IR;
 using Unluau.IR.ControlFlow.Nodes;
 using Unluau.IR.ProtoTypes;
 using Unluau.IR.ProtoTypes.Instructions;
@@ -12,9 +13,8 @@ namespace Unluau.IR.ControlFlow
     {
         private readonly ILogger _logger;
         private readonly List<(int, BasicBlock, string?)> _edgeQueue = [];
-        private readonly HashSet<BasicBlock> _blocks = [];
-        private BasicBlock _entryBlock = new();
-        private BasicBlock _currentBlock = new();
+        private readonly HashSet<CodeBlock> _blocks = [];
+        private CodeBlock? _currentBlock;
 
         /// <summary>
         /// Creates a new instance of the <see cref="ControlFlowBuilder"/> class.
@@ -36,10 +36,9 @@ namespace Unluau.IR.ControlFlow
             // reset all objects that we will use
             _edgeQueue.Clear();
             _blocks.Clear();
-            _currentBlock = new BasicBlock();
-            _entryBlock = _currentBlock;
+            _currentBlock = new CodeBlock();
 
-            var name = protoType.IsMain ? "main" : (protoType.Name ?? $"prototype_{protoType.GetHashCode():x}");
+            var name = protoType.IsMain ? "main" : protoType.Name ?? $"prototype_{protoType.GetHashCode():x}";
 
             _logger.LogInformation("Building control flow graph for prototype '{}'", name);
 
@@ -63,66 +62,68 @@ namespace Unluau.IR.ControlFlow
                 if (instruction.Context.Pc == pc + 1)
                 {
                     // We only want to create a new block if this is the first edge that we are adding.
-                    if (_currentBlock == oldBlock && _currentBlock.Instructions.Count > 0)
+                    if (_currentBlock == oldBlock && _currentBlock!.Instructions.Count > 0)
                     {
                         _currentBlock = new();
-                        _logger.LogDebug("Creating new basic block {:x}", _currentBlock.Id);
+                        _logger.LogDebug("Creating new basic block {}", _currentBlock);
                     }
 
-                    block.AddEdge(_currentBlock.Id, label);
+                    block.AddEdge(_currentBlock!, label);
                     _edgeQueue.RemoveAt(i);
                     i--;
 
-                    _logger.LogDebug("Added forwards edge \"{}\" {:x} => {:x}", label ?? "always branch", block.Id, _currentBlock.Id);
+                    _logger.LogDebug("Added forwards edge \"{}\" {} => {}", label ?? "always branch", block, _currentBlock!);
                 }
             }
 
-            _currentBlock.Instructions.Add(instruction);
+            _currentBlock!.Instructions.Add(instruction);
 
             // If we have created a new block, and the old one has no branches, we need to add an edge to the new block.
             // This way this block will be reachable from the old block.
-            if (_currentBlock != oldBlock && oldBlock.Branch is null)
+            if (_currentBlock != oldBlock && oldBlock!.Branch is null)
             {
-                oldBlock.AddEdge(_currentBlock.Id);
-                _logger.LogDebug("Added forwards edge \"always branch\" {:x} => {:x}", oldBlock.Id, _currentBlock.Id);
+                oldBlock.AddEdge(_currentBlock);
+                _logger.LogDebug("Added forwards edge \"always branch\" {} => {}", oldBlock, _currentBlock);
             }
+
+            _blocks.Add(_currentBlock); 
 
             switch (instruction.Code)
             {
                 case OpCode.JumpX:
-                {
-                    AddEdge(instruction.E, instruction.Context.Pc, _currentBlock, BranchType.Always);
-                    break;
-                }
+                    {
+                        AddEdge(instruction.E, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                        break;
+                    }
                 case OpCode.LoadB:
-                {
-                    AddEdge(instruction.C, instruction.Context.Pc, _currentBlock, BranchType.Always);
-                    break;
-                }
+                    {
+                        AddEdge(instruction.C, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                        break;
+                    }
                 case OpCode.JumpBack:
                 case OpCode.Jump:
-                {
-                    AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Always);
-                    break;
-                }
+                    {
+                        AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                        break;
+                    }
                 case OpCode.ForNPrep:
-                {
-                    AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Always);
-                    break;
-                }
+                    {
+                        AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Always);
+                        break;
+                    }
                 case OpCode.Return:
-                {
-                    AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Never);
-                    break;
-                }
+                    {
+                        AddEdge(0, instruction.Context.Pc, _currentBlock, BranchType.Never);
+                        break;
+                    }
                 case OpCode.JumpXEqKNil:
                 case OpCode.JumpXEqKB:
                 case OpCode.JumpXEqKN:
                 case OpCode.JumpXEqKS:
-                {
-                    AddEdge(instruction.D == 1 ? 0 : instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Can);
-                    break;
-                }
+                    {
+                        AddEdge(instruction.D == 1 ? 0 : instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Can);
+                        break;
+                    }
                 case OpCode.ForNLoop:
                 case OpCode.JumpIf:
                 case OpCode.JumpIfNot:
@@ -132,31 +133,27 @@ namespace Unluau.IR.ControlFlow
                 case OpCode.JumpIfNotLe:
                 case OpCode.JumpIfLt:
                 case OpCode.JumpIfNotLt:
-                {
-                    AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Can);
-                    break;
-                }
+                    {
+                        AddEdge(instruction.D, instruction.Context.Pc, _currentBlock, BranchType.Can);
+                        break;
+                    }
             }
-
-            if (_currentBlock.Instructions.Count != 0)
-                _blocks.Add(_currentBlock); // will fail if the block is already in the set
-
 
             return false;
         }
 
-        private void AddEdge(int jmp, int pc, BasicBlock block, BranchType type)
+        private void AddEdge(int jmp, int pc, CodeBlock block, BranchType type)
         {
             block.Branch = type;
 
             if (type != BranchType.Never)
             {
-                _currentBlock = new BasicBlock();
+                _currentBlock = new CodeBlock();
 
                 if (type == BranchType.Can)
                 {
-                    block.AddEdge(_currentBlock.Id, "false");
-                    _logger.LogDebug("Added forwards edge \"false\" {:x} => {:x}", block.Id, _currentBlock.Id);
+                    block.AddEdge(_currentBlock, "false");
+                    _logger.LogDebug("Added forwards edge \"false\" {} => {}", block, _currentBlock);
                 }
 
                 var label = type == BranchType.Can ? "true" : null;
@@ -172,8 +169,8 @@ namespace Unluau.IR.ControlFlow
                     {
                         if (targetBlock.Instructions.Any(instruction => instruction.Context.Pc == pc + jmp + 1))
                         {
-                            block.AddEdge(targetBlock.Id, label);
-                            _logger.LogDebug("Added backwards edge \"{}\" {:x} <= {:x}", label ?? "always branch", targetBlock.Id, block.Id);
+                            block.AddEdge(targetBlock, label);
+                            _logger.LogDebug("Added backwards edge \"{}\" {} <= {}", label ?? "always branch", targetBlock, block);
                             break;
                         }
                     }
@@ -181,8 +178,8 @@ namespace Unluau.IR.ControlFlow
                 else if (jmp == 0)
                 {
                     // If the jump is zero, we are branching to the next instruction.
-                    block.AddEdge(_currentBlock.Id);
-                    _logger.LogDebug("Added forwards edge \"{}\" {:x} => {:x}", label ?? "always branch", block.Id, _currentBlock.Id);
+                    block.AddEdge(_currentBlock);
+                    _logger.LogDebug("Added forwards edge \"{}\" {} => {}", label ?? "always branch", block, _currentBlock);
                 }
             }
         }

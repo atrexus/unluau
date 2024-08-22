@@ -18,7 +18,6 @@ namespace Unluau.IR.Writers
         private DotGraph? _graph;
         private DotSubgraph? _protoSubGraph;
         private StringBuilder? _builder; // used to build basic block contents
-        private readonly HashSet<BasicBlock> _blockCache = [];
 
         /// <summary>
         /// Writes the main module to the stream.
@@ -81,7 +80,7 @@ namespace Unluau.IR.Writers
         /// Writes a basic block to the stream.
         /// </summary>
         /// <param name="block">The block.</param>
-        public override bool Visit(BasicBlock block)
+        public override bool Visit(CodeBlock block)
         {
             _builder = new StringBuilder();
 
@@ -101,7 +100,7 @@ namespace Unluau.IR.Writers
             _builder.Append("</TABLE>");
 
             var basicBlockNode = new DotNode()
-                .WithIdentifier($"block_{block.GetHashCode()}")
+                .WithIdentifier($"block_{block}")
                 .WithLabel(_builder.ToString(), true)
                 .WithShape(DotNodeShape.Box)
                 .WithAttribute("fontname", "Monospace");
@@ -110,6 +109,31 @@ namespace Unluau.IR.Writers
 
             // Accept all outgoing edges.
             block.OutgoingEdges.ForEach(edge => edge.Accept(this));
+            return false;
+        }
+
+        public override bool Visit(SequentialBlock block)
+        {
+            var oldSubGraph = _protoSubGraph;
+
+            // Create a subgraph for the sequential block.
+            var subGraph = new DotSubgraph()
+                .WithIdentifier($"cluster_{block}")
+                .WithLabel("sequential block")
+                .WithStyle(DotSubgraphStyle.Dashed)
+                .WithColor(DotColor.Black)
+                .WithAttribute("fontname", "Helvetica");
+
+            _graph!.Add(subGraph);
+
+            _protoSubGraph = subGraph;
+
+            // Visit the source and target blocks.
+            block.FirstBlock.Accept(this);
+            block.SecondBlock.Accept(this);
+
+            _protoSubGraph = oldSubGraph;
+
             return false;
         }
 
@@ -125,8 +149,6 @@ namespace Unluau.IR.Writers
                 .WithArrowHead(DotEdgeArrowType.Vee)
                 .WithArrowTail(DotEdgeArrowType.None)
                 .WithAttribute("fontname", "Helvetica");
-                //.WithAttribute("headport", "n");
-                //.WithAttribute("tailport", "s");
 
             if (edge.Label is not null)
                 myEdge = myEdge.WithLabel(edge.Label);
