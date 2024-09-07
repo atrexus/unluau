@@ -1,4 +1,4 @@
-digraph "ControlFlow2.luau" {
+graph "ControlFlow2.luau" {
 	subgraph cluster_0 {
 		"label"="function main(...)"
 		"style"="filled"
@@ -9,57 +9,63 @@ digraph "ControlFlow2.luau" {
 			"shape"="box"
 			"fontname"=Monospace
 		]
-		block_3fbab22 -> block_3d90434 [
+		block_3fbab22 -- block_3d90434 [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
 			"label"="false"
 		]
-		block_3fbab22 -> block_34a3b57 [
+		block_3fbab22 -- block_34a3b57 [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
 			"label"="true"
 		]
-		block_3d90434 [
-			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 3</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getglobal           </TD><TD ALIGN="LEFT">1 0 130<BR ALIGN="LEFT"/>4</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnot           </TD><TD ALIGN="LEFT">1 1</TD></TR></TABLE>>
-			"shape"="box"
-			"fontname"=Monospace
-		]
-		block_3d90434 -> block_2a125d8 [
-			"arrowhead"="vee"
-			"arrowtail"="none"
+		subgraph cluster_17ad52b {
+			"label"="if-then block"
+			"style"="dashed"
+			"color"="#000000"
 			"fontname"=Helvetica
-			"label"="false"
-		]
-		block_3d90434 -> block_3aa54a0 [
-			"arrowhead"="vee"
-			"arrowtail"="none"
-			"fontname"=Helvetica
-			"label"="true"
-		]
-		block_2a125d8 [
-			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 4</TD></TR></TABLE>>
-			"shape"="box"
-			"fontname"=Monospace
-		]
-		block_2a125d8 -> block_3aa54a0 [
-			"arrowhead"="vee"
-			"arrowtail"="none"
-			"fontname"=Helvetica
-		]
+			block_3d90434 [
+				"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 3</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">getglobal           </TD><TD ALIGN="LEFT">1 0 130<BR ALIGN="LEFT"/>4</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnot           </TD><TD ALIGN="LEFT">1 1</TD></TR></TABLE>>
+				"shape"="box"
+				"fontname"=Monospace
+			]
+			block_3d90434 -- block_2a125d8 [
+				"arrowhead"="vee"
+				"arrowtail"="none"
+				"fontname"=Helvetica
+				"label"="false"
+			]
+			block_3d90434 -- block_3aa54a0 [
+				"arrowhead"="vee"
+				"arrowtail"="none"
+				"fontname"=Helvetica
+				"label"="true"
+			]
+			block_2a125d8 [
+				"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 4</TD></TR></TABLE>>
+				"shape"="box"
+				"fontname"=Monospace
+			]
+			block_2a125d8 -- block_3aa54a0 [
+				"arrowhead"="vee"
+				"arrowtail"="none"
+				"fontname"=Helvetica
+			]
+		}
 		block_3aa54a0 [
 			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 6<BR ALIGN="LEFT"/>1078984704</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnot           </TD><TD ALIGN="LEFT">1 10</TD></TR></TABLE>>
 			"shape"="box"
 			"fontname"=Monospace
 		]
-		block_3aa54a0 -> block_fcf9a4 [
+		block_3aa54a0 -- block_fcf9a4 [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
 			"label"="false"
 		]
-		block_3aa54a0 -> block_37a0697 [
+		block_3aa54a0 -- block_37a0697 [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
@@ -70,13 +76,13 @@ digraph "ControlFlow2.luau" {
 			"shape"="box"
 			"fontname"=Monospace
 		]
-		block_fcf9a4 -> block_e4c6c4 [
+		block_fcf9a4 -- block_e4c6c4 [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
 			"label"="false"
 		]
-		block_fcf9a4 -> block_afceb [
+		block_fcf9a4 -- block_afceb [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
@@ -87,44 +93,50 @@ digraph "ControlFlow2.luau" {
 			"shape"="box"
 			"fontname"=Monospace
 		]
-		block_e4c6c4 -> block_37a0697 [
+		block_e4c6c4 -- block_37a0697 [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
 		]
-		block_afceb [
-			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 10<BR ALIGN="LEFT"/>1083179008</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnot           </TD><TD ALIGN="LEFT">1 1</TD></TR></TABLE>>
-			"shape"="box"
-			"fontname"=Monospace
-		]
-		block_afceb -> block_62e449 [
-			"arrowhead"="vee"
-			"arrowtail"="none"
+		subgraph cluster_1517e87 {
+			"label"="if-then block"
+			"style"="dashed"
+			"color"="#000000"
 			"fontname"=Helvetica
-			"label"="false"
-		]
-		block_afceb -> block_37a0697 [
-			"arrowhead"="vee"
-			"arrowtail"="none"
-			"fontname"=Helvetica
-			"label"="true"
-		]
-		block_62e449 [
-			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 7</TD></TR></TABLE>>
-			"shape"="box"
-			"fontname"=Monospace
-		]
-		block_62e449 -> block_37a0697 [
-			"arrowhead"="vee"
-			"arrowtail"="none"
-			"fontname"=Helvetica
-		]
+			block_afceb [
+				"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 10<BR ALIGN="LEFT"/>1083179008</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jumpifnot           </TD><TD ALIGN="LEFT">1 1</TD></TR></TABLE>>
+				"shape"="box"
+				"fontname"=Monospace
+			]
+			block_afceb -- block_62e449 [
+				"arrowhead"="vee"
+				"arrowtail"="none"
+				"fontname"=Helvetica
+				"label"="false"
+			]
+			block_afceb -- block_37a0697 [
+				"arrowhead"="vee"
+				"arrowtail"="none"
+				"fontname"=Helvetica
+				"label"="true"
+			]
+			block_62e449 [
+				"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">0 7</TD></TR></TABLE>>
+				"shape"="box"
+				"fontname"=Monospace
+			]
+			block_62e449 -- block_37a0697 [
+				"arrowhead"="vee"
+				"arrowtail"="none"
+				"fontname"=Helvetica
+			]
+		}
 		block_37a0697 [
 			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">loadn               </TD><TD ALIGN="LEFT">1 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">setglobal           </TD><TD ALIGN="LEFT">1 0 130<BR ALIGN="LEFT"/>4</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">jump                </TD><TD ALIGN="LEFT">0 19</TD></TR></TABLE>>
 			"shape"="box"
 			"fontname"=Monospace
 		]
-		block_37a0697 -> block_262fb3d [
+		block_37a0697 -- block_262fb3d [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
@@ -134,13 +146,13 @@ digraph "ControlFlow2.luau" {
 			"shape"="box"
 			"fontname"=Monospace
 		]
-		block_34a3b57 -> block_19c1610 [
+		block_34a3b57 -- block_19c1610 [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
 			"label"="false"
 		]
-		block_34a3b57 -> block_27cc695 [
+		block_34a3b57 -- block_27cc695 [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
@@ -151,7 +163,7 @@ digraph "ControlFlow2.luau" {
 			"shape"="box"
 			"fontname"=Monospace
 		]
-		block_19c1610 -> block_262fb3d [
+		block_19c1610 -- block_262fb3d [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
@@ -161,19 +173,13 @@ digraph "ControlFlow2.luau" {
 			"shape"="box"
 			"fontname"=Monospace
 		]
-		block_27cc695 -> block_262fb3d [
+		block_27cc695 -- block_262fb3d [
 			"arrowhead"="vee"
 			"arrowtail"="none"
 			"fontname"=Helvetica
 		]
 		block_262fb3d [
 			"label"=<<TABLE BORDER="0" CELLSPACING="0" ALIGN="LEFT"><TR><TD ALIGN="LEFT" VALIGN="top">getimport           </TD><TD ALIGN="LEFT">1 12<BR ALIGN="LEFT"/>1085276160</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">move                </TD><TD ALIGN="LEFT">2 0</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">call                </TD><TD ALIGN="LEFT">1 2 1</TD></TR><TR><TD ALIGN="LEFT" VALIGN="top">return              </TD><TD ALIGN="LEFT">0 1</TD></TR></TABLE>>
-			"shape"="box"
-			"fontname"=Monospace
-		]
-	}
-}
-
 			"shape"="box"
 			"fontname"=Monospace
 		]

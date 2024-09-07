@@ -25,7 +25,8 @@ namespace Unluau.IR.Writers
         /// <param name="module">The module.</param>
         public override bool Visit(Module module)
         {
-            _graph = new DotGraph().WithIdentifier(module.Checksum.Source).Directed();
+            _graph = new DotGraph()
+                .WithIdentifier(module.Checksum.Source);
 
             // Visit all function prototypes in the module.
             module.ProtoTypes.ForEach(proto => proto.Accept(this));
@@ -124,7 +125,7 @@ namespace Unluau.IR.Writers
                 .WithColor(DotColor.Black)
                 .WithAttribute("fontname", "Helvetica");
 
-            _graph!.Add(subGraph);
+            _protoSubGraph!.Add(subGraph);
 
             _protoSubGraph = subGraph;
 
@@ -137,15 +138,55 @@ namespace Unluau.IR.Writers
             return false;
         }
 
+        public override bool Visit(IfThenBlock block)
+        {
+            var oldSubGraph = _protoSubGraph;
+
+            // Create a subgraph for the sequential block.
+            var subGraph = new DotSubgraph()
+                .WithIdentifier($"cluster_{block}")
+                .WithLabel("if-then block")
+                .WithStyle(DotSubgraphStyle.Dashed)
+                .WithColor(DotColor.Black)
+                .WithAttribute("fontname", "Helvetica");
+
+            _protoSubGraph!.Add(subGraph);
+
+            _protoSubGraph = subGraph;
+
+            // Visit the source and target blocks.
+            block.ConditionBlock.Accept(this);
+            block.ThenBlock.Accept(this);
+
+            _protoSubGraph = oldSubGraph;
+
+            return false;
+        }
+
         /// <summary>
         /// Writes an edge to the stream.
         /// </summary>
         /// <param name="edge">The edge.</param>
         public override bool Visit(Edge edge)
         {
+            var source = edge.Source switch
+            {
+                CodeBlock block => $"block_{block}",
+                SequentialBlock block => $"block_{block.SecondBlock}",
+                IfThenBlock block => $"block_{block.ThenBlock}",
+                _ => throw new InvalidOperationException("Invalid edge source.")
+            };
+            var target = edge.Target switch
+            {
+                CodeBlock block => $"block_{block}",
+                SequentialBlock block => $"block_{block.FirstBlock}",
+                IfThenBlock block => $"block_{block.ConditionBlock}",
+                _ => throw new InvalidOperationException("Invalid edge target.")
+            };
+
             // Create an edge with identifiers
             var myEdge = new DotEdge()
-                .From($"block_{edge.Source}").To($"block_{edge.Target}")
+                .From(source).To(target)
                 .WithArrowHead(DotEdgeArrowType.Vee)
                 .WithArrowTail(DotEdgeArrowType.None)
                 .WithAttribute("fontname", "Helvetica");

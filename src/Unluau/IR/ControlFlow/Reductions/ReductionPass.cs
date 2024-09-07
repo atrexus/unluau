@@ -24,5 +24,27 @@ namespace Unluau.IR.ControlFlow.Reductions
             foreach (var node in finalNodes)
                 node.Accept(this);
         }
+
+        /// <summary>
+        /// Reduces the given block.
+        /// </summary>
+        protected abstract void Reduce(BasicBlock block);
+
+        public override bool Visit(BasicBlock block)
+        {
+            if (_protoType == null)
+                throw new InvalidOperationException("The reduction pass has not been initialized.");
+
+            if (_protoType.ControlFlow.Contains(block))
+                Reduce(block);
+
+            // We are traversing the tree backwards, so we visit the incoming edges.
+            foreach (var edge in block.IncomingEdges)
+            {
+                edge.Source.Accept(this);
+            }
+
+            return false;
+        }
     }
 }

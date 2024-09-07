@@ -16,7 +16,7 @@ namespace Unluau.IR.ControlFlow.Reductions
     /// <param name="loggerFactory">The factory to use.</param>
     public class SequentialReduction(ILoggerFactory loggerFactory) : ReductionPass(loggerFactory, "SequentialReduction")
     {
-        public override bool Visit(BasicBlock block)
+        protected override void Reduce(BasicBlock block)
         {
             if (block.IncomingEdges.Count == 1 && block.OutgoingEdges.Count <= 1)
             {
@@ -43,11 +43,6 @@ namespace Unluau.IR.ControlFlow.Reductions
                     _protoType.ControlFlow.Remove(block);
                 }
             }
-
-            // We are traversing the tree backwards, so we visit the incoming edges.
-            block.IncomingEdges.ForEach(edge => edge.Source.Accept(this));
-
-            return false;
         }
     }
 }

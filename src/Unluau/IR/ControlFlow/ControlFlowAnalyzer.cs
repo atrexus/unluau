@@ -22,7 +22,6 @@ namespace Unluau.IR.ControlFlow
         private readonly ILogger _logger;
 
         private readonly List<ReductionPass> _reductionPasses;
-        private readonly HashSet<BasicBlock> _visitedBlocks = [];
 
         /// <summary>
         /// Creates a new instance of the <see cref="ControlFlowAnalyzer"/> class.
@@ -34,7 +33,8 @@ namespace Unluau.IR.ControlFlow
 
             _reductionPasses =
             [
-                new SequentialReduction(_loggerFactory)
+                new SequentialReduction(_loggerFactory),
+                new IfThenReduction(_loggerFactory)
             ];
         }
 
