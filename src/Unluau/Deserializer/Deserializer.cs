@@ -1,8 +1,9 @@
-﻿// Copyright (c) Valence. All Rights Reserved.
+// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace Unluau
         private byte version, typesVersion;
         private OpCodeEncoding encoding;
 
-        private const byte MinVesion = 3, MaxVersion = 5;
+        private const byte MinVesion = 3, MaxVersion = 6; // [3..6]
         private const byte TypeVersion = 1;
 
         public Deserializer(Stream stream, OpCodeEncoding encoding)
@@ -39,14 +40,26 @@ namespace Unluau
             
             // Make sure we have a valid bytecode version (so in range)
             if (version < MinVesion || version > MaxVersion)
-                throw new DecompilerException(Stage.Deserializer, $"Bytecode version mismatch, expected version {MinVesion}...{MaxVersion}");
+                throw new DecompilerException(Stage.Deserializer, $"Bytecode version mismatch, expected version {MinVesion}...{MaxVersion}, got {version}");
 
             if (version >= 4)
                 typesVersion = reader.ReadByte();
 
             var strings = ReadStrings();
+            if (typesVersion == 3) // userdatatype remapping (tv3)
+            {
+                int userdataTypeLimit = (64 + 32) - 64;
+                int[] userdataRemapping = new int[(64 + 32) - 64];
+                byte index = reader.ReadByte();
+                while (index != 0)
+                {
+                    reader.ReadInt32Compressed();
+
+                    index = reader.ReadByte();
+                }
+            }
             chunk.Functions = ReadFunctions(strings);
-            chunk.MainIndex = reader.ReadInt32Compressed();
+            chunk.MainIndex = reader.ReadInt32Compressed(); //;
 
             return chunk;
         }
@@ -59,7 +72,7 @@ namespace Unluau
 
             Log.Debug($"Reading {size} strings from the string table");
 
-            while (strings.Count < size)
+            /*while (strings.Count < size)
             {
                 int stringSize = reader.ReadInt32Compressed();
 
@@ -68,7 +81,12 @@ namespace Unluau
                     stringSize = reader.ReadInt32Compressed();*/
                 
 
-                strings.Add(reader.ReadASCII(stringSize));
+                /*strings.Add(reader.ReadASCII(stringSize));
+            }*/
+
+            for (int i = 1; i <= size; i++)
+            {
+                strings.Add(reader.ReadASCII(reader.ReadInt32Compressed()));
             }
 
             return strings;
@@ -113,18 +131,47 @@ namespace Unluau
             if (version >= 4)
             {
                 function.Flags = reader.ReadByte();
-
+                //Log.Debug(reader.Stream.Position.ToString());
                 int typesSize = reader.ReadInt32Compressed();
-
-                if (typesSize > 0 && typesVersion == TypeVersion)
+                reader.Position += typesSize;
+                //Log.Debug(reader.Stream.Position.ToString());
+                if (typesVersion == 1)
                 {
-                    function.Types = reader.ReadBytes(typesSize);
+                    
 
-                    // Todo: remove these retarded assert function defs
-                    Debug.Assert(typesSize == 2 + function.Parameters);
-                    Debug.Assert(function.Types[0] == (int)BytecodeTypes.Function);
-                    Debug.Assert(function.Types[1] == function.Parameters);
+                    if (typesSize > 0 && typesVersion == TypeVersion)
+                    {
+                        //function.Types = reader.ReadBytes(typesSize);
+
+                        /*int headersize = typesSize > 127 ? 4 : 3;
+                        int[] typeinfo = new int[headersize + typesSize];
+                        function.Types = typeinfo;
+
+                        if (headersize == 4)
+                        {
+                            function.Types[0] = (typesSize & 127);
+                            function.Types[1] = typesSize >> 7;
+                            function.Types[2] = 0;
+                            function.Types[3] = 0;
+                        }
+                        else
+                        {
+                            function.Types[0] = typesSize;
+                            function.Types[1] = 0;
+                            function.Types[2] = 0;
+                        }*/
+
+
+                        // Todo: remove these retarded assert function defs
+                        //Debug.Assert(typesSize == 2 + function.Parameters);
+                        //Debug.Assert(function.Types[0] == (int)BytecodeTypes.Function);
+                        //Debug.Assert(function.Types[1] == function.Parameters);
+                    }
                 }
+                /*else if (typesVersion == 2 || typesVersion == 3)
+                {
+
+                }*/
             }
 
             function.Instructions = ReadInstructions();
@@ -233,6 +280,7 @@ namespace Unluau
 
             // Should never happen
             throw new DecompilerException(Stage.Deserializer, $"No constant returned for type ({constantType})");
+            return new NilConstant();
         }
 
         private IList<int> ReadFunctions()
@@ -264,7 +312,7 @@ namespace Unluau
 
                 lineInfo.LineInfoList = new List<byte>(instructions);
 
-                byte lastOffset = 1;
+                byte lastOffset = 0;
                 while (lineInfo.LineInfoList.Count < instructions)
                 {
                     lastOffset += reader.ReadByte();
