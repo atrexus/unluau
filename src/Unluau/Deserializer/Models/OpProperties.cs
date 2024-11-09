@@ -1,4 +1,4 @@
-﻿// Copyright (c) Valence. All Rights Reserved.
+// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
 using System.Collections.Generic;
@@ -266,8 +266,16 @@ namespace Unluau
         // A: target register (see FORGLOOP for register layout)
         FORGPREP_INEXT,
 
+        // FASTCALL3: perform a fast call of a built-in function using 3 register arguments
+        // A: builtin function id (see LuauBuiltinFunction)
+        // B: source argument register
+        // C: jump offset to get to following CALL
+        // AUX: source register 2 in least-significant byte
+        // AUX: source register 3 in second least-significant byte
+        FASTCALL3,
+
         // removed in v3
-        DEP_FORGLOOP_INEXT,
+        //DEP_FORGLOOP_INEXT,
 
         // FORGPREP_NEXT: prepare FORGLOOP with 2 output variables (no AUX encoding), assuming generator is luaB_next, and jump to FORGLOOP
         // A: target register (see FORGLOOP for register layout)
@@ -463,7 +471,7 @@ namespace Unluau
             { OpCode.FORNLOOP, new OpProperties(OpCode.FORNLOOP, OpMode.iAD) },
             { OpCode.FORGLOOP, new OpProperties(OpCode.FORGLOOP, OpMode.iAD, true) },
             { OpCode.FORGPREP_INEXT, new OpProperties(OpCode.FORGPREP_INEXT, OpMode.iAD) },
-            { OpCode.DEP_FORGLOOP_INEXT, new OpProperties(OpCode.DEP_FORGLOOP_INEXT, OpMode.iAD) },
+            { OpCode.FASTCALL3, new OpProperties(OpCode.FASTCALL3, OpMode.iABC, true) },
             { OpCode.FORGPREP_NEXT, new OpProperties(OpCode.FORGPREP_NEXT, OpMode.iAD) },
             // { OpCode.DEP_FORGLOOP_NEXT, new OpProperties(OpCode.DEP_FORGLOOP_NEXT, OpMode.iAD) },
             { OpCode.GETVARARGS, new OpProperties(OpCode.GETVARARGS, OpMode.iABC) },
