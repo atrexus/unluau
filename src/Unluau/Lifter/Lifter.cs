@@ -578,6 +578,15 @@ namespace Unluau
                         registers.LoadRegister(instruction.A, expression, block, pc, expression.Decleration.Type);
                         break;
                     }
+                    case OpCode.SETUPVAL:
+                    {
+                        // Not sure if this may be correct, but testing gave OK results.
+                        LocalExpression expression = function.Upvalues[instruction.B];
+
+                        block.AddStatement(new Assignment(expression, registers.GetExpression(instruction.A)), pc);
+
+                        break;
+                    }
                     case OpCode.RETURN:
                     {
                         IList<Expression> expressions = new List<Expression>();
