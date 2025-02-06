@@ -705,8 +705,12 @@ namespace Unluau
             OpCode code = instruction.GetProperties().Code;
 
             if (code == OpCode.JUMPIF || code == OpCode.JUMPIFNOT)
-                return code == OpCode.JUMPIFNOT ? registers.GetExpression(instruction.A)
-                            : new UnaryExpression(registers.GetExpression(instruction.A), UnaryExpression.UnaryOperation.Not);
+            {
+                Expression expression = registers.GetExpression(instruction.A) ?? registers.GetExpression(instruction.C);
+
+                return code == OpCode.JUMPIFNOT ? expression
+                            : new UnaryExpression(expression, UnaryExpression.UnaryOperation.Not);
+            }
 
             auxUsed = true;
 
