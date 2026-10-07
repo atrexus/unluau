@@ -388,6 +388,13 @@ namespace Unluau
         // B: source register
         // C: constant table index (0..255)
         IDIVK,
+        
+        // Atom-based userdata field access acceleration
+        // These are equivalent to their GETTABLEKS/SETTABLEKS/NAMECALL counterparts, except tailored towards userdata field accesses
+        // If the user has registered metamethods for a userdata tag, callbacks will be called by these instructions
+        GETUDATAKS,
+        SETUDATAKS,
+        NAMECALLUDATA,
 
         // Enum entry for number of opcodes, not a valid opcode by itself!
         COUNT
@@ -498,6 +505,9 @@ namespace Unluau
             { OpCode.JUMPXEQKS, new OpProperties(OpCode.JUMPXEQKS, OpMode.iAD, true) },
             { OpCode.IDIV, new OpProperties(OpCode.IDIV, OpMode.iABC, false) },
             { OpCode.IDIVK, new OpProperties(OpCode.IDIVK, OpMode.iABC, false) },
+            { OpCode.GETUDATAKS, new OpProperties(OpCode.GETUDATAKS, OpMode.iABC, true) },
+            { OpCode.SETUDATAKS, new OpProperties(OpCode.SETUDATAKS, OpMode.iABC, true) },
+            { OpCode.NAMECALLUDATA, new OpProperties(OpCode.NAMECALLUDATA, OpMode.iABC, true) },
         };
     }
 }
