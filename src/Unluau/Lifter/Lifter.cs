@@ -295,7 +295,9 @@ namespace Unluau
                     case OpCode.LENGTH:
                     case OpCode.MINUS:
                     {
-                        registers.LoadRegister(instruction.A, registers.GetExpression(instruction.B), block, pc);
+                        var unaryExpression = new UnaryExpression(registers.GetExpression(instruction.B),
+                            UnaryExpression.OperationFromOpCode(properties.Code));
+                        registers.LoadRegister(instruction.A, unaryExpression, block, pc);
                         break;
                     }
                     case OpCode.SETTABLEKS:
