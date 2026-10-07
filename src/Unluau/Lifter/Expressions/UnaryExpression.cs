@@ -51,5 +51,16 @@ namespace Unluau
 
             throw new DecompilerException(Stage.Lifter, "'UnaryOperationString' recieved unhandled operation type");
         }
+
+        public static UnaryOperation OperationFromOpCode(OpCode opcode)
+        {
+            return opcode switch
+            {
+                OpCode.NOT => UnaryOperation.Not,
+                OpCode.LENGTH => UnaryOperation.Len,
+                OpCode.MINUS => UnaryOperation.Minus,
+                _ => throw new ArgumentOutOfRangeException(nameof(opcode), opcode, null)
+            };
+        }
     }
 }
