@@ -597,6 +597,16 @@ namespace Unluau
                         registers.LoadRegister(instruction.A, expression, block, pc, expression.Decleration.Type);
                         break;
                     }
+                    case OpCode.SETUPVAL:
+                    {
+                        LocalExpression expression = function.Upvalues[instruction.B];
+                        block.AddStatement(new Assignment(expression, registers.GetExpression(instruction.A)), pc);
+                        break;
+                    }
+                    case OpCode.CLOSEUPVALS:
+                        // "close (migrate to heap) all upvalues that were captured for registers >= target"
+                        // VERIFY: Must be a no-op for decompilers?
+                        break;
                     case OpCode.RETURN:
                     {
                         IList<Expression> expressions = new List<Expression>();
