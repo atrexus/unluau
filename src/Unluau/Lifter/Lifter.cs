@@ -108,6 +108,7 @@ namespace Unluau
                     }
                     case OpCode.NAMECALL:
                     case OpCode.GETTABLEKS:
+                    case OpCode.GETUDATAKS:
                     {
                         Constant target = function.GetConstant(++pc);
                         string targetValue = (target as StringConstant)!.Value;
@@ -299,6 +300,7 @@ namespace Unluau
                         break;
                     }
                     case OpCode.SETTABLEKS:
+                    case OpCode.SETUDATAKS:
                     {
                         StringConstant target = (StringConstant)function.GetConstant(++pc);
                         Expression table = registers.GetExpression(instruction.B);
