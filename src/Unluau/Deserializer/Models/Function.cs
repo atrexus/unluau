@@ -79,6 +79,14 @@ namespace Unluau
                         builder.Append(string.Format("   {0, -10}\t {1, 5}\n", instruction.GetProperties().Code.ToString(),
                             instruction.E));
                         break;
+                    case OpMode.iAB:
+                        builder.Append(string.Format("   {0, -10}\t {1, 5} {2}\n", instruction.GetProperties().Code.ToString(),
+                            instruction.A, instruction.B));
+                        break;
+                    case OpMode.iA:
+                        builder.Append(string.Format("   {0, -10}\t {1, 5}\n", instruction.GetProperties().Code.ToString(),
+                            instruction.A));
+                        break;
                 }
 
                 if (instruction.GetProperties().HasAux)
@@ -98,7 +106,7 @@ namespace Unluau
             {
                 Constant constant = Constants[i];
 
-                var format = string.Format("      {0, -10} {1, -10} {2, -10}", i + 1, constant.Type.ToString().ToLower(), constant);
+                var format = string.Format("      {0, -10} {1, -10} {2, -10}", i, constant.Type.ToString().ToLower(), constant);
                 builder.Append(format + "\n");
             }
 
