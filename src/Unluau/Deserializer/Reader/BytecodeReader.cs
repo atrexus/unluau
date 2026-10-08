@@ -1,37 +1,33 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace Unluau
 {
     public class BytecodeReader
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly Encoding ASCII = Encoding.ASCII;
 
-        private BinaryReader Reader;
+        private readonly BinaryReader _reader;
 
         /// <summary>
         /// The given stream.
         /// </summary>
-        public Stream Stream { get; set; }
+        public Stream Stream { get; }
 
         /// <summary>
         /// The length of the stream.
         /// </summary>
         public long Length => Stream.Length;
 
-
         /// <summary>
         /// The current position of the stream.
         /// </summary>
         public long Position {
-            get => Reader.BaseStream.Position;
-            set => Reader.BaseStream.Position = value;
+            get => _reader.BaseStream.Position;
+            set => _reader.BaseStream.Position = value;
         }
 
         /// <summary>
@@ -45,7 +41,7 @@ namespace Unluau
         public BytecodeReader(Stream stream)
         {
             Stream = stream;
-            Reader = new BinaryReader(stream);
+            _reader = new BinaryReader(stream);
         }
 
         /// <summary>
@@ -53,12 +49,11 @@ namespace Unluau
         /// </summary>
         public bool ReadBoolean()
         {
-            byte boolean = Reader.ReadByte();
+            byte b = _reader.ReadByte();
+            if (b > 1)
+                throw new InvalidDataException($"ReadBoolean encountered non-boolean value: 0x{b:X2}");
 
-            if (boolean == 0 || boolean == 1)
-                return Convert.ToBoolean(boolean);
-            else
-                throw new InvalidDataException($"ReadBoolean encountered non-boolean value: 0x{boolean:X2}");
+            return Convert.ToBoolean(b);
         }
 
         /// <summary>
@@ -66,7 +61,7 @@ namespace Unluau
         /// </summary>
         public int ReadInt32()
         {
-            return Reader.ReadInt32();
+            return _reader.ReadInt32();
         }
 
         /// <summary>
@@ -74,7 +69,7 @@ namespace Unluau
         /// </summary>
         public float ReadSingle() 
         { 
-            return Reader.ReadSingle();
+            return _reader.ReadSingle();
         }
 
         /// <summary>
@@ -82,7 +77,7 @@ namespace Unluau
         /// </summary>
         public uint ReadUInt32()
         {
-            return Reader.ReadUInt32();
+            return _reader.ReadUInt32();
         }
 
         /// <summary>
@@ -106,7 +101,7 @@ namespace Unluau
         }
 
         /// <summary>
-        /// Reads a compressed 32 bit integer.
+        /// Reads a compressed 32-bit integer.
         /// </summary>
         public int ReadInt32Compressed()
         {
@@ -118,7 +113,7 @@ namespace Unluau
         /// </summary>
         public byte ReadByte()
         {
-            return Reader.ReadByte();
+            return _reader.ReadByte();
         }
 
         /// <summary>
@@ -126,7 +121,7 @@ namespace Unluau
         /// </summary>
         public byte[] ReadBytes(int count)
         {
-            byte[] result = Reader.ReadBytes(count);
+            byte[] result = _reader.ReadBytes(count);
 
             if (result.Length != count)
                 throw new EndOfStreamException("Remaining size of stream was smaller than requested number of bytes.");
@@ -138,7 +133,7 @@ namespace Unluau
         /// </summary>
         public short ReadInt16()
         {
-            return Reader.ReadInt16();
+            return _reader.ReadInt16();
         }
 
         /// <summary>
@@ -146,28 +141,29 @@ namespace Unluau
         /// </summary>
         public ushort ReadUInt16()
         {
-            return Reader.ReadUInt16();
+            return _reader.ReadUInt16();
         }
 
         /// <summary>
-        /// Reads a 64 bit integer.
+        /// Reads a 64-bit integer.
         /// </summary>
         public double ReadDouble()
         {
-            return Reader.ReadDouble();
+            return _reader.ReadDouble();
         }
 
         /// <summary>
-        /// Reads a 64 bit unsigned integer.
+        /// Reads a 64-bit unsigned integer.
         /// </summary>
         public double ReadU64()
         {
-            return Reader.ReadUInt64();
+            return _reader.ReadUInt64();
         }
 
         /// <summary>
         /// Reads an ASCII string with the specified length in bytes.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public string ReadASCII(int length)
         {
             byte[] bytes = ReadBytes(length);
@@ -176,7 +172,7 @@ namespace Unluau
 
         public int Peek()
         {
-            return Reader.PeekChar();
+            return _reader.PeekChar();
         }
     }
 }
