@@ -10,10 +10,6 @@ using static Unluau.Decleration;
 
 namespace Unluau
 {
-    public class NamerOptions
-    {
-        public int NamingDepth { get; set; } = 1;
-    }
 
     public class Namer
     {
