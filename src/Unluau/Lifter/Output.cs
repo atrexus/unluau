@@ -1,86 +1,53 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Unluau
 {
     public class Output
     {
-        private TextWriter writer;
+        private readonly TextWriter _writer;
 
-        private int indentationLevel = 0;
-        private int position = 0;
+        private int IndentationLevel { get; set; }
+        private int Position { get; set; }
 
-        public int IndentationLevel {
-            get { return indentationLevel; }
-            set { indentationLevel = value; }
-        }
+        public Output(TextWriter writer) => this._writer = writer;
 
-        public int Position {
-            get { return position; }
-        }
+        public Output() : this(Console.Out) {}
 
-        public bool SpaceChildren { get; set; }
+        public void Indent() => IndentationLevel += 3;
 
-        public Output(TextWriter writer)
-            => this.writer = writer;
-
-        public Output()
-            : this(Console.Out)
-        { }
-
-        public void Indent()
-        {
-            indentationLevel += 3;
-        }
-
-        public void Unindent()
-        {
-            indentationLevel -= 3; 
-        }
+        public void Unindent() => IndentationLevel -= 3;
 
         public void Write(string value)
         {
             MoveCursor();
 
-            writer.Write(value);
-            position += value.Length;
+            _writer.Write(value);
+            Position += value.Length;
         }
 
         public void WriteLine(string value)
         {
             MoveCursor();
 
-            writer.Write(value + '\n');
-            position = 0;
+            _writer.Write(value + '\n');
+            Position = 0;
         }
 
-        public void WriteLine()
-        {
-            WriteLine(string.Empty);
-        }
+        public void WriteLine() => WriteLine(string.Empty);
 
         private void MoveCursor()
         {
-            if (position == 0)
+            if (Position != 0)
+                return;
+
+            for (int i = IndentationLevel; i != 0; i--)
             {
-                for (int i = indentationLevel; i != 0; i--)
-                {
-                    writer.Write(" ");
-                    position++;
-                }
+                _writer.Write(" ");
+                Position++;
             }
         }
 
-        public void Flush()
-        {
-            writer.Flush();
-        }
+        public void Flush() => _writer.Flush();
     }
 }
