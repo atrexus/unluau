@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Unluau.Decleration;
+using static Unluau.Declaration;
 
 namespace Unluau
 {
@@ -16,16 +16,16 @@ namespace Unluau
         public int Top { get; private set; }
         public bool ReassignOccupiedRegisters { get; set; } = false;
 
-        private IDictionary<int, Decleration> declerations;
+        public IDictionary<int, Declaration> Declarations { get; private set; }
         private IDictionary<int, Expression> expressions;
         private Namer namer;
         private DecompilerOptions options;
 
-        public Registers(Function function, IDictionary<int, Decleration> declerations, IDictionary<int, Expression> expressions, DecompilerOptions options)
+        public Registers(Function function, IDictionary<int, Declaration> declarations, IDictionary<int, Expression> expressions, DecompilerOptions options)
         {
             Count = function.MaxStackSize;
-
-            this.declerations = declerations;
+            
+            this.Declarations = declarations;
             this.expressions = expressions;
             this.options = options;
 
@@ -33,21 +33,21 @@ namespace Unluau
         }
 
         public Registers(Function function, DecompilerOptions options)
-            : this(function, new Dictionary<int, Decleration>(), new Dictionary<int, Expression>(), options)
+            : this(function, new Dictionary<int, Declaration>(), new Dictionary<int, Expression>(), options)
         { }
 
         public Registers(Registers registers)
         {
             Count = registers.Count;
 
-            declerations = new Dictionary<int,Decleration>(registers.declerations);
+            Declarations = new Dictionary<int,Declaration>(registers.Declarations);
             expressions = new Dictionary<int, Expression>(registers.expressions);
             options = registers.options;
 
             namer = new Namer(this);
         }
 
-        public void LoadRegister(int register, Expression expression, Block block, int pc, DeclerationType type = DeclerationType.Local)
+        public void LoadRegister(int register, Expression expression, Block block, int pc, DeclarationType type = DeclarationType.Local)
         {
             LocalExpression local = LoadTempRegister(register, expression, block, type);
 
@@ -57,13 +57,13 @@ namespace Unluau
         }
 
         // Literally just loads a register but doesn't create a local assignment for it. Mainly used for GETVARARGS
-        public LocalExpression LoadTempRegister(int register, Expression expression, Block block, DeclerationType type)
+        public LocalExpression LoadTempRegister(int register, Expression expression, Block block, DeclarationType type)
         {
-            Decleration decleration = namer.CreateDecleration(register, expression, block, type, !options.VariableNameGuessing);
+            Declaration declaration = namer.CreateDeclaration(register, expression, block, type, !options.VariableNameGuessing);
 
-            LocalExpression local = new LocalExpression(expression, decleration);
+            LocalExpression local = new LocalExpression(expression, declaration);
 
-            SetDecleration(register, decleration);
+            SetDeclaration(register, declaration);
             SetExpression(register, local);
 
             Top = register;
@@ -87,24 +87,24 @@ namespace Unluau
 
                     if (assignment.TryGetVariable(out LocalExpression variable))
                     {
-                        if (variable.Decleration.Referenced == 1)
+                        if (variable.Declaration.Referenced == 1)
                         {
                             block.Statements.RemoveAt(i);
                             i--;
                         }
-                        else if (declerations.ContainsKey(variable.Decleration.Register))
+                        else if (Declarations.ContainsKey(variable.Declaration.Register))
                         {
                             // Update the ID of the variable
-                            switch (variable.Decleration.Type)
+                            switch (variable.Declaration.Type)
                             {
-                                case DeclerationType.Local:
-                                    declerations[variable.Decleration.Register].Id = localsCount++;
+                                case DeclarationType.Local:
+                                    Declarations[variable.Declaration.Register].Id = localsCount++;
                                     break;
-                                case DeclerationType.Upvalue:
-                                    declerations[variable.Decleration.Register].Id = upvaluesCount++;
+                                case DeclarationType.Upvalue:
+                                    Declarations[variable.Declaration.Register].Id = upvaluesCount++;
                                     break;
-                                case DeclerationType.Closure:
-                                    declerations[variable.Decleration.Register].Id = closuresCount++;
+                                case DeclarationType.Closure:
+                                    Declarations[variable.Declaration.Register].Id = closuresCount++;
                                     break;
                             }
                         }
@@ -113,19 +113,19 @@ namespace Unluau
                     {
                         foreach (Expression expression in expressions.Expressions)
                         {
-                            if (expression is LocalExpression local && declerations.ContainsKey(local.Decleration.Register))
+                            if (expression is LocalExpression local && Declarations.ContainsKey(local.Declaration.Register))
                             {
                                 // Update the ID of the variable
-                                switch (local.Decleration.Type)
+                                switch (local.Declaration.Type)
                                 {
-                                    case DeclerationType.Local:
-                                        declerations[local.Decleration.Register].Id = localsCount++;
+                                    case DeclarationType.Local:
+                                        Declarations[local.Declaration.Register].Id = localsCount++;
                                         break;
-                                    case DeclerationType.Upvalue:
-                                        declerations[local.Decleration.Register].Id = upvaluesCount++;
+                                    case DeclarationType.Upvalue:
+                                        Declarations[local.Declaration.Register].Id = upvaluesCount++;
                                         break;
-                                    case DeclerationType.Closure:
-                                        declerations[local.Decleration.Register].Id = closuresCount++;
+                                    case DeclarationType.Closure:
+                                        Declarations[local.Declaration.Register].Id = closuresCount++;
                                         break;
                                 }
                             }
@@ -136,83 +136,78 @@ namespace Unluau
 
             namer.PurifyVariableNames();
 
-            declerations.Clear();
+            Declarations.Clear();
             expressions.Clear();
         }
 
         public void FreeRegister(int register, Block block)
         {
-            Decleration decleration;
+            Declaration declaration;
 
-            if ((decleration = GetDecleration(register, false)) != null)
+            if ((declaration = GetDeclaration(register, false)) != null)
             {
-                /*if (decleration.Referenced == 1)
-                    block.Statements.RemoveAt(decleration.Location);*/
-                // Remove decleration and expression
-                declerations.Remove(register);
+                /*if (declaration.Referenced == 1)
+                    block.Statements.RemoveAt(declaration.Location);*/
+                // Remove declaration and expression
+                Declarations.Remove(register);
                 expressions.Remove(register);
             }
 
-            /*            // Remove decleration and expression
-                        declerations.Remove(register);
+            /*            // Remove declaration and expression
+                        declarations.Remove(register);
                         expressions.Remove(register);*/
         }
 
         public void MoveRegister(int fromRegister, int toRegister)
         {
-            Decleration decleration = GetDecleration(fromRegister);
+            Declaration declaration = GetDeclaration(fromRegister);
 
-            SetDecleration(toRegister, decleration);
+            SetDeclaration(toRegister, declaration);
             SetExpression(toRegister, expressions[fromRegister]);
         }
 
-        public IList<Decleration> GetDeclerations()
+        public IList<Declaration> GetDeclarations()
         {
-            return declerations.Values.ToList();
+            return Declarations.Values.ToList();
         }
 
-        public IDictionary<int, Decleration> GetDeclerationDict()
+        public Declaration GetDeclaration(int register, bool reference = true)
         {
-            return declerations;
-        }
-
-        public Decleration GetDecleration(int register, bool reference = true)
-        {
-            if (declerations.ContainsKey(register))
+            if (Declarations.ContainsKey(register))
             {
-                var decleration = declerations[register];
+                var declaration = Declarations[register];
 
                 if (reference)
-                    decleration.Referenced++;
+                    declaration.Referenced++;
 
-                SetDecleration(register, decleration);
+                SetDeclaration(register, declaration);
 
-                return decleration;
+                return declaration;
             }
 
             return null;
         }
 
-        public bool IsEmpty(int register) => !(declerations.ContainsKey(register) && expressions.ContainsKey(register));
+        public bool IsEmpty(int register) => !(Declarations.ContainsKey(register) && expressions.ContainsKey(register));
 
-        public void SetDecleration(int register, Decleration decleration)
+        public void SetDeclaration(int register, Declaration declaration)
         {
-            if (declerations.ContainsKey(register))
+            if (Declarations.ContainsKey(register))
             {
-                declerations.Remove(register);
+                Declarations.Remove(register);
             }
             
-            declerations.Add(register, decleration);
+            Declarations.Add(register, declaration);
         }
 
         public Expression GetExpression(int register, bool reference = true)
         {
-            Decleration decleration = GetDecleration(register, reference);
+            Declaration declaration = GetDeclaration(register, reference);
             
             if (expressions.ContainsKey(register))
             {
-                if (decleration != null)
-                    ((LocalExpression)expressions[register]).Decleration = decleration;
+                if (declaration != null)
+                    ((LocalExpression)expressions[register]).Declaration = declaration;
                 return expressions[register];
             }
 

@@ -12,18 +12,18 @@ namespace Unluau
     public class LocalExpression : Expression
     {
         public Expression Expression { get; private set; }
-        public Decleration Decleration { get; set; }
+        public Declaration Declaration { get; set; }
 
-        public LocalExpression(Expression expression, Decleration decleration)
+        public LocalExpression(Expression expression, Declaration declaration)
         {
             Expression = expression;
-            Decleration = decleration;
+            Declaration = declaration;
         }
 
         public override void Write(Output output)
         {
-            if (Decleration.Referenced != 1)
-                output.Write(Decleration.Name);
+            if (Declaration.Referenced != 1)
+                output.Write(Declaration.Name);
             else if (Expression != null)
             {
                 if (Expression is Closure)
@@ -32,13 +32,13 @@ namespace Unluau
                 Expression.Write(output);
             }
             else
-                output.Write(Decleration.Name);
+                output.Write(Declaration.Name);
         }
 
         public override string[] GetNames()
         {
             if (Expression is null)
-                return new string[] { Decleration.Name };
+                return new string[] { Declaration.Name };
 
             return Expression.GetNames();
         }

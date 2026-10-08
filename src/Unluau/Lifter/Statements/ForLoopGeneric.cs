@@ -11,11 +11,11 @@ namespace Unluau
 {
     public class ForLoopGeneric : Statement
     {
-        public List<Decleration> Variables { get; set; }
+        public List<Declaration> Variables { get; set; }
         public ExpressionList Values { get; set; }
         public Block Body { get; set; }
 
-        public ForLoopGeneric(List<Decleration> variables, ExpressionList values, Block body)
+        public ForLoopGeneric(List<Declaration> variables, ExpressionList values, Block body)
         {
             Variables = variables;
             Values = values;

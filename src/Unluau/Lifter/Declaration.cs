@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace Unluau
 {
-    public class Decleration
+    public class Declaration
     {
         public static int LocalIdCounter = 0;
         public static int ClosureIdCounter = 0;
         public static int UpvalueIdCounter = 0;
 
-        public enum DeclerationType
+        public enum DeclarationType
         {
             Local,
             Closure,
@@ -31,10 +31,10 @@ namespace Unluau
                 if (_name is null)
                     return Type switch
                     {
-                        DeclerationType.Local => $"var{Id}",
-                        DeclerationType.Closure => $"fun{Id}",
-                        DeclerationType.Upvalue => $"upval{Id}",
-                        _ => throw new Exception("Invalid DeclerationType")
+                        DeclarationType.Local => $"var{Id}",
+                        DeclarationType.Closure => $"fun{Id}",
+                        DeclarationType.Upvalue => $"upval{Id}",
+                        _ => throw new Exception("Invalid DeclarationType")
                     };
 
                 return _name;
@@ -43,14 +43,14 @@ namespace Unluau
         public int Register { get; set; }
         public int Location { get; private set; }
         public int Referenced { get; set; } = 0;
-        public DeclerationType Type { get; set; }
+        public DeclarationType Type { get; set; }
         public int Id { get; set; }
 
-        public Decleration(LocalVariable localVariable) : this(localVariable.Slot, localVariable.Name, localVariable.StartPc)
+        public Declaration(LocalVariable localVariable) : this(localVariable.Slot, localVariable.Name, localVariable.StartPc)
         {
         }
 
-        public Decleration(int register, int location, DeclerationType type)
+        public Declaration(int register, int location, DeclarationType type)
         {
             Register = register;
             Location = location;
@@ -58,14 +58,14 @@ namespace Unluau
 
             Id = type switch
             {
-                DeclerationType.Local => LocalIdCounter++,
-                DeclerationType.Closure => ClosureIdCounter++,
-                DeclerationType.Upvalue => UpvalueIdCounter++,
-                _ => throw new Exception("Invalid DeclerationType")
+                DeclarationType.Local => LocalIdCounter++,
+                DeclarationType.Closure => ClosureIdCounter++,
+                DeclarationType.Upvalue => UpvalueIdCounter++,
+                _ => throw new Exception("Invalid DeclarationType")
             };
         }
 
-        public Decleration(int register, string name, int location) : this(register, location, DeclerationType.Local)
+        public Declaration(int register, string name, int location) : this(register, location, DeclarationType.Local)
         {
             _name = name;
         }

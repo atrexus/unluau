@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Unluau.Decleration;
+using static Unluau.Declaration;
 
 namespace Unluau
 {
@@ -22,17 +22,17 @@ namespace Unluau
             this.registers = registers; 
         }
         
-        public Decleration CreateDecleration(int register, Expression expression, Block block, DeclerationType type, bool isRegular = true)
+        public Declaration CreateDeclaration(int register, Expression expression, Block block, DeclarationType type, bool isRegular = true)
         {
             if (isRegular)
-                return createRegularDecleration(register, expression, block, type);
+                return CreateRegularDeclaration(register, expression, block, type);
 
-            return createNamedDecleration(register, expression, block, type);
+            return CreateNamedDeclaration(register, expression, block, type);
         }
 
         public void PurifyVariableNames()
         {
-            foreach (KeyValuePair<int, Decleration> declPair in new Dictionary<int, Decleration>(registers.GetDeclerationDict()))
+            foreach (KeyValuePair<int, Declaration> declPair in new Dictionary<int, Declaration>(registers.Declarations))
             {
                 if (declPair.Value is null)
                     continue;
@@ -44,29 +44,29 @@ namespace Unluau
 
                 string realName = name.Split(new string[] { "_v" }, StringSplitOptions.None)[0];
 
-                registers.SetDecleration(declPair.Key, new Decleration(declPair.Value.Register, updateName(realName), declPair.Value.Location));
+                registers.SetDeclaration(declPair.Key, new Declaration(declPair.Value.Register, UpdateName(realName), declPair.Value.Location));
             }
         }
 
-        private Decleration createRegularDecleration(int register, Expression expression, Block block, DeclerationType type)
+        private Declaration CreateRegularDeclaration(int register, Expression expression, Block block, DeclarationType type)
         {
             if (expression is Closure)
-                return new Decleration(register, block.Statements.Count, DeclerationType.Closure);
+                return new Declaration(register, block.Statements.Count, DeclarationType.Closure);
 
-            return new Decleration(register, block.Statements.Count, type);
+            return new Declaration(register, block.Statements.Count, type);
         }
 
-        private Decleration createNamedDecleration(int register, Expression expression, Block block, DeclerationType type)
+        private Declaration CreateNamedDeclaration(int register, Expression expression, Block block, DeclarationType type)
         {
-            string? name = getName(expression);
+            string? name = GetName(expression);
 
             if (name != null)
-                return new Decleration(register, updateName(name), block.Statements.Count);
+                return new Declaration(register, UpdateName(name), block.Statements.Count);
             
-            return createRegularDecleration(register, expression, block, type);
+            return CreateRegularDeclaration(register, expression, block, type);
         }
 
-        private string? getName(Expression expression)
+        private string? GetName(Expression expression)
         {
             NameIndex? nameIndex;
             if ((nameIndex = expression as NameIndex) != null)
@@ -86,9 +86,9 @@ namespace Unluau
             return null;
         }
 
-        private string updateName(string name)
+        private string UpdateName(string name)
         {
-            var matchList = registers.GetDeclerations()
+            var matchList = registers.GetDeclarations()
                 .Where(d => d.Name.StartsWith(name + "_v"))
                 .ToList();
 

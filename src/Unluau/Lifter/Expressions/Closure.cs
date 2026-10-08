@@ -11,12 +11,12 @@ namespace Unluau
 {
     public class Closure : Expression
     {
-        public IList<Decleration> Arguments { get; protected set; }
+        public IList<Declaration> Arguments { get; protected set; }
         public bool HasVararg { get; protected set; }
         public Block Block { get; protected set; }
         public int FunctionId { get; protected set; }
 
-        public Closure(IList<Decleration> arguments, bool hasVararg, Block block, int fId)
+        public Closure(IList<Declaration> arguments, bool hasVararg, Block block, int fId)
         {
             Arguments = arguments;
             HasVararg = hasVararg;
@@ -29,7 +29,7 @@ namespace Unluau
             output.Write("(");
 
             bool first = true;
-            foreach (Decleration argument in Arguments)
+            foreach (Declaration argument in Arguments)
             {
                 if (!first)
                     output.Write(", ");

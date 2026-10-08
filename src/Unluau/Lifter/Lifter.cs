@@ -39,7 +39,7 @@ namespace Unluau
 
             // Note: these values doesn't get cleared after each test in Unluau.Test so we have to do it
             // manually here.
-            Decleration.ResetCounters();
+            Declaration.ResetCounters();
 
             return block;
         }
@@ -315,7 +315,7 @@ namespace Unluau
 
                         if (options.InlineTableDefintions && tableValue is TableLiteral)
                         {
-                            if (((LocalExpression)table).Decleration.Referenced == 1)
+                            if (((LocalExpression)table).Declaration.Referenced == 1)
                                 tableValue = registers.GetRefExpressionValue(instruction.B);
 
                             TableLiteral tableLiteral = (TableLiteral)tableValue;
@@ -422,11 +422,11 @@ namespace Unluau
                             {
                                 int register = instruction.A + i;
 
-                                expressions.Append(registers.LoadTempRegister(register, new Vararg(), block, Decleration.DeclerationType.Local));
+                                expressions.Append(registers.LoadTempRegister(register, new Vararg(), block, Declaration.DeclarationType.Local));
 
                                 // All of the variables need to be referenced more than once so that we don't end up 
                                 // printing '...' for each of their references.
-                                registers.GetDeclerationDict()[register].Referenced = 2;
+                                registers.Declarations[register].Referenced = 2;
                             }
 
                             block.AddStatement(new LocalAssignment(expressions, new Vararg()), pc);
@@ -527,7 +527,7 @@ namespace Unluau
                                 LocalExpression? expression = localAssignment.Expression as LocalExpression;
                                 UnaryExpression? unaryCondition = ifElse.Condition as UnaryExpression;
 
-                                if (expression!.Decleration.Register == register)
+                                if (expression!.Declaration.Register == register)
                                 {
                                     // We know that the current jump instruction represents an `and` or `or` statement.
                                     Expression left = unaryCondition is null ? ifElse.Condition : unaryCondition!.Expression;
@@ -572,10 +572,10 @@ namespace Unluau
 
                                     goto case CaptureType.Value;
                                 case CaptureType.Value:
-                                    var type = options.RenameUpvalues ? Decleration.DeclerationType.Upvalue : Decleration.DeclerationType.Local;
+                                    var type = options.RenameUpvalues ? Declaration.DeclarationType.Upvalue : Declaration.DeclarationType.Local;
 
                                     expression = (LocalExpression)registers.GetExpression(capture.B);
-                                    expression.Decleration.Type = type;
+                                    expression.Declaration.Type = type;
                                     break;
                                 case CaptureType.Upvalue:
                                     // We've got an existing upvalue
@@ -585,20 +585,20 @@ namespace Unluau
                                     throw new DecompilerException(Stage.Lifter, $"Unknown capture type {capture.A}");
                             }
 
-                            expression!.Decleration.Referenced++;
+                            expression!.Declaration.Referenced++;
 
                             // Add the upvalue to our new function
                             newFunction.Upvalues.Add(expression);
                         }
 
-                        registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclerations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters), functionId), block, pc);
+                        registers.LoadRegister(instruction.A, new Closure(newRegisters.GetDeclarations(), newFunction.IsVararg, LiftBlock(newFunction, newRegisters), functionId), block, pc);
                         break;
                     }
                     case OpCode.GETUPVAL:
                     {
                         LocalExpression expression = function.Upvalues[instruction.B];
 
-                        registers.LoadRegister(instruction.A, expression, block, pc, expression.Decleration.Type);
+                        registers.LoadRegister(instruction.A, expression, block, pc, expression.Declaration.Type);
                         break;
                     }
                     case OpCode.RETURN:
@@ -623,14 +623,14 @@ namespace Unluau
 
                         foreach (var statement in block.Statements)
                         {
-                            if (statement is LocalAssignment localAssignment && localAssignment.Expression is LocalExpression localExpression && localExpression.Decleration.Id == index.Decleration.Id)
+                            if (statement is LocalAssignment localAssignment && localAssignment.Expression is LocalExpression localExpression && localExpression.Declaration.Id == index.Declaration.Id)
                             {
                                 block.Statements.Remove(statement);
                                 break;
                             }
                         }
 
-                        Assignment assignment = new(new Global(index.Decleration.Name), index.GetValue()!);
+                        Assignment assignment = new(new Global(index.Declaration.Name), index.GetValue()!);
                         Block body = LiftBlock(function, registers, pc + 1, pc += instruction.D);
 
                         block.AddStatement(new ForLoopNumeric(assignment, limit, step, body), pc);
@@ -640,7 +640,7 @@ namespace Unluau
                     case OpCode.FORGPREP_INEXT:
                     case OpCode.FORGPREP_NEXT:
                     {
-                        List<Decleration> variables = new();
+                        List<Declaration> variables = new();
                         ExpressionList values = new(3);
 
                         // Fill expressions. We are assuming the following register format: generator, state, index
@@ -668,8 +668,8 @@ namespace Unluau
                         {
                             int register = count + 2 + instruction.A;
 
-                            registers.LoadTempRegister(register, new NilLiteral(), block, Decleration.DeclerationType.Local);
-                            variables.Add(registers.GetDecleration(register));
+                            registers.LoadTempRegister(register, new NilLiteral(), block, Declaration.DeclarationType.Local);
+                            variables.Add(registers.GetDeclaration(register));
                         }
 
                         // Lift the loop body into a block
@@ -782,37 +782,37 @@ namespace Unluau
 
         private Registers CreateRegisters(Function function)
         {
-            IDictionary<int, Decleration> declerations = LoadDeclerations(function);
-            IDictionary<int, Expression> expressions = LoadExpressions(declerations);
+            IDictionary<int, Declaration> declarations = LoadDeclarations(function);
+            IDictionary<int, Expression> expressions = LoadExpressions(declarations);
 
-            return new Registers(function, declerations, expressions, options);
+            return new Registers(function, declarations, expressions, options);
         }
 
-        private IDictionary<int, Decleration> LoadDeclerations(Function function)
+        private IDictionary<int, Declaration> LoadDeclarations(Function function)
         {
-            IDictionary<int, Decleration> declerations = new Dictionary<int, Decleration>();
+            IDictionary<int, Declaration> declarations = new Dictionary<int, Declaration>();
 
             if (function.DebugInfo != null)
             {
-                // Load the entire debug info into the declerations
+                // Load the entire debug info into the declarations
                 foreach (LocalVariable variable in function.DebugInfo.Locals)
-                    declerations[variable.Slot] = new Decleration(variable);
+                    declarations[variable.Slot] = new Declaration(variable);
             }
             else
             {
                 for (int slot = 0; slot < function.Parameters; slot++)
-                    declerations[slot] = new Decleration(slot, "arg" + (slot + 1), 0);
+                    declarations[slot] = new Declaration(slot, "arg" + (slot + 1), 0);
             }
 
-            return declerations;
+            return declarations;
         }
 
-        private IDictionary<int, Expression> LoadExpressions(IDictionary<int, Decleration> declerations)
+        private IDictionary<int, Expression> LoadExpressions(IDictionary<int, Declaration> declarations)
         {
             IDictionary<int, Expression> expressions = new Dictionary<int, Expression>();
 
-            foreach (KeyValuePair<int, Decleration> decleration in declerations)
-                expressions[decleration.Key] = new LocalExpression(null, decleration.Value);
+            foreach (KeyValuePair<int, Declaration> declaration in declarations)
+                expressions[declaration.Key] = new LocalExpression(null, declaration.Value);
 
             return expressions;
         }
