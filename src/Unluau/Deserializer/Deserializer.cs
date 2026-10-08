@@ -23,8 +23,6 @@ namespace Unluau
 
         public Chunk Deserialize()
         {
-            Chunk chunk = new Chunk();
-
             _version = _reader.ReadByte();
 
             // The rest of the bytecode is the error message
@@ -49,10 +47,8 @@ namespace Unluau
                     index = _reader.ReadByte();
                 }
             }
-            chunk.Functions = ReadFunctions(strings);
-            chunk.MainIndex = _reader.ReadInt32Compressed(); //;
 
-            return chunk;
+            return new Chunk(ReadFunctions(strings), _reader.ReadInt32Compressed());
         }
 
         private IList<string> ReadStrings()

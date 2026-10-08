@@ -1,27 +1,27 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Unluau
 {
     public class Chunk
     {
-        public IList<Function> Functions { get; set; }
-        public int MainIndex { get; set; }
+        public IList<Function> Functions { get; }
+        public int MainIndex { get; }
+
+        public Chunk(IList<Function> functions, int mainIndex)
+        {
+            this.Functions = functions;
+            this.MainIndex = mainIndex;
+        }
 
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
 
-            foreach(Function function in Functions)
-            {
-                builder.Append(function + "\n");
-            }
+            builder.AppendJoin("\n", Functions);
+            builder.Append("\n");
 
             builder.Append("Main Function: " + MainIndex);
             return builder.ToString();
