@@ -340,8 +340,6 @@ namespace Unluau
             {
                 Log.Debug("Debug information is enabled, reading.");
 
-                debugInfo = new DebugInfo();
-
                 int sizeVars = reader.ReadInt32Compressed();
 
                 IList<LocalVariable> localVariables = new List<LocalVariable>(sizeVars);
@@ -365,8 +363,7 @@ namespace Unluau
                 while (upvalues.Count < sizeUpvals)
                     upvalues.Add(ReadString(strings));
 
-                debugInfo.Locals = localVariables;
-                debugInfo.Upvalues = upvalues;
+                debugInfo = new DebugInfo(localVariables, upvalues);
             }
             else
                 Log.Debug("Debug information is disabled, skipping.");

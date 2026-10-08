@@ -22,6 +22,12 @@ namespace Unluau
         public IList<LocalVariable> Locals { get; set; }
         public IList<string> Upvalues { get; set; }
 
+        public DebugInfo(IList<LocalVariable> locals, IList<string> upvalues)
+        {
+            this.Locals = locals;
+            this.Upvalues = upvalues;
+        }
+
         public override string ToString()
         {
             return "DebugInfo enabled.";
