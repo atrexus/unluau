@@ -1,11 +1,6 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Unluau.Declaration;
 
 namespace Unluau
@@ -13,11 +8,11 @@ namespace Unluau
 
     public class Namer
     {
-        private Registers registers;
+        private readonly Registers _registers;
 
         public Namer(Registers registers)
         { 
-            this.registers = registers; 
+            this._registers = registers; 
         }
         
         public Declaration CreateDeclaration(int register, Expression expression, Block block, DeclarationType type, bool isRegular = true)
@@ -30,7 +25,7 @@ namespace Unluau
 
         public void PurifyVariableNames()
         {
-            foreach (KeyValuePair<int, Declaration> declPair in new Dictionary<int, Declaration>(registers.Declarations))
+            foreach (KeyValuePair<int, Declaration> declPair in new Dictionary<int, Declaration>(_registers.Declarations))
             {
                 if (declPair.Value is null)
                     continue;
@@ -40,13 +35,13 @@ namespace Unluau
                 if (!name.Contains("_v"))
                     continue;
 
-                string realName = name.Split(new string[] { "_v" }, StringSplitOptions.None)[0];
+                string realName = name.Split(new[] { "_v" }, StringSplitOptions.None)[0];
 
-                registers.SetDeclaration(declPair.Key, new Declaration(declPair.Value.Register, UpdateName(realName), declPair.Value.Location));
+                _registers.SetDeclaration(declPair.Key, new Declaration(declPair.Value.Register, UpdateName(realName), declPair.Value.Location));
             }
         }
 
-        private Declaration CreateRegularDeclaration(int register, Expression expression, Block block, DeclarationType type)
+        private static Declaration CreateRegularDeclaration(int register, Expression expression, Block block, DeclarationType type)
         {
             if (expression is Closure)
                 return new Declaration(register, block.Statements.Count, DeclarationType.Closure);
@@ -56,37 +51,33 @@ namespace Unluau
 
         private Declaration CreateNamedDeclaration(int register, Expression expression, Block block, DeclarationType type)
         {
-            string? name = GetName(expression);
-
-            if (name != null)
+            if (GetName(expression) is { } name)
                 return new Declaration(register, UpdateName(name), block.Statements.Count);
             
             return CreateRegularDeclaration(register, expression, block, type);
         }
 
-        private string? GetName(Expression expression)
+        private static string? GetName(Expression expression)
         {
-            NameIndex? nameIndex;
-            if ((nameIndex = expression as NameIndex) != null)
+            if (expression is NameIndex nameIndex)
                 return nameIndex.Name;
 
-            FunctionCall? call;
-            if ((call = expression as FunctionCall) != null)
-            {
-                string[] names = call.GetNames();
+            if (expression is not FunctionCall call)
+                return null;
 
-                // Note: Roblox uses 'game:GetService' to load modules. We can rename variables that contain
-                // these accordingly.
-                if (names.Length == 3 && names[0] == "game" && names[1] == "GetService")
-                    return names[2] + "Service";
-            }
+            string[] names = call.GetNames();
+
+            // Note: Roblox uses 'game:GetService' to load modules. We can rename variables that contain
+            // these accordingly.
+            if (names.Length == 3 && names[0] == "game" && names[1] == "GetService")
+                return names[2] + "Service";
 
             return null;
         }
 
         private string UpdateName(string name)
         {
-            var matchList = registers.GetDeclarations()
+            var matchList = _registers.GetDeclarations()
                 .Where(d => d.Name.StartsWith(name + "_v"))
                 .ToList();
 
