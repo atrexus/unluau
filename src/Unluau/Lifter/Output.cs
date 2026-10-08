@@ -49,5 +49,33 @@ namespace Unluau
         }
 
         public void Flush() => _writer.Flush();
+
+        public void Join(string separator, IEnumerable<string> strings)
+        {
+            bool first = true;
+            foreach (var str in strings)
+            {
+                if (!first)
+                    this.Write(separator);
+                
+                this.Write(str);
+
+                first = false;
+            }
+        }
+
+        public void Join(string separator, IEnumerable<Expression> expressions)
+        {
+            bool first = true;
+            foreach (var expression in expressions)
+            {
+                if (!first)
+                    this.Write(separator);
+                
+                expression.Write(this);
+
+                first = false;
+            }
+        }
     }
 }

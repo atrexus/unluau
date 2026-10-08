@@ -13,7 +13,12 @@ namespace Unluau
         public override void Write(Output output)
         {
             output.Write("return");
-            output.Write(string.Join(", ", Expressions));
+
+            if (Expressions.Count <= 0)
+                return;
+
+            output.Write(" ");
+            output.Join(", ", Expressions);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Unluau
         {
             output.Write("for ");
             
-            output.Write(string.Join(", ", Variables.Select(d => d.Name)));
+            output.Join(", ", Variables.Select(d => d.Name));
 
             output.Write(" in ");
             Values.Write(output);
