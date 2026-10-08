@@ -1,111 +1,94 @@
 // Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 using Serilog;
 
 namespace Unluau
 {
     public class Deserializer
     {
-        private BytecodeReader reader;
-        private byte version, typesVersion;
-        private OpCodeEncoding encoding;
+        private readonly BytecodeReader _reader;
+        private byte _version, _typesVersion;
+        private readonly OpCodeEncoding _encoding;
 
-        private const byte MinVesion = 3, MaxVersion = 6; // [3..6]
+        private const byte MinVersion = 3, MaxVersion = 6; // [3..6]
         private const byte TypeVersion = 1;
 
         public Deserializer(Stream stream, OpCodeEncoding encoding)
         {
-            reader = new BytecodeReader(stream);
+            _reader = new BytecodeReader(stream);
 
-            this.encoding = encoding;
+            this._encoding = encoding;
         }
 
         public Chunk Deserialize()
         {
             Chunk chunk = new Chunk();
 
-            version = reader.ReadByte();
+            _version = _reader.ReadByte();
 
             // The rest of the bytecode is the error message
-            if (version == 0)
-                throw new DecompilerException(Stage.Deserializer, reader.ReadASCII((int)(reader.Stream.Length - 1)));
+            if (_version == 0)
+                throw new DecompilerException(Stage.Deserializer, _reader.ReadASCII((int)(_reader.Stream.Length - 1)));
             
             // Make sure we have a valid bytecode version (so in range)
-            if (version < MinVesion || version > MaxVersion)
-                throw new DecompilerException(Stage.Deserializer, $"Bytecode version mismatch, expected version {MinVesion}...{MaxVersion}, got {version}");
+            if (_version < MinVersion || _version > MaxVersion)
+                throw new DecompilerException(Stage.Deserializer, $"Bytecode version mismatch, expected version {MinVersion}...{MaxVersion}, got {_version}");
 
-            if (version >= 4)
-                typesVersion = reader.ReadByte();
+            if (_version >= 4)
+                _typesVersion = _reader.ReadByte();
 
             var strings = ReadStrings();
-            if (typesVersion == 3) // userdatatype remapping (tv3)
+            if (_typesVersion == 3) // userdatatype remapping (tv3)
             {
-                byte index = reader.ReadByte();
+                byte index = _reader.ReadByte();
                 while (index != 0)
                 {
-                    reader.ReadInt32Compressed();
+                    _reader.ReadInt32Compressed();
 
-                    index = reader.ReadByte();
+                    index = _reader.ReadByte();
                 }
             }
             chunk.Functions = ReadFunctions(strings);
-            chunk.MainIndex = reader.ReadInt32Compressed(); //;
+            chunk.MainIndex = _reader.ReadInt32Compressed(); //;
 
             return chunk;
         }
 
         private IList<string> ReadStrings()
         {
-            int size = reader.ReadInt32Compressed();
+            int size = _reader.ReadInt32Compressed();
+            
+            Log.Debug("Reading {Size} strings from the string table", size);
 
-            IList<string> strings = new List<string>(size);
-
-            Log.Debug($"Reading {size} strings from the string table");
-
-            /*while (strings.Count < size)
+            var strings = new List<string>(size);
+            for (int i = 0; i < size; i++)
             {
-                int stringSize = reader.ReadInt32Compressed();
-
-                // Really stupid check, but Luau seems to have an issue where '\n' is added before 'GetService'.
-/*                if (stringSize == 13 && reader.Peek() == 10)
-                    stringSize = reader.ReadInt32Compressed();*/
-                
-
-                /*strings.Add(reader.ReadASCII(stringSize));
-            }*/
-
-            for (int i = 1; i <= size; i++)
-            {
-                strings.Add(reader.ReadASCII(reader.ReadInt32Compressed()));
+                strings.Add(_reader.ReadASCII(_reader.ReadInt32Compressed()));
             }
 
             return strings;
         }
 
-        // Function used to read a string from the string table. Not used in the actual string table.
+        /// <summary>
+        /// Function used to read a string from the string table. Not used in the actual string table.
+        /// </summary>
+        /// <param name="strings"></param>
+        /// <returns></returns>
         private string ReadString(IList<string> strings)
         {
-            int id = reader.ReadInt32Compressed();
+            int id = _reader.ReadInt32Compressed();
 
             return id == 0 || id > strings.Count ? string.Empty : strings[id - 1];
         }
 
         private IList<Function> ReadFunctions(IList<string> strings)
         {
-            int size = reader.ReadInt32Compressed();
+            int size = _reader.ReadInt32Compressed();
 
-            IList<Function> functions = new List<Function>(size);
-
-            Log.Debug($"Reading {size} functions from main bytecode pool");
-
+            Log.Debug("Reading {Size} functions from main bytecode pool", size);
+            
+            var functions = new List<Function>(size);
             while (functions.Count < size)
                 functions.Add(ReadFunction(functions, strings));
 
@@ -114,62 +97,24 @@ namespace Unluau
 
         private Function ReadFunction(IList<Function> functions, IList<string> strings)
         {
-            Function function = new Function();
-
-            function.Id = functions.Count;
-
             Log.Debug("Reading basic function prototype information");
-
-            function.MaxStackSize = reader.ReadByte();
-            function.Parameters = reader.ReadByte();
-            function.MaxUpvalues = reader.ReadByte();
-            function.Upvalues = new List<LocalExpression>(function.MaxUpvalues);
-            function.IsVararg = reader.ReadByte() == 1;
-
-            if (version >= 4)
+            
+            Function function = new Function
             {
-                function.Flags = reader.ReadByte();
-                //Log.Debug(reader.Stream.Position.ToString());
-                int typesSize = reader.ReadInt32Compressed();
-                reader.Position += typesSize;
-                //Log.Debug(reader.Stream.Position.ToString());
-                if (typesVersion == 1)
-                {
-                    
+                Id = functions.Count,
+                MaxStackSize = _reader.ReadByte(),
+                Parameters = _reader.ReadByte(),
+                MaxUpvalues = _reader.ReadByte()
+            };
 
-                    if (typesSize > 0 && typesVersion == TypeVersion)
-                    {
-                        //function.Types = reader.ReadBytes(typesSize);
+            function.Upvalues = new List<LocalExpression>(function.MaxUpvalues);
+            function.IsVararg = _reader.ReadByte() == 1;
 
-                        /*int headersize = typesSize > 127 ? 4 : 3;
-                        int[] typeinfo = new int[headersize + typesSize];
-                        function.Types = typeinfo;
-
-                        if (headersize == 4)
-                        {
-                            function.Types[0] = (typesSize & 127);
-                            function.Types[1] = typesSize >> 7;
-                            function.Types[2] = 0;
-                            function.Types[3] = 0;
-                        }
-                        else
-                        {
-                            function.Types[0] = typesSize;
-                            function.Types[1] = 0;
-                            function.Types[2] = 0;
-                        }*/
-
-
-                        // Todo: remove these retarded assert function defs
-                        //Debug.Assert(typesSize == 2 + function.Parameters);
-                        //Debug.Assert(function.Types[0] == (int)BytecodeTypes.Function);
-                        //Debug.Assert(function.Types[1] == function.Parameters);
-                    }
-                }
-                /*else if (typesVersion == 2 || typesVersion == 3)
-                {
-
-                }*/
+            if (_version >= 4)
+            {
+                function.Flags = _reader.ReadByte();
+                int typesSize = _reader.ReadInt32Compressed();
+                _reader.Position += typesSize;
             }
 
             function.Instructions = ReadInstructions();
@@ -177,7 +122,7 @@ namespace Unluau
             function.Functions = ReadFunctions();
             function.GlobalFunctions = functions;
 
-            function.LineDefined = reader.ReadInt32Compressed();
+            function.LineDefined = _reader.ReadInt32Compressed();
             function.DebugName = ReadString(strings);
 
             function.LineInfo = ReadLineInfo(function.Instructions.Count);
@@ -188,25 +133,24 @@ namespace Unluau
 
         private IList<Instruction> ReadInstructions()
         {
-            int size = reader.ReadInt32Compressed();
+            int size = _reader.ReadInt32Compressed();
 
-            IList<Instruction> instructions = new List<Instruction>(size);
+            Log.Debug("Reading {Size} instructions from function prototype body", size);
 
-            Log.Debug($"Reading {size} instructions from function prototype body");
-
+            var instructions = new List<Instruction>(size);
             while (instructions.Count < size) 
             {
-                Instruction instruction = new Instruction(reader.ReadUInt32(), encoding);
+                Instruction instruction = new Instruction(_reader.ReadUInt32(), _encoding);
                 OpProperties properties = instruction.GetProperties();
 
                 // Note: Sometimes we get NOPs...
                 if (properties.Code == OpCode.NOP)
-                    Log.Warning($"Encountered unexpected NOP instruction.");
+                    Log.Warning("Encountered unexpected NOP instruction.");
 
                 instructions.Add(instruction);
 
                 if (properties.HasAux)
-                    instructions.Add(new Instruction(reader.ReadUInt32()));
+                    instructions.Add(new Instruction(_reader.ReadUInt32()));
             }
                 
             return instructions;
@@ -214,12 +158,11 @@ namespace Unluau
 
         private IList<Constant> ReadConstants(IList<string> strings)
         {
-            int size = reader.ReadInt32Compressed();
+            int size = _reader.ReadInt32Compressed();
+            
+            Log.Debug("Reading {Size} constants from function prototype body", size);
 
-            IList<Constant> constants = new List<Constant>(size);
-
-            Log.Debug($"Reading {size} constants from function prototype body");
-
+            var constants = new List<Constant>(size);
             while (constants.Count < size)
                 constants.Add(ReadConstant(strings, constants));
 
@@ -228,147 +171,121 @@ namespace Unluau
 
         private Constant ReadConstant(IList<string> strings, IList<Constant> constants)
         {
-            int c = reader.ReadByte();
-
-            if (!Enum.IsDefined(typeof(ConstantType), c))
-                throw new DecompilerException(Stage.Deserializer, $"Constant is not defined ({c})");
-            
-            ConstantType constantType = (ConstantType)c;
+            ConstantType constantType = (ConstantType)_reader.ReadByte();
 
             switch (constantType)
             {
                 case ConstantType.Nil:
                     return new NilConstant();
                 case ConstantType.Bool:
-                    return new BoolConstant(reader.ReadBoolean());
+                    return new BoolConstant(_reader.ReadBoolean());
                 case ConstantType.Number:
-                    return new NumberConstant(reader.ReadDouble());
+                    return new NumberConstant(_reader.ReadDouble());
                 case ConstantType.String:
                     return new StringConstant(ReadString(strings));
                 case ConstantType.Import:
-                    uint id = reader.ReadUInt32();
+                    uint id = _reader.ReadUInt32();
                     int count = (int)(id >> 30);
 
-                    IList<StringConstant> names = new List<StringConstant>(count);
+                    var names = new List<StringConstant>(count);
 
                     if (count > 0)
-                        names.Add((StringConstant)constants[(int)(id >> 20) & 1023]);
+                        names.Add((StringConstant)constants[(int)(id >> 20) & 0x3FF]);
 
                     if (count > 1)
-                        names.Add((StringConstant)constants[(int)(id >> 10) & 1023]);
+                        names.Add((StringConstant)constants[(int)(id >> 10) & 0x3FF]);
 
                     if (count > 2)
-                        names.Add((StringConstant)constants[(int)(id >> 0) & 1023]);
+                        names.Add((StringConstant)constants[(int)(id >> 0) & 0x3FF]);
 
                     return new ImportConstant(names);
                 case ConstantType.Table:
-                    int size = reader.ReadInt32Compressed();
-
-                    IList<Constant> keys = new List<Constant>(size);
-
-                    while (keys.Count < size)
-                        keys.Add(constants[reader.ReadInt32Compressed()]);
+                    var keys = new List<Constant>(_reader.ReadInt32Compressed());
+                    for (int i = 0; i < keys.Capacity; i++)
+                        keys.Add(constants[_reader.ReadInt32Compressed()]);
 
                     return new TableConstant(keys);
                 case ConstantType.Closure:
-                    return new ClosureConstant(reader.ReadInt32Compressed());
+                    return new ClosureConstant(_reader.ReadInt32Compressed());
                 case ConstantType.Vector:
-                    return new VectorConstant(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                    return new VectorConstant(_reader.ReadSingle(), _reader.ReadSingle(), _reader.ReadSingle(), _reader.ReadSingle());
+                default:
+                    throw new DecompilerException(Stage.Deserializer, $"Constant type is not defined ({constantType})");
             }
-
-            // Should never happen
-            throw new DecompilerException(Stage.Deserializer, $"No constant returned for type ({constantType})");
         }
 
         private IList<int> ReadFunctions()
         {
-            int size = reader.ReadInt32Compressed();
-
-            IList<int> newFunctions = new List<int>(size);
-
-            while (newFunctions.Count < size)
-                newFunctions.Add(reader.ReadInt32Compressed());
+            var newFunctions = new List<int>(_reader.ReadInt32Compressed());
+            for (int i = 0; i < newFunctions.Capacity; i++)
+                newFunctions.Add(_reader.ReadInt32Compressed());
             
             return newFunctions;
         }
 
         private LineInfo? ReadLineInfo(int instructions)
         {
-            LineInfo? lineInfo = null;
-
-            // Line info needs to be enabled
-            if (reader.ReadBoolean())
+            if (!_reader.ReadBoolean())
             {
-                Log.Debug("Line information is enabled, reading.");
-
-                lineInfo = new LineInfo();
-
-                lineInfo.LineGapLog = reader.ReadByte();
-
-                int intervals = ((instructions - 1) >> lineInfo.LineGapLog) + 1;
-
-                lineInfo.LineInfoList = new List<byte>(instructions);
-
-                byte lastOffset = 0;
-                while (lineInfo.LineInfoList.Count < instructions)
-                {
-                    lastOffset += reader.ReadByte();
-                    lineInfo.LineInfoList.Add(lastOffset);
-                }
-
-                lineInfo.AbsLineInfoList = new List<int>(instructions);
-
-                int lastLine = 0;
-                while (lineInfo.AbsLineInfoList.Count < intervals)
-                {
-                    lastLine += reader.ReadInt32();
-                    lineInfo.AbsLineInfoList.Add(lastLine);
-                }
-            }
-            else
                 Log.Debug("Line information is disabled, skipping.");
+                return null;
+            }
+
+            Log.Debug("Line information is enabled, reading.");
+
+            var lineInfo = new LineInfo { LineGapLog = _reader.ReadByte() };
+
+            int intervals = ((instructions - 1) >> lineInfo.LineGapLog) + 1;
+
+            lineInfo.LineInfoList = new List<byte>(instructions);
+
+            byte lastOffset = 0;
+            while (lineInfo.LineInfoList.Count < instructions)
+            {
+                lastOffset += _reader.ReadByte();
+                lineInfo.LineInfoList.Add(lastOffset);
+            }
+
+            lineInfo.AbsLineInfoList = new List<int>(instructions);
+
+            int lastLine = 0;
+            while (lineInfo.AbsLineInfoList.Count < intervals)
+            {
+                lastLine += _reader.ReadInt32();
+                lineInfo.AbsLineInfoList.Add(lastLine);
+            }
 
             return lineInfo;
         }
 
         private DebugInfo? ReadDebugInfo(IList<string> strings)
         {
-            DebugInfo? debugInfo = null;
-
-            // Line info needs to be enabled
-            if (reader.ReadBoolean())
+            if (!_reader.ReadBoolean())
             {
-                Log.Debug("Debug information is enabled, reading.");
-
-                int sizeVars = reader.ReadInt32Compressed();
-
-                IList<LocalVariable> localVariables = new List<LocalVariable>(sizeVars);
-
-                while (localVariables.Count < sizeVars)
-                {
-                    LocalVariable variable = new LocalVariable();
-
-                    variable.Name = ReadString(strings);
-                    variable.StartPc = reader.ReadInt32Compressed();
-                    variable.EndPc = reader.ReadInt32Compressed();
-                    variable.Slot = reader.ReadByte();
-
-                    localVariables.Add(variable);
-                }
-
-                int sizeUpvals = reader.ReadInt32Compressed();
-
-                IList<string> upvalues = new List<string>(sizeUpvals);
-
-                while (upvalues.Count < sizeUpvals)
-                    upvalues.Add(ReadString(strings));
-
-                debugInfo = new DebugInfo(localVariables, upvalues);
-            }
-            else
                 Log.Debug("Debug information is disabled, skipping.");
+                return null;
+            }
 
-            return debugInfo;
+            Log.Debug("Debug information is enabled, reading.");
+            
+            var localVariables = new List<LocalVariable>(_reader.ReadInt32Compressed());
+            for (int i = 0; i < localVariables.Capacity; i++)
+            {
+                LocalVariable variable = new LocalVariable
+                {
+                    Name = ReadString(strings),
+                    StartPc = _reader.ReadInt32Compressed(),
+                    EndPc = _reader.ReadInt32Compressed(),
+                    Slot = _reader.ReadByte()
+                };
+                localVariables.Add(variable);
+            }
+
+            var upvalues = new List<string>(_reader.ReadInt32Compressed());
+            for (int i = 0; i < upvalues.Capacity; i++)
+                upvalues.Add(ReadString(strings));
+
+            return new DebugInfo(localVariables, upvalues);
         }
     }
 }
