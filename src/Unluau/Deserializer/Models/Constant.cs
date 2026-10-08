@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Numerics;
-using System.Text;
 
 namespace Unluau
 {
@@ -23,15 +20,15 @@ namespace Unluau
 
 	public abstract class Constant
 	{
-		public ConstantType Type { get; protected set; }
-		public override abstract string ToString();
+		public ConstantType Type { get; protected init; }
+		public abstract override string ToString();
 	}
 
-	public class Constant<T> : Constant
+	public abstract class Constant<T> : Constant
 	{
-		public T Value { get; private set; }
+		public T? Value { get; }
 
-		protected Constant(ConstantType type, T value)
+		protected Constant(ConstantType type, T? value)
 		{
 			Type = type;
 			Value = value;
@@ -39,7 +36,7 @@ namespace Unluau
 
 		public override string ToString()
 		{
-			return Value.ToString();
+			return Value?.ToString() ?? throw new InvalidOperationException();
 		}
 	}
 
@@ -75,7 +72,7 @@ namespace Unluau
 
         public override string ToString()
         {
-			return Value.ToString();
+			return Value.ToString(CultureInfo.InvariantCulture);
         }
     }
 
@@ -99,7 +96,7 @@ namespace Unluau
 
         public override string ToString()
         {
-            return $"[{string.Join(",", Value)}]";
+            return $"[{string.Join(",", Value ?? throw new InvalidOperationException())}]";
         }
 	}
 
@@ -111,7 +108,7 @@ namespace Unluau
 
         public override string ToString()
         {
-            return $"{{{string.Join(", ", Value)}}}";
+            return $"{{{string.Join(", ", Value ?? throw new InvalidOperationException())}}}";
         }
 	}
 
@@ -125,7 +122,7 @@ namespace Unluau
     public class VectorConstant : Constant<Vector4>
     {
         public VectorConstant(float x, float y, float z, float w)
-            : base(ConstantType.Vector, new(x, y, z, w))
+            : base(ConstantType.Vector, new Vector4(x, y, z, w))
         { }
     }
 }
