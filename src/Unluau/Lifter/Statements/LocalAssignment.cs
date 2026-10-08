@@ -1,18 +1,14 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Unluau
 {
     public class LocalAssignment : Statement
     {
-        public Expression Expression { get; private set; }
-        public Expression Value { get; private set; }
+        public Expression Expression { get; }
+        public Expression Value { get; }
 
         public LocalAssignment(LocalExpression expression)
         {
@@ -26,11 +22,11 @@ namespace Unluau
             Value = value;
         }
 
-        public bool TryGetVariable(out LocalExpression variable)
+        public bool TryGetVariable([NotNullWhen(true)] out LocalExpression? variable)
         {
-            if (Expression is LocalExpression)
+            if (Expression is LocalExpression localExpression)
             {
-                variable = Expression as LocalExpression;
+                variable = localExpression;
                 return true;
             }
 
@@ -38,11 +34,11 @@ namespace Unluau
             return false;
         }
 
-        public bool TryGetVariables(out ExpressionList variable)
+        public bool TryGetVariables([NotNullWhen(true)] out ExpressionList? variable)
         {
-            if (Expression is ExpressionList)
+            if (Expression is ExpressionList expression)
             {
-                variable = Expression as ExpressionList;
+                variable = expression;
                 return true;
             }
 
