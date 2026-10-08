@@ -1,16 +1,13 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Unluau
 {
     // Note: Ported from Luau source code.
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public enum BuiltinFunction : byte
     {
         NONE = 0,
@@ -133,8 +130,8 @@ namespace Unluau
 
     public class Builtin
     {
-        public BuiltinFunction Function { get; set; }
-        public Expression Expression { get; set; }
+        public BuiltinFunction Function { get; private set; }
+        public Expression Expression { get; private set; }
 
         private Builtin(BuiltinFunction function, Expression expression)
         {
@@ -145,29 +142,21 @@ namespace Unluau
         public static Builtin FromId(byte id)
         {
             var function = (BuiltinFunction)id;
-
-            return new(function, ToExpression(function));
+            return new Builtin(function, ToExpression(function));
         }
 
         private static Expression ToExpression(BuiltinFunction function)
         {
-            switch (function)
-            {
-                case BuiltinFunction.VECTOR:
-                    return new NameIndex(new Global("Vector3"), "new");
+            if (function == BuiltinFunction.VECTOR)
+                return new NameIndex(new Global("Vector3"), "new");
 
-                default:
-                {
-                    string[] names = function.ToString().ToLower().Split('_');
+            string[] names = function.ToString().ToLower().Split('_');
+            Expression expression = new Global(names[0]);
 
-                    Expression expression = new Global(names[0]);
+            for (int i = 1; i < names.Length; i++)
+                expression = new NameIndex(expression, names[i]);
 
-                    for (int i = 1; i < names.Length; i++)
-                        expression = new NameIndex(expression, names[i]);
-
-                    return expression;
-                }
-            }
+            return expression;
         }
     }
 }
