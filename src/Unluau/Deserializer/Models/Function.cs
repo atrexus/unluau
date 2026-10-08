@@ -97,7 +97,7 @@ namespace Unluau
             }
 
             if (DebugInfo != null)
-                builder.Append("\n" + DebugInfo.ToString());
+                builder.Append("\n" + DebugInfo);
 
             // Display constants
             builder.Append($"\n   constants ({Constants.Count})\n");

@@ -48,8 +48,6 @@ namespace Unluau
             var strings = ReadStrings();
             if (typesVersion == 3) // userdatatype remapping (tv3)
             {
-                int userdataTypeLimit = (64 + 32) - 64;
-                int[] userdataRemapping = new int[(64 + 32) - 64];
                 byte index = reader.ReadByte();
                 while (index != 0)
                 {
@@ -280,7 +278,6 @@ namespace Unluau
 
             // Should never happen
             throw new DecompilerException(Stage.Deserializer, $"No constant returned for type ({constantType})");
-            return new NilConstant();
         }
 
         private IList<int> ReadFunctions()

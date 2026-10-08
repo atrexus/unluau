@@ -55,7 +55,6 @@ namespace Unluau
 
                 return (OpCode)rawCode;
             }
-            private set { }
         }
 
         public Instruction(uint value, OpCodeEncoding encoding = OpCodeEncoding.None)

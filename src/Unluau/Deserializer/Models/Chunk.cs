@@ -20,7 +20,7 @@ namespace Unluau
 
             foreach(Function function in Functions)
             {
-                builder.Append(function.ToString() + "\n");
+                builder.Append(function + "\n");
             }
 
             builder.Append("Main Function: " + MainIndex);

@@ -13,8 +13,6 @@ namespace Unluau
 
     public class Namer
     {
-        private static int _closureCount = 1;
-
         private Registers registers;
 
         public Namer(Registers registers)
