@@ -783,7 +783,7 @@ namespace Unluau
         private Registers CreateRegisters(Function function)
         {
             IDictionary<int, Declaration> declarations = LoadDeclarations(function);
-            IDictionary<int, Expression> expressions = LoadExpressions(declarations);
+            IDictionary<int, LocalExpression> expressions = LoadExpressions(declarations);
 
             return new Registers(declarations, expressions, options);
         }
@@ -807,9 +807,9 @@ namespace Unluau
             return declarations;
         }
 
-        private IDictionary<int, Expression> LoadExpressions(IDictionary<int, Declaration> declarations)
+        private IDictionary<int, LocalExpression> LoadExpressions(IDictionary<int, Declaration> declarations)
         {
-            IDictionary<int, Expression> expressions = new Dictionary<int, Expression>();
+            var expressions = new Dictionary<int, LocalExpression>();
 
             foreach (KeyValuePair<int, Declaration> declaration in declarations)
                 expressions[declaration.Key] = new LocalExpression(null, declaration.Value);

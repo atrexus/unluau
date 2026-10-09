@@ -11,10 +11,10 @@ namespace Unluau
 {
     public class LocalExpression : Expression
     {
-        public Expression Expression { get; private set; }
+        public Expression? Expression { get; private set; }
         public Declaration Declaration { get; set; }
 
-        public LocalExpression(Expression expression, Declaration declaration)
+        public LocalExpression(Expression? expression, Declaration declaration)
         {
             Expression = expression;
             Declaration = declaration;

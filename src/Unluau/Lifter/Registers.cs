@@ -10,11 +10,11 @@ namespace Unluau
         public int Top { get; private set; }
 
         public IDictionary<int, Declaration> Declarations { get; }
-        private readonly IDictionary<int, Expression> _expressions;
+        private readonly IDictionary<int, LocalExpression> _expressions;
         private readonly Namer _namer;
         private readonly DecompilerOptions _options;
 
-        public Registers(IDictionary<int, Declaration> declarations, IDictionary<int, Expression> expressions, DecompilerOptions options)
+        public Registers(IDictionary<int, Declaration> declarations, IDictionary<int, LocalExpression> expressions, DecompilerOptions options)
         {
             this.Declarations = declarations;
             this._expressions = expressions;
@@ -25,8 +25,8 @@ namespace Unluau
 
         public Registers(Registers registers)
         {
-            Declarations = new Dictionary<int,Declaration>(registers.Declarations);
-            _expressions = new Dictionary<int, Expression>(registers._expressions);
+            Declarations = new Dictionary<int, Declaration>(registers.Declarations);
+            _expressions = new Dictionary<int, LocalExpression>(registers._expressions);
             _options = registers._options;
 
             _namer = new Namer(this);
@@ -151,26 +151,27 @@ namespace Unluau
 
         public bool IsEmpty(int register) => !(Declarations.ContainsKey(register) && _expressions.ContainsKey(register));
 
-        public Expression? GetExpression(int register, bool reference = true)
+        public LocalExpression? GetExpression(int register, bool reference = true)
         {
             Declaration? declaration = GetDeclaration(register, reference);
 
-            if (!_expressions.TryGetValue(register, out var expression))
+            if (!_expressions.TryGetValue(register, out var localExpression))
                 return null;
 
             if (declaration != null)
-                ((LocalExpression)expression).Declaration = declaration;
+                localExpression.Declaration = declaration;
+            
             return _expressions[register];
         }
 
-        public Expression GetExpressionValue(int register)
+        public Expression? GetExpressionValue(int register)
         {
-            return ((LocalExpression)GetExpression(register, false)).Expression;
+            return GetExpression(register, false)?.Expression;
         }
 
-        public Expression GetRefExpressionValue(int register)
+        public Expression? GetRefExpressionValue(int register)
         {
-            return ((LocalExpression)GetExpression(register)).Expression;
+            return GetExpression(register)?.Expression;
         }
     }
 }
