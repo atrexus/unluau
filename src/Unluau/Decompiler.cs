@@ -2,6 +2,9 @@
 // Licensed under the Apache License, Version 2.0
 
 using Serilog;
+using Unluau.Format;
+using Unluau.Format.Models;
+using Unluau.Logic.Statements;
 
 namespace Unluau
 {

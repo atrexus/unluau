@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-namespace Unluau
+namespace Unluau.Utilities
 {
     public enum Stage
     {

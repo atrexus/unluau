@@ -6,6 +6,8 @@ using CommandLine;
 using CommandLine.Text;
 using Serilog;
 using Serilog.Events;
+using Unluau.Format.Models;
+using Unluau.Utilities;
 
 namespace Unluau.CLI
 {
