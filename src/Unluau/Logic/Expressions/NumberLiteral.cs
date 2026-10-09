@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
+using System.Globalization;
+
 namespace Unluau.Logic.Expressions
 {
     public class NumberLiteral : Expression, IComparable<double>
@@ -12,7 +14,12 @@ namespace Unluau.Logic.Expressions
 
         public override void Write(Output output)
         {
-            output.Write(Value.ToString());
+            if (double.IsPositiveInfinity(Value))
+                output.Write("math.huge");
+            else if (double.IsNegativeInfinity(Value))
+                output.Write("-math.huge");
+            else
+                output.Write(Value.ToString(CultureInfo.InvariantCulture));
         }
 
         public int CompareTo(double other)
