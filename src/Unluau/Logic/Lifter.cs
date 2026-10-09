@@ -117,7 +117,7 @@ namespace Unluau
                         var aux = function.Instructions[++pc];
                         var targetValue = function.GetConstantOrThrow<StringConstant>((int)aux.Value).Value;
                         bool isNamecall = properties.Code == OpCode.NAMECALL;
-                        Expression nameExpression = registers.GetExpression(instruction.B);
+                        Expression nameExpression = registers.GetExpressionOrThrow(instruction.B);
 
                         Expression expression = new NameIndex(nameExpression, targetValue, isNamecall);
 
@@ -223,7 +223,6 @@ namespace Unluau
                     }
                     case OpCode.MOVE:
                     {
-                        //Console.WriteLine($"{pc}, {function.DebugName}");
                         var fromExpression = registers.GetExpression(instruction.B);
 
                         // If our target register is empty, then load into that register
@@ -232,7 +231,9 @@ namespace Unluau
                         else
                         {
                             // Now create the reassignment
-                            block.AddStatement(new Assignment(registers.GetExpression(instruction.A), fromExpression), pc);
+                            var assignment = new Assignment(
+                                registers.GetExpressionOrThrow(instruction.A), fromExpression);
+                            block.AddStatement(assignment, pc);
                         }
                         break;
                     }
@@ -343,18 +344,12 @@ namespace Unluau
                     }
                     case OpCode.SETTABLE:
                     {
-                        Expression expression = registers.GetRefExpressionValue(instruction.C), value = registers.GetExpression(instruction.A);
-                        Expression table = registers.GetExpression(instruction.B, false);
-                        if (table == null || !(table is LocalExpression))
-                        {
-                            break;
-                        }
-                        Expression tableValue = ((LocalExpression)table).Expression;
+                        var expression = registers.GetExpressionOrThrow(instruction.C).Expression;
+                        var value = registers.GetExpressionOrThrow(instruction.A);
+                        var table = registers.GetExpressionOrThrow(instruction.B, false);
 
-                        if (options.InlineTableDefintions && tableValue is TableLiteral)
+                        if (options.InlineTableDefintions && table.Expression is TableLiteral tableLiteral)
                         {
-                            TableLiteral tableLiteral = (TableLiteral)tableValue;
-
                             if (tableLiteral.MaxEntries > tableLiteral.Entries.Count)
                             {
                                 tableLiteral.AddEntry(expression, value);
@@ -370,8 +365,10 @@ namespace Unluau
                     }
                     case OpCode.SETTABLEN:
                     {
-                        ExpressionIndex index = new ExpressionIndex(registers.GetExpression(instruction.B), new NumberLiteral(instruction.C + 1));
-                        Expression value = registers.GetExpression(instruction.A);
+                        var expression = registers.GetExpressionOrThrow(instruction.B);
+                        var numberLiteral = new NumberLiteral(instruction.C + 1);
+                        ExpressionIndex index = new ExpressionIndex(expression, numberLiteral);
+                        Expression value = registers.GetExpressionOrThrow(instruction.A);
 
                         block.AddStatement(new Assignment(index, value), pc);
                         break;
@@ -397,10 +394,18 @@ namespace Unluau
                     }
                     case OpCode.SETLIST:
                     {
-                        TableLiteral? tableLiteral = registers.GetExpression(instruction.A, false)?.Expression as TableLiteral;
+                        var tableExpression = registers.GetExpressionOrThrow(instruction.A, false);
+                        if (tableExpression.Expression is not TableLiteral tableLiteral)
+                            throw new DecompilerException(Stage.Lifter, "Expected TableLiteral");
 
                         for (int slot = 0; slot < instruction.C - 1; slot++)
-                            tableLiteral.AddEntry(null, registers.GetRefExpressionValue(slot + instruction.B));
+                        {
+                            var valueExpression = registers.GetExpressionOrThrow(slot + instruction.B);
+                            if (valueExpression.Expression is not { } value)
+                                throw new DecompilerException(Stage.Lifter, "");
+                            
+                            tableLiteral.AddEntry(null, value);
+                        }
 
                         // Skip next instruction because we didn't use AUX
                         pc++;
@@ -625,14 +630,14 @@ namespace Unluau
                     }
                     case OpCode.FORNPREP:
                     {
-                        var limit = registers.GetExpression(instruction.A);
-                        var step = registers.GetExpression(instruction.A + 1);
+                        var limit = registers.GetExpressionOrThrow(instruction.A);
+                        var step = registers.GetExpressionOrThrow(instruction.A + 1);
 
-                        LocalExpression index = (LocalExpression)registers.GetExpression(instruction.A + 2);
+                        var index = registers.GetExpressionOrThrow(instruction.A + 2);
 
                         foreach (var statement in block.Statements)
                         {
-                            if (statement is LocalAssignment localAssignment && localAssignment.Expression is LocalExpression localExpression && localExpression.Declaration.Id == index.Declaration.Id)
+                            if (statement is LocalAssignment { Expression: LocalExpression localExpression } && localExpression.Declaration.Id == index.Declaration.Id)
                             {
                                 block.Statements.Remove(statement);
                                 break;
