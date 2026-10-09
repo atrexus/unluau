@@ -32,13 +32,7 @@ namespace Unluau.Logic.Expressions
         public override string[] GetNames()
         {
             string[] names = Expression.GetNames();
-
-            if (names is null)
-            {
-                return new string[] { Name };
-            }
-
-            return names.Append(Name).ToArray();
+            return names.Length <= 0 ? new[] { Name } : names.Append(Name).ToArray();
         }
     }
 }

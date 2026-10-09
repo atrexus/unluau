@@ -41,22 +41,15 @@ namespace Unluau.Logic.Expressions
         {
             string[] names = Function.GetNames();
 
-            if (names != null)
+            if (names.Length <= 0)
+                return names;
+
+            foreach (Expression expression in Arguments)
             {
-                foreach (Expression expression in Arguments)
-                {
-                    // If expression is null we can't get names from it
-                    if (expression is null)
-                        continue;
+                if (expression is not LocalExpression { Expression: not null } local)
+                    continue;
 
-                    if (expression is LocalExpression local && local.Expression != null)
-                    {
-                        string[] expressionNames = local.Expression.GetNames();
-
-                        if (expressionNames != null)
-                            names = names.Concat(expressionNames).ToArray();
-                    }          
-                }
+                names = names.Concat(local.Expression.GetNames()).ToArray();
             }
 
             return names;

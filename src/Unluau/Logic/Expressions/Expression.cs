@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Unluau.Logic.Expressions
 {
     public abstract class Expression
     {
         public abstract void Write(Output output);
-        public virtual string[] GetNames()
-        {
-            return null;
-        }
+        
+        public virtual string[] GetNames() => Array.Empty<String>();
 
         public Expression? GetValue()
         {

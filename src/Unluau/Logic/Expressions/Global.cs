@@ -20,9 +20,6 @@ namespace Unluau.Logic.Expressions
 
         public int CompareTo(string? other) => Value.CompareTo(other);
 
-        public override string[] GetNames()
-        {
-            return new[] { Value };
-        }
+        public override string[] GetNames() => new[] { Value };
     }
 }
