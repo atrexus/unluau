@@ -66,15 +66,15 @@ namespace Unluau
             }
         }
 
-        public void Join(string separator, IEnumerable<Expression> expressions)
+        public void Join(string separator, IEnumerable<Expression?> expressions)
         {
             bool first = true;
-            foreach (var expression in expressions)
+            foreach (var expression in expressions.Where(e => e is not null))
             {
                 if (!first)
                     this.Write(separator);
                 
-                expression.Write(this);
+                expression!.Write(this);
 
                 first = false;
             }
