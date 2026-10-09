@@ -309,29 +309,29 @@ namespace Unluau
                     case OpCode.SETUDATAKS:
                     {
                         StringConstant target = (StringConstant)function.GetConstant(++pc);
-                        Expression table = registers.GetExpression(instruction.B);
-                        if (table == null || !(table is LocalExpression))
-                        {
-                            // Skip this instruction if table is null or not a LocalExpression
-                            break;
-                        }
-                        Expression tableValue = ((LocalExpression)table).Expression;
 
-                        if (options.InlineTableDefintions && tableValue is TableLiteral)
-                        {
-                            if (((LocalExpression)table).Declaration.Referenced == 1)
-                                tableValue = registers.GetRefExpressionValue(instruction.B);
+                        if (!registers.TryGetExpression(instruction.B, out var tableExpression))
+                            throw new DecompilerException(Stage.Lifter, "Could not find table");
 
-                            TableLiteral tableLiteral = (TableLiteral)tableValue;
+                        if (tableExpression.Expression is TableLiteral tableLiteral && options.InlineTableDefintions)
+                        {
+                            if (tableExpression.Declaration.Referenced == 1)
+                            {
+                                var nestedExpression = registers.GetExpression(instruction.B)?.Expression;
+                                if (nestedExpression is not TableLiteral nestedLiteral)
+                                    throw new DecompilerException(Stage.Lifter, "Failed to inline table definition");
+
+                                tableLiteral = nestedLiteral;
+                            }
 
                             if (tableLiteral.MaxEntries > tableLiteral.Entries.Count)
                             {
-                                tableLiteral.AddEntry(new TableLiteral.Entry(GetConstantAsGlobal(target), registers.GetExpression(instruction.A)));
+                                tableLiteral.AddEntry(GetConstantAsGlobal(target), registers.GetExpression(instruction.A));
                                 break;
                             }
                         }
 
-                        NameIndex nameIndex = new NameIndex(table, target.Value);
+                        NameIndex nameIndex = new NameIndex(tableExpression, target.Value);
 
                         block.AddStatement(new Assignment(nameIndex, registers.GetExpression(instruction.A)), pc);
                         break;
@@ -352,7 +352,7 @@ namespace Unluau
 
                             if (tableLiteral.MaxEntries > tableLiteral.Entries.Count)
                             {
-                                tableLiteral.AddEntry(new TableLiteral.Entry(expression, value));
+                                tableLiteral.AddEntry(expression, value);
                                 break;
                             }
                         }
@@ -392,10 +392,10 @@ namespace Unluau
                     }
                     case OpCode.SETLIST:
                     {
-                        TableLiteral tableLiteral = (TableLiteral)registers.GetExpressionValue(instruction.A);
+                        TableLiteral? tableLiteral = registers.GetExpression(instruction.A, false)?.Expression as TableLiteral;
 
                         for (int slot = 0; slot < instruction.C - 1; slot++)
-                            tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetRefExpressionValue(slot + instruction.B)));
+                            tableLiteral.AddEntry(null, registers.GetRefExpressionValue(slot + instruction.B));
 
                         // Skip next instruction because we didn't use AUX
                         pc++;

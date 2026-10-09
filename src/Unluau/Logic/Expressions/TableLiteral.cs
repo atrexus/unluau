@@ -7,10 +7,10 @@ namespace Unluau.Logic.Expressions
     {
         public sealed class Entry
         {
-            public Expression Key { get; set; }
+            public Expression? Key { get; set; }
             public Expression Value { get; set; }
 
-            public Entry(Expression key, Expression value)
+            public Entry(Expression? key, Expression value)
             {
                 Key = key;
                 Value = value;
@@ -32,9 +32,9 @@ namespace Unluau.Logic.Expressions
             IsDictionary = !isList;
         }
 
-        public void AddEntry(Entry entry)
+        public void AddEntry(Expression? key, Expression value)
         {
-            Entries.Add(entry);
+            Entries.Add(new Entry(key, value));
         }
 
         public override void Write(Output output)
