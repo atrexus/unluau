@@ -20,7 +20,7 @@ namespace Unluau.CLI
         private class Options
         {
             [Option(Default = false, HelpText = "Converts the bytecode to a readable list of instructions.")]
-            public bool Dissasemble { get; set; }
+            public bool Disassemble { get; set; }
 
             [Option('o', "output", Default = null, HelpText = "The file that the decompiled script will be stored in (stdout otherwise).")]
             public string? OutputFile { get; set; }
@@ -109,7 +109,7 @@ namespace Unluau.CLI
             {
                 Decompiler decompiler = new Decompiler(stream, decompilerOptions);
 
-                if (options.Dissasemble)
+                if (options.Disassemble)
                     // ReSharper disable once LocalizableElement
                     Console.WriteLine(decompiler.Dissasemble() + "\n\n");
 
