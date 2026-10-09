@@ -9,19 +9,10 @@ namespace Unluau
 
         public abstract void Write(Output output);
 
-        public static void WriteSequence(Output output, IList<Statement> statements)
+        protected static void WriteSequence(Output output, IList<Statement> statements)
         {
-            for (int i = 0; i < statements.Count; i++)
+            foreach (var statement in statements)
             {
-                var statement = statements[i];
-        
-                // Add null check for statement
-                if (statement == null)
-                {
-                    output.WriteLine("-- [Unluau: null statement]");
-                    continue;
-                }
-        
                 if (statement.Comment != null)
                     output.WriteLine("-- " + statement.Comment);
 
