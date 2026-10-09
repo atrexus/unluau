@@ -190,13 +190,13 @@ namespace Unluau
                             {
                                 arguments.Add(expression);
 
-                                registers.FreeRegister(register, block);
+                                registers.FreeRegister(register);
                             }
                         }
 
                         // Free the function register if we used it
                         if (builtin is null)
-                            registers.FreeRegister(instruction.A, block);
+                            registers.FreeRegister(instruction.A);
 
                         Expression call = new FunctionCall(callFunction, arguments);
 
@@ -785,7 +785,7 @@ namespace Unluau
             IDictionary<int, Declaration> declarations = LoadDeclarations(function);
             IDictionary<int, Expression> expressions = LoadExpressions(declarations);
 
-            return new Registers(function, declarations, expressions, options);
+            return new Registers(declarations, expressions, options);
         }
 
         private IDictionary<int, Declaration> LoadDeclarations(Function function)

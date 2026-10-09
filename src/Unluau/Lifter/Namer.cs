@@ -37,7 +37,9 @@ namespace Unluau
 
                 string realName = name.Split(new[] { "_v" }, StringSplitOptions.None)[0];
 
-                _registers.SetDeclaration(declPair.Key, new Declaration(declPair.Value.Register, UpdateName(realName), declPair.Value.Location));
+                var declaration =
+                    new Declaration(declPair.Value.Register, UpdateName(realName), declPair.Value.Location);
+                _registers.Declarations[declPair.Key] = declaration;
             }
         }
 

@@ -5,10 +5,10 @@ namespace Unluau
 {
     public class Block : Statement
     {
-        public IList<Statement> Statements { get; }
+        public List<Statement> Statements { get; }
         public IDictionary<int, Statement> PcMap { get; }
 
-        public Block(IList<Statement> statements)
+        public Block(List<Statement> statements)
         {
             Statements = statements;
             PcMap = new Dictionary<int, Statement>();   

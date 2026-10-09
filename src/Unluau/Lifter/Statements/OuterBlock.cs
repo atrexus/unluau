@@ -5,7 +5,7 @@ namespace Unluau
 {
     public class OuterBlock : Block
     { 
-        public OuterBlock(IList<Statement> statements)
+        public OuterBlock(List<Statement> statements)
             : base(statements)
         { }
 
