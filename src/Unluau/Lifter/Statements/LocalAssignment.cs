@@ -8,7 +8,7 @@ namespace Unluau
     public class LocalAssignment : Statement
     {
         public Expression Expression { get; }
-        public Expression Value { get; }
+        public Expression? Value { get; }
 
         public LocalAssignment(LocalExpression expression)
         {
@@ -48,8 +48,7 @@ namespace Unluau
 
         public override void Write(Output output)
         {
-            // Add null checks
-            if (Expression == null || Value == null)
+            if (Value == null)
             {
                 output.Write("-- [Unluau: Failed to decompile local assignment]");
                 return;
