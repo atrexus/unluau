@@ -26,9 +26,9 @@ namespace Unluau.Format.Models
 
 	public abstract class Constant<T> : Constant
 	{
-		public T? Value { get; }
+		public T Value { get; }
 
-		protected Constant(ConstantType type, T? value)
+		protected Constant(ConstantType type, T value)
 		{
 			Type = type;
 			Value = value;
@@ -43,7 +43,7 @@ namespace Unluau.Format.Models
 	public class NilConstant : Constant<object>
 	{
 		public NilConstant()
-			: base(ConstantType.Nil, null)
+			: base(ConstantType.Nil, "nil")
 		{ }
 
 		public override string ToString()
