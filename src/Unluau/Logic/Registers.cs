@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
+using System.Diagnostics.CodeAnalysis;
 using Unluau.Logic;
 using Unluau.Logic.Expressions;
 using Unluau.Logic.Statements;
@@ -140,6 +141,7 @@ namespace Unluau
             return Declarations.Values.ToList();
         }
 
+        [Obsolete("Prefer TryGetDeclaration")]
         public Declaration? GetDeclaration(int register, bool reference = true)
         {
             if (!Declarations.TryGetValue(register, out var declaration))
@@ -151,8 +153,20 @@ namespace Unluau
             return declaration;
         }
 
+        public bool TryGetDeclaration(int register, [NotNullWhen(true)] out Declaration? declaration, bool reference = true)
+        {
+            if (!Declarations.TryGetValue(register, out declaration))
+                return false;
+
+            if (reference)
+                declaration.Referenced++;
+
+            return true;
+        }
+
         public bool IsEmpty(int register) => !(Declarations.ContainsKey(register) && _expressions.ContainsKey(register));
 
+        [Obsolete("Prefer TryGetExpression")]
         public LocalExpression? GetExpression(int register, bool reference = true)
         {
             Declaration? declaration = GetDeclaration(register, reference);
@@ -166,11 +180,19 @@ namespace Unluau
             return _expressions[register];
         }
 
-        public Expression? GetExpressionValue(int register)
+        public bool TryGetExpression(int register, [NotNullWhen(true)] out LocalExpression? localExpression, bool reference = true)
         {
-            return GetExpression(register, false)?.Expression;
-        }
+            if (!_expressions.TryGetValue(register, out localExpression))
+                return false;
 
+            if (TryGetDeclaration(register, out var declaration, reference))
+                localExpression.Declaration = declaration;
+            
+            localExpression = _expressions[register];
+            return true;
+        }
+        
+        [Obsolete("Switch to inlining this")]
         public Expression? GetRefExpressionValue(int register)
         {
             return GetExpression(register)?.Expression;
