@@ -1,21 +1,15 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Unluau
 {
     public class IfElse : Statement
     {
-        public Expression Condition { get; set; }
+        public Expression? Condition { get; set; }
         public Block IfBody { get; set; }
-        public Statement ElseBody { get; set; }
+        public Statement? ElseBody { get; set; }
 
-        public IfElse(Expression condition, Block ifBody)
+        public IfElse(Expression? condition, Block ifBody)
         {
             Condition = condition;
             IfBody = ifBody;
@@ -24,8 +18,7 @@ namespace Unluau
 
         public override void Write(Output output)
         {
-            // Add null checks for Condition and IfBody
-            if (Condition == null || IfBody == null)
+            if (Condition == null)
             {
                 output.WriteLine("-- [Unluau: Failed to decompile if statement - missing condition or body]");
                 return;
