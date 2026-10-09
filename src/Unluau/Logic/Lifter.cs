@@ -92,7 +92,7 @@ namespace Unluau
                     }
                     case OpCode.GETIMPORT:
                     {
-                        ImportConstant target = (ImportConstant)function.Constants[instruction.D];
+                        var target = function.GetConstantOrThrow<ImportConstant>(instruction.D);
 
                         if (target.Value.Count > 1)
                         {
@@ -114,9 +114,8 @@ namespace Unluau
                     case OpCode.GETTABLEKS:
                     case OpCode.GETUDATAKS:
                     {
-                        Constant target = function.GetConstant(++pc);
-                        string targetValue = (target as StringConstant)!.Value;
-
+                        var aux = function.Instructions[++pc];
+                        var targetValue = function.GetConstantOrThrow<StringConstant>((int)aux.Value).Value;
                         bool isNamecall = properties.Code == OpCode.NAMECALL;
                         Expression nameExpression = registers.GetExpression(instruction.B);
 
@@ -309,7 +308,8 @@ namespace Unluau
                     case OpCode.SETTABLEKS:
                     case OpCode.SETUDATAKS:
                     {
-                        StringConstant target = (StringConstant)function.GetConstant(++pc);
+                        var aux = function.Instructions[++pc];
+                        var target = function.GetConstantOrThrow<StringConstant>((int)aux.Value);
 
                         if (!registers.TryGetExpression(instruction.B, out var tableExpression))
                             throw new DecompilerException(Stage.Lifter, "Could not find table");

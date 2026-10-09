@@ -35,6 +35,15 @@ namespace Unluau.Format.Models
         public Constant GetConstant(int pc)
             => Constants[Convert.ToInt32(Instructions[pc].Value)];
 
+        public T GetConstantOrThrow<T>(int constantIndex) where T : Constant
+        {
+            var constant = Constants[constantIndex];
+            if (constant is not T typedConstant)
+                throw new ArgumentException("Constant value of wrong type; expected" +
+                                            $" {typeof(T).FullName} but got {constant.GetType().FullName}");
+            return typedConstant;
+        }
+
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
