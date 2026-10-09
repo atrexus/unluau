@@ -228,30 +228,32 @@ namespace Unluau
             }
 
             Log.Debug("Line information is enabled, reading.");
+            
+            var lineGapLog = _reader.ReadByte();
+            int intervals = ((instructions - 1) >> lineGapLog) + 1;
 
-            var lineInfo = new LineInfo { LineGapLog = _reader.ReadByte() };
-
-            int intervals = ((instructions - 1) >> lineInfo.LineGapLog) + 1;
-
-            lineInfo.LineInfoList = new List<byte>(instructions);
+            var lineInfoList = new List<byte>(instructions);
 
             byte lastOffset = 0;
-            while (lineInfo.LineInfoList.Count < instructions)
+            while (lineInfoList.Count < instructions)
             {
                 lastOffset += _reader.ReadByte();
-                lineInfo.LineInfoList.Add(lastOffset);
+                lineInfoList.Add(lastOffset);
             }
 
-            lineInfo.AbsLineInfoList = new List<int>(instructions);
+            var absLineInfoList = new List<int>(instructions);
 
             int lastLine = 0;
-            while (lineInfo.AbsLineInfoList.Count < intervals)
+            while (absLineInfoList.Count < intervals)
             {
                 lastLine += _reader.ReadInt32();
-                lineInfo.AbsLineInfoList.Add(lastLine);
+                absLineInfoList.Add(lastLine);
             }
 
-            return lineInfo;
+            return new LineInfo(lineInfoList, absLineInfoList)
+            {
+                LineGapLog = lineGapLog
+            };
         }
 
         private DebugInfo? ReadDebugInfo(IList<string> strings)
