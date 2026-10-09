@@ -1,10 +1,11 @@
 // Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Unluau
 {
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public enum OpMode
     {
         // ABC encoding: three 8-bit values, containing registers or small numbers
@@ -23,6 +24,7 @@ namespace Unluau
         None
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public enum OpCode : byte
     {
         // NOP: noop
@@ -216,7 +218,7 @@ namespace Unluau
         ANDK,
         ORK,
 
-        // CONCAT: concatenate all strings between B and C (inclusive) and put the result into A
+        // CONCAT: concatenate all strings between B and C (inclusive) and put the result into A.
         // A: target register
         // B: source register start
         // C: source register end
@@ -413,14 +415,14 @@ namespace Unluau
         public OpMode Mode { get; private set; }
         public bool HasAux { get; private set; }
 
-        public OpProperties(OpCode code, OpMode mode, bool hasAux = false)
+        private OpProperties(OpCode code, OpMode mode, bool hasAux = false)
         {
             Code = code;
             Mode = mode;
             HasAux = hasAux;
         }
 
-        public static IDictionary<OpCode, OpProperties> Map = new Dictionary<OpCode, OpProperties>()
+        public static readonly IDictionary<OpCode, OpProperties> Map = new Dictionary<OpCode, OpProperties>()
         {
             { OpCode.NOP, new OpProperties(OpCode.NOP, OpMode.None) },
             { OpCode.BREAK, new OpProperties(OpCode.BREAK, OpMode.None) },
@@ -493,8 +495,8 @@ namespace Unluau
             { OpCode.FASTCALL, new OpProperties(OpCode.FASTCALL, OpMode.iABC) },
             { OpCode.COVERAGE, new OpProperties(OpCode.COVERAGE, OpMode.iE) },
             { OpCode.CAPTURE, new OpProperties(OpCode.CAPTURE, OpMode.iAB) },
-            { OpCode.SUBRK, new OpProperties(OpCode.SUBRK, OpMode.iABC, false) },
-            { OpCode.DIVRK, new OpProperties(OpCode.DIVRK, OpMode.iABC, false) },
+            { OpCode.SUBRK, new OpProperties(OpCode.SUBRK, OpMode.iABC) },
+            { OpCode.DIVRK, new OpProperties(OpCode.DIVRK, OpMode.iABC) },
             { OpCode.FASTCALL1, new OpProperties(OpCode.FASTCALL1, OpMode.iABC) },
             { OpCode.FASTCALL2, new OpProperties(OpCode.FASTCALL2, OpMode.iABC, true) },
             { OpCode.FASTCALL2K, new OpProperties(OpCode.FASTCALL2K, OpMode.iABC, true) },
@@ -503,8 +505,8 @@ namespace Unluau
             { OpCode.JUMPXEQKB, new OpProperties(OpCode.JUMPXEQKB, OpMode.iAD, true) },
             { OpCode.JUMPXEQKN, new OpProperties(OpCode.JUMPXEQKN, OpMode.iAD, true) },
             { OpCode.JUMPXEQKS, new OpProperties(OpCode.JUMPXEQKS, OpMode.iAD, true) },
-            { OpCode.IDIV, new OpProperties(OpCode.IDIV, OpMode.iABC, false) },
-            { OpCode.IDIVK, new OpProperties(OpCode.IDIVK, OpMode.iABC, false) },
+            { OpCode.IDIV, new OpProperties(OpCode.IDIV, OpMode.iABC) },
+            { OpCode.IDIVK, new OpProperties(OpCode.IDIVK, OpMode.iABC) },
             { OpCode.GETUDATAKS, new OpProperties(OpCode.GETUDATAKS, OpMode.iABC, true) },
             { OpCode.SETUDATAKS, new OpProperties(OpCode.SETUDATAKS, OpMode.iABC, true) },
             { OpCode.NAMECALLUDATA, new OpProperties(OpCode.NAMECALLUDATA, OpMode.iABC, true) },
