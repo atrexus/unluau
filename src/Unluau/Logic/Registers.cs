@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using Unluau.Logic;
 using Unluau.Logic.Expressions;
 using Unluau.Logic.Statements;
+using Unluau.Utilities;
 
 namespace Unluau
 {
@@ -166,7 +167,7 @@ namespace Unluau
 
         public bool IsEmpty(int register) => !(Declarations.ContainsKey(register) && _expressions.ContainsKey(register));
 
-        [Obsolete("Prefer TryGetExpression")]
+        [Obsolete("Prefer GetExpressionOrThrow or TryGetExpression")]
         public LocalExpression? GetExpression(int register, bool reference = true)
         {
             Declaration? declaration = GetDeclaration(register, reference);
@@ -190,6 +191,14 @@ namespace Unluau
             
             localExpression = _expressions[register];
             return true;
+        }
+
+        public LocalExpression GetExpressionOrThrow(int register, bool reference = true)
+        {
+            if (!TryGetExpression(register, out var localExpression, reference))
+                throw new DecompilerException(Stage.Lifter, "Expected expression in register");
+
+            return localExpression;
         }
         
         [Obsolete("Switch to inlining this")]
