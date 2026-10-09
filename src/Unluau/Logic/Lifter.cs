@@ -131,8 +131,7 @@ namespace Unluau
                             {
                                 // Safely extract the format string
                                 var localExpr = nameIndex?.Expression as LocalExpression;
-                                var stringLiteral = localExpr?.Expression as StringLiteral;
-                                if (stringLiteral != null)
+                                if (localExpr?.Expression is StringLiteral stringLiteral)
                                 {
                                     string format = stringLiteral.Value;
                                     expression = new InterpolatedStringLiteral(format, new List<Expression>());
@@ -357,7 +356,7 @@ namespace Unluau
                             }
                         }
 
-                        if (expression is NumberLiteral || expression is StringLiteral)
+                        if (expression is NumberLiteral or StringLiteral)
                             expression = new ExpressionIndex(table, expression);
 
                         block.AddStatement(new Assignment(expression, value), pc);
