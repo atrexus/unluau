@@ -1,19 +1,13 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Unluau
 {
     public class Declaration
     {
-        public static int LocalIdCounter = 0;
-        public static int ClosureIdCounter = 0;
-        public static int UpvalueIdCounter = 0;
+        private static int _localIdCounter;
+        private static int _closureIdCounter;
+        private static int _upvalueIdCounter;
 
         public enum DeclarationType
         {
@@ -22,7 +16,7 @@ namespace Unluau
             Upvalue
         }
 
-        private string? _name;
+        private readonly string? _name;
 
         public string Name
         {
@@ -58,9 +52,9 @@ namespace Unluau
 
             Id = type switch
             {
-                DeclarationType.Local => LocalIdCounter++,
-                DeclarationType.Closure => ClosureIdCounter++,
-                DeclarationType.Upvalue => UpvalueIdCounter++,
+                DeclarationType.Local => _localIdCounter++,
+                DeclarationType.Closure => _closureIdCounter++,
+                DeclarationType.Upvalue => _upvalueIdCounter++,
                 _ => throw new Exception("Invalid DeclarationType")
             };
         }
@@ -72,9 +66,9 @@ namespace Unluau
 
         public static void ResetCounters()
         {
-            LocalIdCounter = 0;
-            ClosureIdCounter = 0;
-            UpvalueIdCounter = 0;
+            _localIdCounter = 0;
+            _closureIdCounter = 0;
+            _upvalueIdCounter = 0;
         }
     }
 }
