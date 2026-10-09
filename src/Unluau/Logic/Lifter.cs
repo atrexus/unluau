@@ -154,14 +154,18 @@ namespace Unluau
                     }
                     case OpCode.GETTABLEN:
                     {
-                        ExpressionIndex index = new ExpressionIndex(registers.GetExpression(instruction.B), new NumberLiteral(instruction.C + 1));
+                        var tableExpression = registers.GetExpressionOrThrow(instruction.B);
+                        var numberLiteral = new NumberLiteral(instruction.C + 1);
+                        ExpressionIndex index = new ExpressionIndex(tableExpression, numberLiteral);
 
                         registers.LoadRegister(instruction.A, index, block, pc);
                         break;
                     }
                     case OpCode.GETTABLE:
                     {
-                        ExpressionIndex expressionIndex = new ExpressionIndex(registers.GetExpression(instruction.B), registers.GetExpression(instruction.C));
+                        var tableExpression = registers.GetExpressionOrThrow(instruction.B);
+                        var indexExpression = registers.GetExpressionOrThrow(instruction.C);
+                        ExpressionIndex expressionIndex = new ExpressionIndex(tableExpression, indexExpression);
 
                         registers.LoadRegister(instruction.A, expressionIndex, block, pc);
                         break;
