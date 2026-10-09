@@ -412,7 +412,7 @@ namespace Unluau
                     }
                     case OpCode.DUPTABLE:
                     {
-                        TableConstant target = (TableConstant)function.Constants[instruction.D];
+                        var target = function.GetConstantOrThrow<TableConstant>(instruction.D);
 
                         TableLiteral tableLiteral = new TableLiteral(target.Value.Count, false);
 
