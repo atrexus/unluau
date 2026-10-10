@@ -18,7 +18,7 @@ namespace Unluau.Logic.Expressions
             output.Write(Value);
         }
 
-        public int CompareTo(string? other) => Value.CompareTo(other);
+        public int CompareTo(string? other) => String.Compare(Value, other, StringComparison.Ordinal);
 
         public override string[] GetNames() => new[] { Value };
     }
