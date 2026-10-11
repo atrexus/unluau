@@ -389,11 +389,16 @@ namespace Unluau
                     case OpCode.SETLIST:
                     {
                         TableLiteral tableLiteral = (TableLiteral)registers.GetExpressionValue(instruction.A);
+                        var aux = function.Instructions[pc + 1];
 
                         for (int slot = 0; slot < instruction.C - 1; slot++)
-                            tableLiteral.AddEntry(new TableLiteral.Entry(null, registers.GetRefExpressionValue(slot + instruction.B)));
+                        {
+                            var key = aux.Value != 1 ? new NumberLiteral(aux.Value + slot) : null;
+                            var value = registers.GetExpression(slot + instruction.B);
+                            tableLiteral.AddEntry(new TableLiteral.Entry(key!, value));
+                        }
 
-                        // Skip next instruction because we didn't use AUX
+                        // Consume AUX
                         pc++;
                         break;
                     }
