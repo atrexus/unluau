@@ -12,7 +12,7 @@ namespace Unluau.Logic.Expressions
         {
             Add,
             Subtract,
-            Mulitply,
+            Multiply,
             Divide,
             Modulus,
             Power,
@@ -45,18 +45,18 @@ namespace Unluau.Logic.Expressions
             Right.Write(output);
         }
 
-        public static int GetBinaryOperationPrescedence(Expression expression)
+        public static int GetBinaryOperationPrecedence(Expression expression)
         {
-            if (expression is LocalExpression local && local.Expression is BinaryExpression binaryExpression)
-            {
-                return GetBinaryOperationPrescedence(binaryExpression.Operation);
-            }
-            else
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (expression is not LocalExpression { Expression: BinaryExpression binaryExpression })
                 return 0;
+
+            return GetBinaryOperationPrecedence(binaryExpression.Operation);
         }
 
-        public static int GetBinaryOperationPrescedence(BinaryOperation operation)
+        public static int GetBinaryOperationPrecedence(BinaryOperation operation)
         {
+            // ReSharper disable once ConvertSwitchStatementToSwitchExpression
             switch (operation)
             {
                 case BinaryOperation.And:
@@ -72,7 +72,7 @@ namespace Unluau.Logic.Expressions
                 case BinaryOperation.Add:
                 case BinaryOperation.Subtract:
                     return 3;
-                case BinaryOperation.Mulitply:
+                case BinaryOperation.Multiply:
                 case BinaryOperation.Divide:
                 case BinaryOperation.Modulus:
                     return 4;
@@ -87,92 +87,58 @@ namespace Unluau.Logic.Expressions
 
         public static string BinaryOperationChar(BinaryOperation operation)
         {
-            switch (operation)
+            return operation switch
             {
-                case BinaryOperation.Add:
-                    return "+";
-                case BinaryOperation.Subtract:
-                    return "-";
-                case BinaryOperation.Mulitply:
-                    return "*";
-                case BinaryOperation.Divide:
-                    return "/";
-                case BinaryOperation.Modulus:
-                    return "%";
-                case BinaryOperation.Power:
-                    return "^";
-                case BinaryOperation.Concat:
-                    return "...";
-                case BinaryOperation.CompareNe:
-                    return "~=";
-                case BinaryOperation.CompareEq:
-                    return "==";
-                case BinaryOperation.CompareGe:
-                    return ">=";
-                case BinaryOperation.CompareGt:
-                    return ">";
-                case BinaryOperation.CompareLe:
-                    return "<=";
-                case BinaryOperation.CompareLt:
-                    return "<";
-                case BinaryOperation.And:
-                    return "and";
-                case BinaryOperation.Or:
-                    return "or";
-            }
-
-            throw new DecompilerException(Stage.Lifter, "'BinaryOperationChar' got unexpected binary operation");
+                BinaryOperation.Add => "+",
+                BinaryOperation.Subtract => "-",
+                BinaryOperation.Multiply => "*",
+                BinaryOperation.Divide => "/",
+                BinaryOperation.Modulus => "%",
+                BinaryOperation.Power => "^",
+                BinaryOperation.Concat => "...",
+                BinaryOperation.CompareNe => "~=",
+                BinaryOperation.CompareEq => "==",
+                BinaryOperation.CompareGe => ">=",
+                BinaryOperation.CompareGt => ">",
+                BinaryOperation.CompareLe => "<=",
+                BinaryOperation.CompareLt => "<",
+                BinaryOperation.And => "and",
+                BinaryOperation.Or => "or",
+                _ => throw new DecompilerException(Stage.Lifter,
+                    "'BinaryOperationChar' got unexpected binary operation")
+            };
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        /// <exception cref="DecompilerException"></exception>
+        /// <remarks>This is not entirely accurate for JUMPX instructions since they may encode a negation in
+        /// their AUX value.</remarks>
         public static BinaryOperation GetBinaryOperation(OpCode code)
         {
-            switch (code)
+            return code switch
             {
-                case OpCode.ADDK:
-                case OpCode.ADD:
-                    return BinaryOperation.Add;
-                case OpCode.SUBK:
-                case OpCode.SUB:
-                    return BinaryOperation.Subtract;
-                case OpCode.MULK:
-                case OpCode.MUL:
-                    return BinaryOperation.Mulitply;
-                case OpCode.DIVK:
-                case OpCode.DIV:
-                    return BinaryOperation.Divide;
-                case OpCode.MODK:
-                case OpCode.MOD:
-                    return BinaryOperation.Modulus;
-                case OpCode.POWK:
-                case OpCode.POW:
-                    return BinaryOperation.Power;
-                case OpCode.CONCAT:
-                    return BinaryOperation.Concat;
-                case OpCode.JUMPIFEQ:
-                    return BinaryOperation.CompareNe;
-                case OpCode.JUMPIFNOTEQ:
-                case OpCode.JUMPXEQKNIL:
-                case OpCode.JUMPXEQKB:
-                case OpCode.JUMPXEQKN:
-                case OpCode.JUMPXEQKS:
-                    return BinaryOperation.CompareEq;
-                case OpCode.JUMPIFLE:
-                    return BinaryOperation.CompareGe;
-                case OpCode.JUMPIFLT:
-                    return BinaryOperation.CompareGt;
-                case OpCode.JUMPIFNOTLE:
-                    return BinaryOperation.CompareLe;
-                case OpCode.JUMPIFNOTLT:
-                    return BinaryOperation.CompareLt;
-                case OpCode.ORK:
-                case OpCode.OR:
-                    return BinaryOperation.Or;
-                case OpCode.ANDK:
-                case OpCode.AND:
-                    return BinaryOperation.And;
-            }
-
-            throw new DecompilerException(Stage.Lifter, "'GetBinaryOperation' got unexpected operation code");
+                OpCode.ADDK or OpCode.ADD => BinaryOperation.Add,
+                OpCode.SUBK or OpCode.SUB => BinaryOperation.Subtract,
+                OpCode.MULK or OpCode.MUL => BinaryOperation.Multiply,
+                OpCode.DIVK or OpCode.DIV => BinaryOperation.Divide,
+                OpCode.MODK or OpCode.MOD => BinaryOperation.Modulus,
+                OpCode.POWK or OpCode.POW => BinaryOperation.Power,
+                OpCode.CONCAT => BinaryOperation.Concat,
+                OpCode.JUMPIFEQ => BinaryOperation.CompareNe,
+                OpCode.JUMPIFNOTEQ or OpCode.JUMPXEQKNIL or OpCode.JUMPXEQKB or OpCode.JUMPXEQKN or OpCode.JUMPXEQKS =>
+                    BinaryOperation.CompareEq,
+                OpCode.JUMPIFLE => BinaryOperation.CompareGe,
+                OpCode.JUMPIFLT => BinaryOperation.CompareGt,
+                OpCode.JUMPIFNOTLE => BinaryOperation.CompareLe,
+                OpCode.JUMPIFNOTLT => BinaryOperation.CompareLt,
+                OpCode.ORK or OpCode.OR => BinaryOperation.Or,
+                OpCode.ANDK or OpCode.AND => BinaryOperation.And,
+                _ => throw new DecompilerException(Stage.Lifter, "'GetBinaryOperation' got unexpected operation code")
+            };
         }
     }
 }

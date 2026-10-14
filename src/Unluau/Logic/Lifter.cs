@@ -274,16 +274,16 @@ namespace Unluau
                         // Get the equivalent binary operation for the opcode
                         BinaryExpression.BinaryOperation operation = BinaryExpression.GetBinaryOperation(properties.Code);
 
-                        // Get the prescedence of the left and right hand expressions and the current operation
-                        int leftPresedence = BinaryExpression.GetBinaryOperationPrescedence(left), rightPrescedence = BinaryExpression.GetBinaryOperationPrescedence(right);
-                        int currentPrescedence = BinaryExpression.GetBinaryOperationPrescedence(operation);
+                        // Get the precedence of the left and right hand expressions and the current operation
+                        int leftPrecedence = BinaryExpression.GetBinaryOperationPrecedence(left), rightPrecedence = BinaryExpression.GetBinaryOperationPrecedence(right);
+                        int currentPrecedence = BinaryExpression.GetBinaryOperationPrecedence(operation);
 
-                        // If the left hand expression has a lower prescedence than the current operation, we need to wrap it in an expression group
-                        if (leftPresedence < currentPrescedence && leftPresedence > 0)
+                        // If the left hand expression has a lower precedence than the current operation, we need to wrap it in an expression group
+                        if (leftPrecedence < currentPrecedence && leftPrecedence > 0)
                             left = new ExpressionGroup(left);
 
-                        // If the right hand expression has a lower prescedence than the current operation, we need to wrap it in an expression group
-                        if (rightPrescedence < currentPrescedence && rightPrescedence > 0)
+                        // If the right hand expression has a lower precedence than the current operation, we need to wrap it in an expression group
+                        if (rightPrecedence < currentPrecedence && rightPrecedence > 0)
                             right = new ExpressionGroup(right);
 
                         BinaryExpression binary = new BinaryExpression(left, operation, right);
