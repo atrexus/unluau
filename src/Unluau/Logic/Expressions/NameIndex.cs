@@ -18,13 +18,6 @@ namespace Unluau.Logic.Expressions
 
         public override void Write(Output output)
         {
-            // Add null check
-            if (Expression == null)
-            {
-                output.Write("nil");
-                return;
-            }
-    
             Expression.Write(output);
             output.Write((IsSelf ? ":" : ".") + Name);
         }
