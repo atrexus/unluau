@@ -18,22 +18,7 @@ namespace Unluau.Logic.Expressions
         {
             Function.Write(output);
             output.Write("(");
-
-            bool first = true;
-
-            foreach (Expression argument in Arguments)
-            {
-                if (argument is null)
-                    continue;
-
-                if (first)
-                    first = false;
-                else
-                    output.Write(", ");
-
-                argument.Write(output);
-            }
-
+            output.Join(", ", Arguments);
             output.Write(")");
         }
 
