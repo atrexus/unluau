@@ -71,9 +71,9 @@ namespace Unluau.Logic.Expressions
                         entry.Key.Write(output);
                         output.Write("]");
                     }
-                    else if (entry.Key is StringLiteral)
+                    else if (entry.Key is StringLiteral stringLiteral)
                     {
-                        output.Write((entry.Key as StringLiteral).Value);
+                        output.Write(stringLiteral.Value);
                     }
                     else
                         entry.Key.Write(output);
