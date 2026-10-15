@@ -59,5 +59,13 @@ namespace Unluau.Logic.Expressions
                 _ => throw new ArgumentOutOfRangeException(nameof(opcode), opcode, null)
             };
         }
+
+        public Expression Invert()
+        {
+            if (Operation == UnaryOperation.Not)
+                return Expression;
+
+            return this;
+        }
     }
 }

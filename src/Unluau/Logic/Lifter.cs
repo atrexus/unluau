@@ -464,9 +464,8 @@ namespace Unluau
                     case OpCode.JUMPXEQKN:
                     case OpCode.JUMPXEQKS:
                     {
-                        bool auxUsed = false;
                         // Console.WriteLine(instruction.Code.ToString());
-                        Expression condition = GetCondition(registers, instruction, function.Instructions[pc + 1], function.Constants, ref auxUsed);
+                        Expression condition = GetCondition(registers, instruction, function.Instructions[pc + 1], function.Constants, out var auxUsed);
 
                         // If the next instruction is a JUMPBACK instruction, then we must be dealing with a repeat..until loop.
                         Instruction nextInstruction = function.Instructions[pc + 1];
@@ -751,22 +750,30 @@ namespace Unluau
             return new BinaryExpression(left, BinaryExpression.BinaryOperation.Concat, right);
         }
 
-        private Expression GetCondition(Registers registers, Instruction instruction, Instruction aux, IList<Constant> constants, ref bool auxUsed)
+        private Expression GetCondition(Registers registers, Instruction instruction, Instruction aux, IList<Constant> constants, out bool auxUsed)
         {
             auxUsed = false;
 
             OpCode code = instruction.GetProperties().Code;
 
-            if (code == OpCode.JUMPIF || code == OpCode.JUMPIFNOT)
-                return code == OpCode.JUMPIFNOT ? registers.GetExpression(instruction.A)
-                            : new UnaryExpression(registers.GetExpression(instruction.A), UnaryExpression.UnaryOperation.Not);
+            switch (code)
+            {
+                case OpCode.JUMPIF:
+                    return new UnaryExpression(registers.GetExpressionOrThrow(instruction.A),
+                        UnaryExpression.UnaryOperation.Not);
+                case OpCode.JUMPIFNOT:
+                    return registers.GetExpressionOrThrow(instruction.A);
+            }
 
             auxUsed = true;
 
             BinaryExpression.BinaryOperation operation = BinaryExpression.GetBinaryOperation(code);
 
-            if (operation == BinaryExpression.BinaryOperation.CompareGt || operation == BinaryExpression.BinaryOperation.CompareGe)
-                return new BinaryExpression(registers.GetExpression((int)aux.Value), operation, registers.GetExpression(instruction.A));
+            if (operation is BinaryExpression.BinaryOperation.CompareGt or BinaryExpression.BinaryOperation.CompareGe)
+                return new BinaryExpression(
+                    registers.GetExpressionOrThrow((int)aux.Value),
+                    operation,
+                    registers.GetExpressionOrThrow(instruction.A));
 
             Expression right;
             switch (code)
@@ -786,24 +793,19 @@ namespace Unluau
                     right = ConstantToExpression(constants[(int)constantIndex]);
                     break;
                 default:
-                    right = registers.GetExpression((int)aux.Value);
+                    right = registers.GetExpressionOrThrow((int)aux.Value);
                     break;
             }
 
-            return new BinaryExpression(registers.GetExpression(instruction.A), operation, right);
+            return new BinaryExpression(registers.GetExpressionOrThrow(instruction.A), operation, right);
         }
 
         private Expression InvertCondition(Expression expression)
         {
-            if (expression is UnaryExpression unary)
-            {
-                if (unary.Operation == UnaryExpression.UnaryOperation.Not)
-                    return unary.Expression;
-            }
-            else
-                return new UnaryExpression(expression, UnaryExpression.UnaryOperation.Not);
+            if (expression is UnaryExpression unaryExpression)
+                return unaryExpression.Invert();
 
-            return expression;
+            return new UnaryExpression(expression, UnaryExpression.UnaryOperation.Not);
         }
 
         private Registers CreateRegisters(Function function)
