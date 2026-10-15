@@ -396,17 +396,20 @@ namespace Unluau
                         var tableExpression = registers.GetExpressionOrThrow(instruction.A, false);
                         if (tableExpression.Expression is not TableLiteral tableLiteral)
                             throw new DecompilerException(Stage.Lifter, "Expected TableLiteral");
+                        
+                        var aux = function.Instructions[pc + 1];
 
                         for (int slot = 0; slot < instruction.C - 1; slot++)
                         {
+                            var key = aux.Value != 1 ? new NumberLiteral(aux.Value + slot) : null;
                             var valueExpression = registers.GetExpressionOrThrow(slot + instruction.B);
                             if (valueExpression.Expression is not { } value)
                                 throw new DecompilerException(Stage.Lifter, "");
                             
-                            tableLiteral.AddEntry(null, value);
+                            tableLiteral.AddEntry(key!, value);
                         }
 
-                        // Skip next instruction because we didn't use AUX
+                        // Consume AUX
                         pc++;
                         break;
                     }
@@ -614,6 +617,16 @@ namespace Unluau
                         registers.LoadRegister(instruction.A, expression, block, pc, expression.Declaration.Type);
                         break;
                     }
+                    case OpCode.SETUPVAL:
+                    {
+                        LocalExpression expression = function.Upvalues[instruction.B];
+                        block.AddStatement(new Assignment(expression, registers.GetExpression(instruction.A)), pc);
+                        break;
+                    }
+                    case OpCode.CLOSEUPVALS:
+                        // "close (migrate to heap) all upvalues that were captured for registers >= target"
+                        // VERIFY: Must be a no-op for decompilers?
+                        break;
                     case OpCode.RETURN:
                     {
                         IList<Expression> expressions = new List<Expression>();
@@ -755,29 +768,29 @@ namespace Unluau
             if (operation == BinaryExpression.BinaryOperation.CompareGt || operation == BinaryExpression.BinaryOperation.CompareGe)
                 return new BinaryExpression(registers.GetExpression((int)aux.Value), operation, registers.GetExpression(instruction.A));
 
-            Expression? right = null;
+            Expression right;
+            switch (code)
+            {
+                case OpCode.JUMPXEQKNIL:
+                    right = new NilLiteral();
+                    break;
+                case OpCode.JUMPXEQKB:
+                    right = new BooleanLiteral((aux.Value & 0x1) == 0x1);
+                    break;
+                case OpCode.JUMPXEQKN:
+                case OpCode.JUMPXEQKS:
+                    uint constantIndex = aux.Value & 0xffffff;
+                    if (constantIndex >= constants.Count)
+                        throw new Exception("Constant value index is greater than constant table size");
+                    
+                    right = ConstantToExpression(constants[(int)constantIndex]);
+                    break;
+                default:
+                    right = registers.GetExpression((int)aux.Value);
+                    break;
+            }
 
-                if (operation == BinaryExpression.BinaryOperation.CompareEq && code != OpCode.JUMPIFEQ)
-                {
-                if (aux.Value < constants.Count)
-                {
-                    right = code switch
-                    {
-                        // Both instructions contain a constant index as the aux instruction.
-                        OpCode.JUMPXEQKN or OpCode.JUMPXEQKS => ConstantToExpression(constants[(int)aux.Value & 0xffffff]),
-                        OpCode.JUMPXEQKNIL => new NilLiteral(),
-                        _ => ConstantToExpression(constants[(int)aux.Value]),
-                    };
-                }
-                else
-                {
-                    right = new NilLiteral(); // really bad fix
-                }
-                }
-            else
-                right = registers.GetExpression((int)aux.Value);
-
-            return new BinaryExpression(registers.GetExpression(instruction.A), operation, right!);
+            return new BinaryExpression(registers.GetExpression(instruction.A), operation, right);
         }
 
         private Expression InvertCondition(Expression expression)

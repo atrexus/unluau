@@ -58,6 +58,9 @@ namespace Unluau.CLI
 
             [Option("encoding", Default = OpCodeEncoding.None, HelpText = "Set the encoding format of the operation codes in the luau binary.")]
             public OpCodeEncoding Encoding { get; set; }
+            
+            [Option("no-header", Default = false, HelpText = "Disable writing Unluau file GUID to the decompilation output.")]
+            public bool NoWriteHeader { get; set; }
 
             #endregion
         }
@@ -91,12 +94,12 @@ namespace Unluau.CLI
                 logConfig.WriteTo.File(options.OutputFile!, options.LogLevel);
 
             logConfig.MinimumLevel.Is(options.LogLevel);
-                
+
             DecompilerOptions decompilerOptions = new DecompilerOptions()
             {
                 Output = options.OutputFile == null ? new Output() : new Output(File.CreateText(options.OutputFile)),
                 DescriptiveComments = options.ShowDescriptiveComments,
-                HeaderEnabled = true,
+                HeaderEnabled = !options.NoWriteHeader,
                 InlineTableDefintions = options.InlineTables,
                 RenameUpvalues = options.RenameUpvalues,
                 VariableNameGuessing = options.SmartVariableNames,
