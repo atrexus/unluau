@@ -294,7 +294,7 @@ namespace Unluau
                     case OpCode.CONCAT:
                     {
                         // Kinda annoying, gotta unravel the whole TING
-                        Expression expression = BuildConcat(registers, instruction.B, instruction.C);
+                        Expression expression = registers.BuildConcat(instruction.B, instruction.C);
 
                         registers.LoadRegister(instruction.A, expression, block, pc);
                         break;
@@ -740,14 +740,6 @@ namespace Unluau
                 return nameIndex.IsSelf ? 1 : 0;
 
             return 0;
-        }
-
-        private Expression BuildConcat(Registers registers, int from, int to)
-        {
-            Expression left = registers.GetExpression(from);
-            Expression right = (from + 1) == to ? registers.GetExpression(to) : BuildConcat(registers, from + 1, to);
-
-            return new BinaryExpression(left, BinaryExpression.BinaryOperation.Concat, right);
         }
 
         private Expression GetCondition(Registers registers, Instruction instruction, Instruction aux, IList<Constant> constants, out bool auxUsed)

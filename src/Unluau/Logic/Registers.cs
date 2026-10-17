@@ -206,5 +206,13 @@ namespace Unluau
         {
             return GetExpression(register)?.Expression;
         }
+
+        public Expression BuildConcat(int from, int to)
+        {
+            Expression left = GetExpressionOrThrow(from);
+            Expression right = (from + 1) == to ? GetExpressionOrThrow(to) : BuildConcat(from + 1, to);
+
+            return new BinaryExpression(left, BinaryExpression.BinaryOperation.Concat, right);
+        }
     }
 }
