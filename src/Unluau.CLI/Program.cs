@@ -1,29 +1,28 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Runtime.InteropServices;
 using CommandLine;
 using CommandLine.Text;
 using Serilog;
 using Serilog.Events;
+using Unluau.Format.Models;
+using Unluau.Utilities;
 
 namespace Unluau.CLI
 {
-    class Program
+    static class Program
     {
-        private static string Version = "1.0.9-alpha";
+        private const string Version = "1.0.9-alpha";
 
         /// <summary>
         /// Avalible options for the Unluau decompiler/dissasembler.
         /// </summary>
-        public class Options
+        // ReSharper disable once ClassNeverInstantiated.Local
+        private class Options
         {
             [Option(Default = false, HelpText = "Converts the bytecode to a readable list of instructions.")]
-            public bool Dissasemble { get; set; }
+            public bool Disassemble { get; set; }
 
             [Option('o', "output", Default = null, HelpText = "The file that the decompiled script will be stored in (stdout otherwise).")]
             public string? OutputFile { get; set; }
@@ -86,57 +85,56 @@ namespace Unluau.CLI
 
         static void RunOptions(Options options)
         {
-            using (Stream stream = string.IsNullOrEmpty(options.InputFile) ? Console.OpenStandardInput() : File.OpenRead(options.InputFile))
+            using Stream stream = string.IsNullOrEmpty(options.InputFile) ? Console.OpenStandardInput() : File.OpenRead(options.InputFile);
+
+            var logConfig = new LoggerConfiguration();
+            if (string.IsNullOrEmpty(options.LogFile))
+                logConfig.WriteTo.Console(options.LogLevel);           
+            else
+                logConfig.WriteTo.File(options.OutputFile!, options.LogLevel);
+
+            logConfig.MinimumLevel.Is(options.LogLevel);
+
+            DecompilerOptions decompilerOptions = new DecompilerOptions()
             {
-                var logConfig = new LoggerConfiguration();
+                Output = options.OutputFile == null ? new Output() : new Output(File.CreateText(options.OutputFile)),
+                DescriptiveComments = options.ShowDescriptiveComments,
+                HeaderEnabled = !options.NoWriteHeader,
+                InlineTableDefintions = options.InlineTables,
+                RenameUpvalues = options.RenameUpvalues,
+                VariableNameGuessing = options.SmartVariableNames,
+                Version = Version,
+                PerferStringInterpolation = options.StringInterpolation,
+                Encoding = options.Encoding,
+            };
 
-                if (string.IsNullOrEmpty(options.LogFile))
-                    logConfig.WriteTo.Console(options.LogLevel);           
-                else
-                    logConfig.WriteTo.File(options.OutputFile!, options.LogLevel);
+            Log.Logger = decompilerOptions.Logger = logConfig.CreateLogger();
 
-                logConfig.MinimumLevel.Is(options.LogLevel);
-                
-                DecompilerOptions decompilerOptions = new DecompilerOptions()
-                {
-                    Output = options.OutputFile == null ? new Output() : new Output(File.CreateText(options.OutputFile)),
-                    DescriptiveComments = options.ShowDescriptiveComments,
-                    HeaderEnabled = !options.NoWriteHeader,
-                    InlineTableDefintions = options.InlineTables,
-                    RenameUpvalues = options.RenameUpvalues,
-                    VariableNameGuessing = options.SmartVariableNames,
-                    Version = Version,
-                    PerferStringInterpolation = options.StringInterpolation,
-                    Encoding = options.Encoding,
-                };
+            try
+            {
+                Decompiler decompiler = new Decompiler(stream, decompilerOptions);
 
-                Log.Logger = decompilerOptions.Logger = logConfig.CreateLogger();
+                if (options.Disassemble)
+                    // ReSharper disable once LocalizableElement
+                    Console.WriteLine(decompiler.Dissasemble() + "\n\n");
 
-                try
-                {
-                    Decompiler decompiler = new Decompiler(stream, decompilerOptions);
-
-                    if (options.Dissasemble)
-                        Console.WriteLine(decompiler.Dissasemble() + "\n\n");
-
-                    decompiler.Decompile();
-                }
-                catch (DecompilerException e)
-                {
-                    Log.Fatal(e, "Decompilation error");
-                }
-                catch (Exception e)
-                {
-                    Log.Fatal(e, "Unexpected error; please report here: https://github.com/atrexus/unluau/issues");
-                }
-
-                Log.CloseAndFlush();
+                decompiler.Decompile();
             }
+            catch (DecompilerException e)
+            {
+                Log.Fatal(e, "Decompilation error");
+            }
+            catch (Exception e)
+            {
+                Log.Fatal(e, "Unexpected error; please report here: https://github.com/atrexus/unluau/issues");
+            }
+
+            Log.CloseAndFlush();
         }
 
         static void HandleParseError<T>(ParserResult<T> result, IEnumerable<Error> errors)
         {
-            HelpText? helpText = null;
+            HelpText? helpText;
 
             if (errors.IsVersion())
                 helpText = new HelpText("Unluau " + Version);

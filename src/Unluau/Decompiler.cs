@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using Serilog;
+using Unluau.Format;
+using Unluau.Format.Models;
+using Unluau.Logic.Statements;
 
 namespace Unluau
 {
@@ -16,11 +14,11 @@ namespace Unluau
         public bool VariableNameGuessing { get; set; }
         public bool DescriptiveComments { get; set; }
         public bool HeaderEnabled { get; set; } = true;
-        public bool InlineTableDefintions { get; set; } = false;
+        public bool InlineTableDefintions { get; set; }
         public bool RenameUpvalues { get; set; }
         public string? Version { get; set; }
         public OpCodeEncoding Encoding { get; set; }
-        public Output Output { get; set; } = new Output();
+        public Output Output { get; set; } = new();
         public ILogger Logger { get; set; } = new LoggerConfiguration().CreateLogger();
     }
 
@@ -29,11 +27,11 @@ namespace Unluau
         private readonly DecompilerOptions _options;
         private readonly Chunk _chunk;
 
-        public Guid Guid { get; private set; }
+        private Guid Guid { get; }
 
         public Decompiler(Stream stream, DecompilerOptions options)
         {
-            Log.Logger = options.Logger!;
+            Log.Logger = options.Logger;
 
             _options = options;
             _chunk = new Deserializer(stream, options.Encoding).Deserialize();
