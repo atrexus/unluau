@@ -622,10 +622,6 @@ namespace Unluau
                         block.AddStatement(new Assignment(expression, registers.GetExpression(instruction.A)), pc);
                         break;
                     }
-                    case OpCode.CLOSEUPVALS:
-                        // "close (migrate to heap) all upvalues that were captured for registers >= target"
-                        // VERIFY: Must be a no-op for decompilers?
-                        break;
                     case OpCode.RETURN:
                     {
                         IList<Expression> expressions = new List<Expression>();
@@ -701,14 +697,24 @@ namespace Unluau
                         Block body = LiftBlock(function, registers, pc + 1, (pc += instruction.D) + 1);
 
                         block.AddStatement(new ForLoopGeneric(variables, values, body), pc);
-
-                        // Note: Add this so skip the FORGLOOP instruction so that we don't have any warnings come out.
-                        pc += 2;
                         break;
                     }
 
                     // Instructions that require no code. We have them here so that there are no compiler warnings.
-                    case OpCode.PREPVARARGS: break;
+                    case OpCode.PREPVARARGS:
+                    case OpCode.CAPTURE:
+                    case OpCode.CLOSEUPVALS:
+                    case OpCode.FASTCALL1:
+                    case OpCode.FASTCALL2:
+                    case OpCode.FASTCALL3:
+                    case OpCode.FASTCALL2K:
+                    case OpCode.FORGLOOP:
+                    case OpCode.FORNLOOP:
+                    case OpCode.JUMP:
+                    case OpCode.JUMPBACK:
+                        if (properties.HasAux)
+                            pc++;
+                        break;
 
                     default:
                     {
