@@ -703,9 +703,9 @@ namespace Unluau
                         for (int register = instruction.A; register < 3; ++register)
                         {
                             if (!registers.TryGetExpression(register, out var expression))
-                                continue;
+                                break;
 
-                            values.Append(expression.GetValue()! is NilLiteral ? null : expression);
+                            values.Append(expression.GetValue() is NilLiteral ? null : expression);
                         }
                           
                         var loopInstruction = function.Instructions[pc + instruction.D + 1];
