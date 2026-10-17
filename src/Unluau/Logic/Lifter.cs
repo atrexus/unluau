@@ -87,7 +87,7 @@ namespace Unluau
                     {
                         Constant target = function.GetConstant(++pc);
 
-                        block.AddStatement(new Assignment(GetConstantAsGlobal(target), registers.GetExpression(instruction.A)), pc);
+                        block.AddStatement(new Assignment(GetConstantAsGlobal(target), registers.GetExpressionOrThrow(instruction.A)), pc);
                         break;
                     }
                     case OpCode.GETIMPORT:
@@ -183,21 +183,18 @@ namespace Unluau
 
                         IList<Expression> arguments = new List<Expression>();
 
-                        Expression callFunction = builtin is null ? registers.GetExpression(instruction.A) : builtin!.Expression;
+                        Expression callFunction = builtin is null ? registers.GetExpressionOrThrow(instruction.A) : builtin.Expression;
 
                         int numArgs = instruction.B > 0 ? instruction.B : (registers.Top - instruction.A) + 1;
 
                         for (int slot = 1 + IsSelf(callFunction); slot < numArgs; ++slot)
                         {
                             int register = instruction.A + slot;
-                            Expression expression = registers.GetExpression(register);
+                            if (!registers.TryGetExpression(register, out var expression))
+                                continue;
 
-                            if (expression != null)
-                            {
-                                arguments.Add(expression);
-
-                                registers.FreeRegister(register);
-                            }
+                            arguments.Add(expression);
+                            registers.FreeRegister(register);
                         }
 
                         // Free the function register if we used it
@@ -657,7 +654,7 @@ namespace Unluau
                     case OpCode.SETUPVAL:
                     {
                         LocalExpression expression = function.Upvalues[instruction.B];
-                        block.AddStatement(new Assignment(expression, registers.GetExpression(instruction.A)), pc);
+                        block.AddStatement(new Assignment(expression, registers.GetExpressionOrThrow(instruction.A)), pc);
                         break;
                     }
                     case OpCode.RETURN:
@@ -705,12 +702,10 @@ namespace Unluau
                         // Fill expressions. We are assuming the following register format: generator, state, index
                         for (int register = instruction.A; register < 3; ++register)
                         {
-                            var expression = registers.GetExpression(register);
+                            if (!registers.TryGetExpression(register, out var expression))
+                                continue;
 
-                            if (expression is not null && expression.GetValue()! is NilLiteral)
-                                values.Append(null);
-                            else
-                                values.Append(expression);
+                            values.Append(expression.GetValue()! is NilLiteral ? null : expression);
                         }
                           
                         var loopInstruction = function.Instructions[pc + instruction.D + 1];
