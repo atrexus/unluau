@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Unluau.Logic;
 using Unluau.Logic.Expressions;
 
 namespace Unluau.Format.Models
@@ -127,6 +128,34 @@ namespace Unluau.Format.Models
             builder.Append($"end -- function id: {Id}\n");
 
             return builder.ToString();
+        }
+        
+        public Registers CreateRegisters(DecompilerOptions options)
+        {
+            IDictionary<int, Declaration> declarations = LoadDeclarations();
+            var expressions = declarations
+                .ToDictionary(kp => kp.Key, kp => new LocalExpression(null, kp.Value));
+            
+            return new Registers(declarations, expressions, options);
+        }
+        
+        private IDictionary<int, Declaration> LoadDeclarations()
+        {
+            var declarations = new Dictionary<int, Declaration>();
+
+            if (DebugInfo != null)
+            {
+                // Load the entire debug info into the declarations
+                foreach (LocalVariable variable in DebugInfo.Locals)
+                    declarations[variable.Slot] = new Declaration(variable);
+            }
+            else
+            {
+                for (int slot = 0; slot < Parameters; slot++)
+                    declarations[slot] = new Declaration(slot, "arg" + (slot + 1), 0);
+            }
+
+            return declarations;
         }
     }
 }

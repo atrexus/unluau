@@ -37,7 +37,7 @@ namespace Unluau
         public OuterBlock LiftProgram()
         {
             Function main = chunk.Functions[chunk.MainIndex];
-            Registers registers = CreateRegisters(main);
+            Registers registers = main.CreateRegisters(options);
 
             var block = new OuterBlock(LiftBlock(main, registers));
 
@@ -601,7 +601,7 @@ namespace Unluau
                         int functionId = properties.Code == OpCode.DUPCLOSURE ? ((ClosureConstant)function.Constants[instruction.D]).Value : instruction.D;
 
                         Function newFunction = properties.Code == OpCode.DUPCLOSURE ? function.GlobalFunctions[functionId] : function.GetFunction(functionId);
-                        Registers newRegisters = CreateRegisters(newFunction);
+                        Registers newRegisters = newFunction.CreateRegisters(options);
 
                         while (newFunction.Upvalues.Count < newFunction.MaxUpvalues)
                         {
@@ -816,43 +816,6 @@ namespace Unluau
             }
 
             return new BinaryExpression(registers.GetExpressionOrThrow(instruction.A), operation, right);
-        }
-
-        private Registers CreateRegisters(Function function)
-        {
-            IDictionary<int, Declaration> declarations = LoadDeclarations(function);
-            IDictionary<int, LocalExpression> expressions = LoadExpressions(declarations);
-
-            return new Registers(declarations, expressions, options);
-        }
-
-        private IDictionary<int, Declaration> LoadDeclarations(Function function)
-        {
-            IDictionary<int, Declaration> declarations = new Dictionary<int, Declaration>();
-
-            if (function.DebugInfo != null)
-            {
-                // Load the entire debug info into the declarations
-                foreach (LocalVariable variable in function.DebugInfo.Locals)
-                    declarations[variable.Slot] = new Declaration(variable);
-            }
-            else
-            {
-                for (int slot = 0; slot < function.Parameters; slot++)
-                    declarations[slot] = new Declaration(slot, "arg" + (slot + 1), 0);
-            }
-
-            return declarations;
-        }
-
-        private IDictionary<int, LocalExpression> LoadExpressions(IDictionary<int, Declaration> declarations)
-        {
-            var expressions = new Dictionary<int, LocalExpression>();
-
-            foreach (KeyValuePair<int, Declaration> declaration in declarations)
-                expressions[declaration.Key] = new LocalExpression(null, declaration.Value);
-
-            return expressions;
         }
     }
 }
