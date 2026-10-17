@@ -252,6 +252,7 @@ namespace Unluau
                     case OpCode.SUB:
                     case OpCode.MUL:
                     case OpCode.DIV:
+                    case OpCode.IDIV:
                     case OpCode.MOD:
                     case OpCode.POW:
                     case OpCode.AND:
@@ -261,6 +262,7 @@ namespace Unluau
                     case OpCode.SUBK:
                     case OpCode.MULK:
                     case OpCode.DIVK:
+                    case OpCode.IDIVK:
                     case OpCode.MODK:
                     case OpCode.POWK:
                     case OpCode.ANDK:
@@ -283,6 +285,7 @@ namespace Unluau
                             case OpCode.SUB:
                             case OpCode.MUL:
                             case OpCode.DIV:
+                            case OpCode.IDIV:
                             case OpCode.MOD:
                             case OpCode.POW:
                             case OpCode.AND:
@@ -294,6 +297,7 @@ namespace Unluau
                             case OpCode.SUBK:
                             case OpCode.MULK:
                             case OpCode.DIVK:
+                            case OpCode.IDIVK:
                             case OpCode.MODK:
                             case OpCode.POWK:
                             case OpCode.ANDK:

@@ -14,6 +14,7 @@ namespace Unluau.Logic.Expressions
             Subtract,
             Multiply,
             Divide,
+            FloorDivide,
             Modulus,
             Power,
             Concat,
@@ -74,6 +75,7 @@ namespace Unluau.Logic.Expressions
                     return 3;
                 case BinaryOperation.Multiply:
                 case BinaryOperation.Divide:
+                case BinaryOperation.FloorDivide:
                 case BinaryOperation.Modulus:
                     return 4;
                 case BinaryOperation.Concat:
@@ -93,6 +95,7 @@ namespace Unluau.Logic.Expressions
                 BinaryOperation.Subtract => "-",
                 BinaryOperation.Multiply => "*",
                 BinaryOperation.Divide => "/",
+                BinaryOperation.FloorDivide => "//",
                 BinaryOperation.Modulus => "%",
                 BinaryOperation.Power => "^",
                 BinaryOperation.Concat => "...",
@@ -125,6 +128,7 @@ namespace Unluau.Logic.Expressions
                 OpCode.SUBK or OpCode.SUB or OpCode.SUBRK => BinaryOperation.Subtract,
                 OpCode.MULK or OpCode.MUL => BinaryOperation.Multiply,
                 OpCode.DIVK or OpCode.DIV or OpCode.DIVRK => BinaryOperation.Divide,
+                OpCode.IDIV or OpCode.IDIVK => BinaryOperation.FloorDivide,
                 OpCode.MODK or OpCode.MOD => BinaryOperation.Modulus,
                 OpCode.POWK or OpCode.POW => BinaryOperation.Power,
                 OpCode.CONCAT => BinaryOperation.Concat,
