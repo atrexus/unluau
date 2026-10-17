@@ -13,5 +13,13 @@ namespace Unluau.Logic.Expressions
         {
             return this is not LocalExpression local ? this : local.Expression?.GetValue();
         }
+
+        public Expression InvertCondition()
+        {
+            if (this is UnaryExpression unaryExpression)
+                return unaryExpression.Invert();
+            
+            return new UnaryExpression(this, UnaryExpression.UnaryOperation.Not);
+        }
     }
 }

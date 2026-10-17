@@ -187,7 +187,8 @@ namespace Unluau
 
                         int numArgs = instruction.B > 0 ? instruction.B : (registers.Top - instruction.A) + 1;
 
-                        for (int slot = 1 + IsSelf(callFunction); slot < numArgs; ++slot)
+                        var isSelfCall = callFunction.GetValue() is NameIndex { IsSelf: true };
+                        for (int slot = 1 + (isSelfCall ? 1 : 0); slot < numArgs; ++slot)
                         {
                             int register = instruction.A + slot;
                             if (!registers.TryGetExpression(register, out var expression))
@@ -507,7 +508,7 @@ namespace Unluau
                         if (nextInstruction.GetProperties().Code == OpCode.JUMPBACK)
                         {
                             // We need to invert the condition, because repeat..until loops are reversed.
-                            condition = InvertCondition(condition);
+                            condition = condition.InvertCondition();
 
                             Block body = new();
 
@@ -767,20 +768,6 @@ namespace Unluau
             return block;
         }
 
-        private int IsSelf(Expression expression)
-        {
-            Expression? value = expression?.GetValue();
-    
-            // Add null check here
-            if (value == null)
-                return 0;
-
-            if (value is NameIndex nameIndex)
-                return nameIndex.IsSelf ? 1 : 0;
-
-            return 0;
-        }
-
         private Expression GetCondition(Registers registers, Instruction instruction, Instruction aux, IList<Constant> constants, out bool auxUsed)
         {
             auxUsed = false;
@@ -829,14 +816,6 @@ namespace Unluau
             }
 
             return new BinaryExpression(registers.GetExpressionOrThrow(instruction.A), operation, right);
-        }
-
-        private Expression InvertCondition(Expression expression)
-        {
-            if (expression is UnaryExpression unaryExpression)
-                return unaryExpression.Invert();
-
-            return new UnaryExpression(expression, UnaryExpression.UnaryOperation.Not);
         }
 
         private Registers CreateRegisters(Function function)
