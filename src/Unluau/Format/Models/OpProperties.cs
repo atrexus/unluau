@@ -19,6 +19,7 @@ namespace Unluau.Format.Models
         // Disassembly modes
         iAB,
         iA,
+        iD,
 
         // Represents an empy instruction (contans no args)
         None
@@ -447,8 +448,8 @@ namespace Unluau.Format.Models
             { OpCode.NAMECALL, new OpProperties(OpCode.NAMECALL, OpMode.iABC, true) },
             { OpCode.CALL, new OpProperties(OpCode.CALL, OpMode.iABC) },
             { OpCode.RETURN, new OpProperties(OpCode.RETURN, OpMode.iAB) },
-            { OpCode.JUMP, new OpProperties(OpCode.JUMP, OpMode.iAD) },
-            { OpCode.JUMPBACK, new OpProperties(OpCode.JUMPBACK, OpMode.iAD) },
+            { OpCode.JUMP, new OpProperties(OpCode.JUMP, OpMode.iD) },
+            { OpCode.JUMPBACK, new OpProperties(OpCode.JUMPBACK, OpMode.iD) },
             { OpCode.JUMPIF, new OpProperties(OpCode.JUMPIF, OpMode.iAD) },
             { OpCode.JUMPIFNOT, new OpProperties(OpCode.JUMPIFNOT, OpMode.iAD) },
             { OpCode.JUMPIFEQ, new OpProperties(OpCode.JUMPIFEQ, OpMode.iAD, true) },

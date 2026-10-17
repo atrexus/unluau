@@ -97,6 +97,10 @@ namespace Unluau.Format.Models
                         builder.Append(string.Format("   {0, -10}\t {1, 5}\n", instruction.GetProperties().Code.ToString(),
                             instruction.A));
                         break;
+                    case OpMode.iD:
+                        builder.Append(string.Format("   {0, -10}\t {1, 5}\n", instruction.GetProperties().Code.ToString(),
+                            instruction.D));
+                        break;
                 }
 
                 if (instruction.GetProperties().HasAux)
