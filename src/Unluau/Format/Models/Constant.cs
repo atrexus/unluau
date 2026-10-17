@@ -3,6 +3,8 @@
 
 using System.Globalization;
 using System.Numerics;
+using Unluau.Logic.Expressions;
+using Unluau.Utilities;
 
 namespace Unluau.Format.Models
 {
@@ -22,7 +24,14 @@ namespace Unluau.Format.Models
 	{
 		public ConstantType Type { get; protected init; }
 		public abstract override string ToString();
-	}
+
+        public abstract Expression ToExpression();
+
+        public virtual Expression ToExpressionGlobal()
+        {
+            throw new InvalidOperationException();
+        }
+    }
 
 	public abstract class Constant<T> : Constant
 	{
@@ -50,6 +59,8 @@ namespace Unluau.Format.Models
 		{
 			return "nil";
 		}
+
+        public override Expression ToExpression() => new NilLiteral();
 	}
 
 	public class BoolConstant : Constant<bool>
@@ -62,6 +73,8 @@ namespace Unluau.Format.Models
 		{
 			return Value ? "true" : "false";
 		}
+        
+        public override Expression ToExpression() => new BooleanLiteral(Value);
 	}
 
 	public class NumberConstant : Constant<double>
@@ -74,6 +87,8 @@ namespace Unluau.Format.Models
         {
 			return Value.ToString(CultureInfo.InvariantCulture);
         }
+        
+        public override Expression ToExpression() => new NumberLiteral(Value);
     }
 
 	public class StringConstant : Constant<string>
@@ -86,7 +101,10 @@ namespace Unluau.Format.Models
         {
             return $"\"{Value}\"";
         }
-	}
+
+        public override Expression ToExpression() => new StringLiteral(Value);
+        public override Expression ToExpressionGlobal() => new Global(Value);
+    }
 
 	public class ImportConstant : Constant<IList<StringConstant>>
 	{
@@ -98,6 +116,13 @@ namespace Unluau.Format.Models
         {
             return $"[{string.Join(",", Value ?? throw new InvalidOperationException())}]";
         }
+
+        public override Expression ToExpression()
+        {
+            return new Global(Value.Select(c => c.Value).ToList());
+        }
+
+        public override Expression ToExpressionGlobal() => ToExpression();
 	}
 
 	public class TableConstant : Constant<IList<Constant>>
@@ -110,6 +135,11 @@ namespace Unluau.Format.Models
         {
             return $"{{{string.Join(", ", Value ?? throw new InvalidOperationException())}}}";
         }
+        
+        public override Expression ToExpression()
+        {
+            throw new InvalidOperationException();
+        }
 	}
 
 	public class ClosureConstant : Constant<int>
@@ -117,6 +147,11 @@ namespace Unluau.Format.Models
 		public ClosureConstant(int index)
 			: base(ConstantType.Closure, index)
 		{ }
+
+        public override Expression ToExpression()
+        {
+            throw new InvalidOperationException();
+        }
     }
 
     public class VectorConstant : Constant<Vector4>
@@ -124,5 +159,7 @@ namespace Unluau.Format.Models
         public VectorConstant(float x, float y, float z, float w)
             : base(ConstantType.Vector, new Vector4(x, y, z, w))
         { }
+
+        public override Expression ToExpression() => new VectorLiteral(Value);
     }
 }

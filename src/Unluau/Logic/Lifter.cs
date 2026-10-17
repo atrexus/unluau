@@ -68,7 +68,7 @@ namespace Unluau
                         Constant target = properties.Code == OpCode.LOADK
                             ? function.Constants[instruction.D] : function.GetConstant(++pc);
 
-                        registers.LoadRegister(instruction.A, ConstantToExpression(target), block, pc);
+                        registers.LoadRegister(instruction.A, target.ToExpression(), block, pc);
                         break;
                     }
                     case OpCode.LOADN:
@@ -80,14 +80,14 @@ namespace Unluau
                     {
                         Constant target = function.GetConstant(++pc);
 
-                        registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block, pc);
+                        registers.LoadRegister(instruction.A, target.ToExpressionGlobal(), block, pc);
                         break;
                     }
                     case OpCode.SETGLOBAL:
                     {
                         Constant target = function.GetConstant(++pc);
 
-                        block.AddStatement(new Assignment(GetConstantAsGlobal(target), registers.GetExpressionOrThrow(instruction.A)), pc);
+                        block.AddStatement(new Assignment(target.ToExpressionGlobal(), registers.GetExpressionOrThrow(instruction.A)), pc);
                         break;
                     }
                     case OpCode.GETIMPORT:
@@ -104,7 +104,7 @@ namespace Unluau
                             registers.LoadRegister(instruction.A, expression, block, pc);
                         }
                         else
-                            registers.LoadRegister(instruction.A, GetConstantAsGlobal(target), block, pc);
+                            registers.LoadRegister(instruction.A, target.ToExpressionGlobal(), block, pc);
 
                         // Skip next instruction (we used the constant instead of AUX)
                         pc++;
@@ -277,7 +277,7 @@ namespace Unluau
                             case OpCode.SUBRK:
                             case OpCode.DIVRK:
                                 right = registers.GetExpressionOrThrow(instruction.C);
-                                left = ConstantToExpression(function.Constants[instruction.B]);
+                                left = function.Constants[instruction.B].ToExpression();
                                 break;
                             case OpCode.ADD:
                             case OpCode.SUB:
@@ -300,7 +300,7 @@ namespace Unluau
                             case OpCode.POWK:
                             case OpCode.ANDK:
                             case OpCode.ORK:
-                                right = ConstantToExpression(function.Constants[instruction.C]);
+                                right = function.Constants[instruction.C].ToExpression();
                                 left = registers.GetExpressionOrThrow(instruction.B);
                                 break;
                             default:
@@ -367,7 +367,7 @@ namespace Unluau
 
                             if (tableLiteral.MaxEntries > tableLiteral.Entries.Count)
                             {
-                                tableLiteral.AddEntry(GetConstantAsGlobal(target), registers.GetExpression(instruction.A));
+                                tableLiteral.AddEntry(target.ToExpressionGlobal(), registers.GetExpression(instruction.A));
                                 break;
                             }
                         }
@@ -808,7 +808,7 @@ namespace Unluau
                     if (constantIndex >= constants.Count)
                         throw new Exception("Constant value index is greater than constant table size");
                     
-                    right = ConstantToExpression(constants[(int)constantIndex]);
+                    right = constants[(int)constantIndex].ToExpression();
                     break;
                 default:
                     right = registers.GetExpressionOrThrow((int)aux.Value);
@@ -853,54 +853,6 @@ namespace Unluau
                 expressions[declaration.Key] = new LocalExpression(null, declaration.Value);
 
             return expressions;
-        }
-
-        private Expression ConstantToExpression(Constant constant)
-        {
-            if (constant is StringConstant)
-                return new StringLiteral(((StringConstant)constant).Value);
-
-            if (constant is NumberConstant)
-                return new NumberLiteral(((NumberConstant)constant).Value);
-
-            if (constant is BoolConstant)
-                return new BooleanLiteral(((BoolConstant)constant).Value);
-
-            if (constant is NilConstant)
-                return new NilLiteral();
-
-            if (constant is ImportConstant)
-            {
-                ImportConstant import = (ImportConstant)constant;
-                IList<string> names = new List<string>(import.Value.Count);
-
-                foreach (StringConstant stringConstant in import.Value)
-                    names.Add(stringConstant.Value);
-
-                return new Global(names);
-            }
-
-            if (constant is VectorConstant)
-            {
-                VectorConstant vector = (VectorConstant)constant;
-
-                return new VectorLiteral(vector.Value);
-            }
-
-            throw new DecompilerException(Stage.Lifter, "unexpected constant passed to 'ConstantToExpression'");
-        }
-
-        private Expression GetConstantAsGlobal(Constant constant)
-        {
-            Expression expression;
-
-            if ((expression = ConstantToExpression(constant)) is StringLiteral)
-                return new Global(((StringLiteral)expression).Value);
-
-            if (constant.Type != ConstantType.Import)
-                throw new DecompilerException(Stage.Lifter, $"unable to get Import from constant of type \"{constant.Type}\"");
-
-            return expression;
         }
     }
 }
