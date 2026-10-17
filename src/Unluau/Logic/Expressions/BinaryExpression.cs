@@ -122,9 +122,9 @@ namespace Unluau.Logic.Expressions
             return code switch
             {
                 OpCode.ADDK or OpCode.ADD => BinaryOperation.Add,
-                OpCode.SUBK or OpCode.SUB => BinaryOperation.Subtract,
+                OpCode.SUBK or OpCode.SUB or OpCode.SUBRK => BinaryOperation.Subtract,
                 OpCode.MULK or OpCode.MUL => BinaryOperation.Multiply,
-                OpCode.DIVK or OpCode.DIV => BinaryOperation.Divide,
+                OpCode.DIVK or OpCode.DIV or OpCode.DIVRK => BinaryOperation.Divide,
                 OpCode.MODK or OpCode.MOD => BinaryOperation.Modulus,
                 OpCode.POWK or OpCode.POW => BinaryOperation.Power,
                 OpCode.CONCAT => BinaryOperation.Concat,

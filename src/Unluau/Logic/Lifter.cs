@@ -265,11 +265,45 @@ namespace Unluau
                     case OpCode.POWK:
                     case OpCode.ANDK:
                     case OpCode.ORK:
+                    // Uses constants for left-hand expression
+                    case OpCode.SUBRK:
+                    case OpCode.DIVRK:
                     {
-                        //Console.WriteLine($"{properties.Code >= OpCode.ADDK}   {properties.Code}");
-                        Expression right = (properties.Code >= OpCode.ADDK) ? ConstantToExpression(function.Constants[instruction.C])
-                            : registers.GetExpression(instruction.C);
-                        Expression left = registers.GetExpression(instruction.B);
+                        Expression right;
+                        Expression left;
+
+                        switch (properties.Code)
+                        {
+                            case OpCode.SUBRK:
+                            case OpCode.DIVRK:
+                                right = registers.GetExpressionOrThrow(instruction.C);
+                                left = ConstantToExpression(function.Constants[instruction.B]);
+                                break;
+                            case OpCode.ADD:
+                            case OpCode.SUB:
+                            case OpCode.MUL:
+                            case OpCode.DIV:
+                            case OpCode.MOD:
+                            case OpCode.POW:
+                            case OpCode.AND:
+                            case OpCode.OR:
+                                right = registers.GetExpressionOrThrow(instruction.C);
+                                left = registers.GetExpressionOrThrow(instruction.B);
+                                break;
+                            case OpCode.ADDK:
+                            case OpCode.SUBK:
+                            case OpCode.MULK:
+                            case OpCode.DIVK:
+                            case OpCode.MODK:
+                            case OpCode.POWK:
+                            case OpCode.ANDK:
+                            case OpCode.ORK:
+                                right = ConstantToExpression(function.Constants[instruction.C]);
+                                left = registers.GetExpressionOrThrow(instruction.B);
+                                break;
+                            default:
+                                throw new DecompilerException(Stage.Lifter, $"Unrecognized opcode: {properties.Code}");
+                        }
 
                         // Get the equivalent binary operation for the opcode
                         BinaryExpression.BinaryOperation operation = BinaryExpression.GetBinaryOperation(properties.Code);
