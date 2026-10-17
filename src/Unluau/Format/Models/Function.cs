@@ -1,9 +1,6 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Unluau.Logic;
 using Unluau.Logic.Expressions;
@@ -12,23 +9,22 @@ namespace Unluau.Format.Models
 {
     public class Function
     {
-        public int Id { get; set; }
-        public byte MaxStackSize { get; set; }
-        public byte Parameters { get; set; }
-        public byte MaxUpvalues { get; set; }
-        public IList<LocalExpression> Upvalues { get; set; }
-        public bool IsVararg { get; set; }
+        public int Id { get; init; }
+        public byte MaxStackSize { get; init; }
+        public byte Parameters { get; init; }
+        public byte MaxUpvalues { get; init; }
+        public IList<LocalExpression> Upvalues { get; init; } = new List<LocalExpression>();
+        public bool IsVararg { get; init; }
         public byte Flags { get; set; }
-        public byte[] Types { get; set; }
         public int LineDefined { get; set; }
-        public string DebugName { get; set; }
-        public IList<Constant> Constants { get; set; }
-        public IList<Instruction> Instructions { get; set; }
-        public IList<int> Functions { get; set; }
-        public LineInfo? LineInfo { get; set; }
-        public DebugInfo? DebugInfo { get; set; }
+        public string DebugName { get; init; } = "";
+        public IList<Constant> Constants { get; init; } = new List<Constant>();
+        public IList<Instruction> Instructions { get; init; } = new List<Instruction>();
+        public IList<int> Functions { get; init; } = new List<int>();
+        public LineInfo? LineInfo { get; init; }
+        public DebugInfo? DebugInfo { get; init; }
 
-        public IList<Function> GlobalFunctions { get; set; }
+        public IList<Function> GlobalFunctions { get; init; } = new List<Function>();
 
         public Function GetFunction(int fId)
             => GlobalFunctions[Functions[fId]];
@@ -49,7 +45,11 @@ namespace Unluau.Format.Models
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.Append($"{Parameters}{(IsVararg ? "+" : string.Empty)} param(s), {MaxStackSize} slot(s), {MaxUpvalues} upvalue(s), {Constants.Count} constant(s), {Functions.Count} function(s)\n");
+            builder.Append($"{Parameters}{(IsVararg ? "+" : string.Empty)} param(s), ");
+            builder.Append($"{MaxStackSize} slot(s), ");
+            builder.Append($"{MaxUpvalues} upvalue(s), ");
+            builder.Append($"{Constants.Count} constant(s), ");
+            builder.Append($"{Functions.Count} function(s)\n");
 
             builder.Append($"function {(string.IsNullOrEmpty(DebugName) ? "main" : DebugName)}(");
 

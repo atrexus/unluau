@@ -97,35 +97,41 @@ namespace Unluau.Format
         private Function ReadFunction(IList<Function> functions, IList<string> strings)
         {
             Log.Debug("Reading basic function prototype information");
-            
-            Function function = new Function
-            {
-                Id = functions.Count,
-                MaxStackSize = _reader.ReadByte(),
-                Parameters = _reader.ReadByte(),
-                MaxUpvalues = _reader.ReadByte()
-            };
 
-            function.Upvalues = new List<LocalExpression>(function.MaxUpvalues);
-            function.IsVararg = _reader.ReadByte() == 1;
+            var maxStackSize = _reader.ReadByte();
+            var parameters = _reader.ReadByte();
+            var maxUpvalues = _reader.ReadByte();
 
+            var isVarArg = _reader.ReadByte() == 1;
+
+            byte flags = 0;
             if (_version >= 4)
             {
-                function.Flags = _reader.ReadByte();
+                flags = _reader.ReadByte();
                 int typesSize = _reader.ReadInt32Compressed();
                 _reader.Position += typesSize;
             }
 
-            function.Instructions = ReadInstructions();
-            function.Constants = ReadConstants(strings);
-            function.Functions = ReadFunctions();
-            function.GlobalFunctions = functions;
-
-            function.LineDefined = _reader.ReadInt32Compressed();
-            function.DebugName = ReadString(strings);
-
-            function.LineInfo = ReadLineInfo(function.Instructions.Count);
-            function.DebugInfo = ReadDebugInfo(strings);
+            var instructions = ReadInstructions();
+            
+            Function function = new Function
+            {
+                Id = functions.Count,
+                MaxStackSize = maxStackSize,
+                Parameters = parameters,
+                MaxUpvalues = maxUpvalues,
+                Upvalues = new List<LocalExpression>(maxUpvalues),
+                IsVararg = isVarArg,
+                Flags = flags,
+                Instructions = instructions,
+                Constants = ReadConstants(strings),
+                Functions = ReadFunctions(),
+                GlobalFunctions = functions,
+                LineDefined = _reader.ReadInt32Compressed(),
+                DebugName = ReadString(strings),
+                LineInfo = ReadLineInfo(instructions.Count),
+                DebugInfo = ReadDebugInfo(strings)
+            };
 
             return function;
         }
