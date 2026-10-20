@@ -1,12 +1,6 @@
 ﻿// Copyright (c) Valence. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using Serilog;
 using Unluau.Format.Models;
 using Unluau.Logic;
@@ -18,8 +12,8 @@ namespace Unluau
 {
     public class Lifter
     {
-        private Chunk chunk;
-        private DecompilerOptions options;
+        private readonly Chunk _chunk;
+        private readonly DecompilerOptions _options;
 
         private enum CaptureType : byte
         {
@@ -30,14 +24,14 @@ namespace Unluau
 
         public Lifter(Chunk chunk, DecompilerOptions options)
         {
-            this.chunk = chunk;
-            this.options = options;
+            this._chunk = chunk;
+            this._options = options;
         }
 
         public OuterBlock LiftProgram()
         {
-            Function main = chunk.Functions[chunk.MainIndex];
-            Registers registers = main.CreateRegisters(options);
+            Function main = _chunk.Functions[_chunk.MainIndex];
+            Registers registers = main.CreateRegisters(_options);
 
             var block = new OuterBlock(LiftBlock(main, registers));
 
@@ -127,7 +121,7 @@ namespace Unluau
                             // Extract the name index from the expression
                             NameIndex? nameIndex = expression as NameIndex;
 
-                            if (options.PerferStringInterpolation)
+                            if (_options.PerferStringInterpolation)
                             {
                                 // Safely extract the format string
                                 var localExpr = nameIndex?.Expression as LocalExpression;
@@ -354,7 +348,7 @@ namespace Unluau
                         if (!registers.TryGetExpression(instruction.B, out var tableExpression))
                             throw new DecompilerException(Stage.Lifter, "Could not find table");
 
-                        if (tableExpression.Expression is TableLiteral tableLiteral && options.InlineTableDefintions)
+                        if (tableExpression.Expression is TableLiteral tableLiteral && _options.InlineTableDefintions)
                         {
                             if (tableExpression.Declaration.Referenced == 1)
                             {
@@ -383,7 +377,7 @@ namespace Unluau
                         var value = registers.GetExpressionOrThrow(instruction.A);
                         var table = registers.GetExpressionOrThrow(instruction.B, false);
 
-                        if (options.InlineTableDefintions && table.Expression is TableLiteral tableLiteral)
+                        if (_options.InlineTableDefintions && table.Expression is TableLiteral tableLiteral)
                         {
                             if (tableLiteral.MaxEntries > tableLiteral.Entries.Count)
                             {
@@ -421,7 +415,7 @@ namespace Unluau
                         else
                             expression = new TableLiteral(hashSize, false);
 
-                        if (options.InlineTableDefintions && hashSize > 0)
+                        if (_options.InlineTableDefintions && hashSize > 0)
                             expression.MaxEntries = hashSize;
 
                         registers.LoadRegister(instruction.A, expression, block, pc);
@@ -455,7 +449,7 @@ namespace Unluau
 
                         TableLiteral tableLiteral = new TableLiteral(target.Value.Count, false);
 
-                        if (options.InlineTableDefintions)
+                        if (_options.InlineTableDefintions)
                             tableLiteral.MaxEntries = target.Value.Count;
 
 
@@ -601,7 +595,7 @@ namespace Unluau
                         int functionId = properties.Code == OpCode.DUPCLOSURE ? ((ClosureConstant)function.Constants[instruction.D]).Value : instruction.D;
 
                         Function newFunction = properties.Code == OpCode.DUPCLOSURE ? function.GlobalFunctions[functionId] : function.GetFunction(functionId);
-                        Registers newRegisters = newFunction.CreateRegisters(options);
+                        Registers newRegisters = newFunction.CreateRegisters(_options);
 
                         while (newFunction.Upvalues.Count < newFunction.MaxUpvalues)
                         {
@@ -623,7 +617,7 @@ namespace Unluau
 
                                     goto case CaptureType.Value;
                                 case CaptureType.Value:
-                                    var type = options.RenameUpvalues ? Declaration.DeclarationType.Upvalue : Declaration.DeclarationType.Local;
+                                    var type = _options.RenameUpvalues ? Declaration.DeclarationType.Upvalue : Declaration.DeclarationType.Local;
 
                                     expression = (LocalExpression)registers.GetExpression(capture.B);
                                     expression.Declaration.Type = type;
@@ -752,7 +746,7 @@ namespace Unluau
 
                     default:
                     {
-                        Log.Warning($"Encountered unhandled code {properties.Code}, skipping");
+                        Log.Warning("Encountered unhandled code {PropertiesCode}, skipping", properties.Code);
 
                         // If we don't handle the instruction and it has an auxiliary value, we need to skip it
                         if (properties.HasAux)
