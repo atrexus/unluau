@@ -527,56 +527,50 @@ namespace Unluau
                         }
 
                         Registers newRegisters = new Registers(registers);
-                        Statement statement = new IfElse(condition, LiftBlock(function, newRegisters, auxUsed ? pc + 2 : pc + 1, (pc += instruction.D) + 1));
+                        var ifElse = new IfElse(condition, LiftBlock(function, newRegisters, auxUsed ? pc + 2 : pc + 1, (pc += instruction.D) + 1));
 
                         nextInstruction = function.Instructions[pc];
-                        switch (nextInstruction.GetProperties().Code)
+                        if (nextInstruction.GetProperties().Code == OpCode.JUMPBACK)
                         {
-                            case OpCode.JUMP:
-                            {
-                                IfElse ifElse = (IfElse)statement;
+                            block.AddStatement(new WhileLoop(ifElse.Condition, ifElse.IfBody), pc);
+                            break;
+                        }
+                        
+                        if (nextInstruction.GetProperties().Code == OpCode.JUMP)
+                        {
+                            newRegisters = new Registers(registers);
+                            var elseBlock = LiftBlock(function, newRegisters, pc + 1, (pc += nextInstruction.D) + 1);
+                            ifElse.ElseBody = elseBlock;
 
-                                newRegisters = new Registers(registers);
-                                ifElse.ElseBody = LiftBlock(function, newRegisters, pc + 1, (pc += nextInstruction.D) + 1);
-
-                                Block elseBodyBlock = ifElse.ElseBody as Block; // We know it has to be a block
-
-                                // Little optimization to include elseifs
-                                if (elseBodyBlock.Statements.Count == 1 && elseBodyBlock.Statements[0] is IfElse)
-                                    ifElse.ElseBody = elseBodyBlock.Statements[0] as IfElse;
-                                break;
-                            }
-                            case OpCode.JUMPBACK:
-                            {
-                                IfElse ifElse = (IfElse)statement;
-
-                                statement = new WhileLoop(ifElse.Condition, ifElse.IfBody);
-                                break;
-                            }
+                            // Little optimization to include elseifs
+                            if (elseBlock.Statements.Count == 1 && elseBlock.Statements[0] is IfElse)
+                                ifElse.ElseBody = elseBlock.Statements[0] as IfElse;
                         }
 
                         // Check if the current instruction is a simple jump instruction
-                        if ((properties.Code == OpCode.JUMPIF || properties.Code == OpCode.JUMPIFNOT) && statement is IfElse)
+                        if (properties.Code is OpCode.JUMPIF or OpCode.JUMPIFNOT)
                         {
                             // These are the two instructions that are always used for `and` and `or` statements.
                             // We need to check if the register that the unary operator references is the same as 
                             // the one being reassigned in the body of the if statement.
                             byte register = instruction.A;
-                            IfElse ifElse = (IfElse)statement;
 
                             // If our condition is a unary expression and the body of the if statement is a local assignment
                             // we can go on to check if the unary expression is referencing the same register as the local assignment.
                             if (ifElse.IfBody.Statements.Count == 1
                                 && ifElse.IfBody.Statements.First() is LocalAssignment localAssignment)
                             {
-                                LocalExpression? expression = localAssignment.Expression as LocalExpression;
-                                UnaryExpression? unaryCondition = ifElse.Condition as UnaryExpression;
+                                var expression = localAssignment.Expression as LocalExpression;
+                                var unaryCondition = ifElse.Condition as UnaryExpression;
 
                                 if (expression!.Declaration.Register == register)
                                 {
                                     // We know that the current jump instruction represents an `and` or `or` statement.
-                                    Expression left = unaryCondition is null ? ifElse.Condition : unaryCondition!.Expression;
-                                    Expression right = expression!.Expression;
+                                    var left = unaryCondition is null ? ifElse.Condition : unaryCondition.Expression;
+                                    var right = expression.Expression;
+
+                                    if (right is null)
+                                        throw new DecompilerException(Stage.Lifter, "Expression expected");
 
                                     var operation = unaryCondition is null ? BinaryExpression.BinaryOperation.And : BinaryExpression.BinaryOperation.Or;
 
@@ -586,7 +580,7 @@ namespace Unluau
                             }
                         }
 
-                        block.AddStatement(statement, pc);
+                        block.AddStatement(ifElse, pc);
                         break;
                     }
                     case OpCode.NEWCLOSURE:
