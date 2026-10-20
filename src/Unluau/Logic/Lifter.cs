@@ -676,7 +676,7 @@ namespace Unluau
                         }
 
                         Assignment assignment = new(new Global(index.Declaration.Name), index.GetValue()!);
-                        Block body = LiftBlock(function, registers, pc + 1, pc += instruction.D);
+                        Block body = LiftBlock(function, new Registers(registers), pc + 1, pc += instruction.D);
 
                         block.AddStatement(new ForLoopNumeric(assignment, limit, step, body), pc);
                         break;
@@ -716,7 +716,7 @@ namespace Unluau
                         }
 
                         // Lift the loop body into a block
-                        Block body = LiftBlock(function, registers, pc + 1, (pc += instruction.D) + 1);
+                        Block body = LiftBlock(function, new Registers(registers), pc + 1, (pc += instruction.D) + 1);
 
                         block.AddStatement(new ForLoopGeneric(variables, values, body), pc);
                         break;
